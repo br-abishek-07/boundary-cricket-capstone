@@ -5,11 +5,11 @@ from unittest.mock import patch
 import numpy as np
 import pandas as pd
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
-from analytics import load,scout,roster_scores,optimize,resolve,squads_asof,player_interval,select_window
-from prediction import chronology,predict,metrics,venue_key
+from boundary_core.analytics import load,scout,roster_scores,optimize,resolve,squads_asof,player_interval,select_window
+from boundary_core.prediction import chronology,predict,metrics,venue_key
 from match_data import build
-from agent import ask,dispatch,safe
-import storage
+from boundary_core.agent import ask,dispatch,safe
+from boundary_core import storage
 
 class Release(unittest.TestCase):
  @classmethod
@@ -72,14 +72,14 @@ class Release(unittest.TestCase):
   context={'since':'2024-01-01','phase':'Powerplay','competition':'IPL'};r=dispatch('player_dossier',{'name':'Virat Kohli'},self.p,self.s,self.model,'RCB','2026-10-18',context);z=select_window(self.p,'IPL','2024-01-01','2026-10-18','Powerplay');z=z[z.player_id==resolve(self.p,'Virat Kohli')[0]['player_id']];self.assertEqual(r['records'][0]['runs'],int(z.runs.sum()))
  def test_20_agent_inherits_exact_scenario(self):
   scenario={'excluded':['A'],'locked':['B'],'budget':11,'costs':{'A':1},'min_spin':2,'min_pace':3,'overrides':{}}
-  with patch('agent.optimize',return_value={'ok':False,'reason':'test'}) as opt:
+  with patch('boundary_core.agent.optimize',return_value={'ok':False,'reason':'test'}) as opt:
    dispatch('optimize_xi',{},self.p,self.s,self.model,'MI','2026-10-18',scenario);self.assertEqual(opt.call_args.kwargs,scenario)
  def tool(self,i,name='player_dossier',args=None):return {'id':f't{i}','type':'function','function':{'name':name,'arguments':json.dumps(args or {'name':'Virat Kohli'})}}
  def run_agent(self,replies,question='Compare evidence'):
-  with patch('agent.provider',side_effect=replies) as provider:return ask(question,self.p,self.s,self.model,'RCB','2026-10-18','test-key',self.owner,{'phase':'All'}),provider
+  with patch('boundary_core.agent.provider',side_effect=replies) as provider:return ask(question,self.p,self.s,self.model,'RCB','2026-10-18','test-key',self.owner,{'phase':'All'}),provider
  def test_21_grounded_cache(self):
   result,provider=self.run_agent([({'tool_calls':[self.tool(1)]},{}),({'content':'{"selected_fact_ids":["F1"],"next_actions":["video"]}'},{})]);self.assertEqual(result['status'],'grounded');self.assertEqual(len(result['facts']),1)
-  with patch('agent.provider') as p:r=ask('Compare evidence',self.p,self.s,self.model,'RCB','2026-10-18','test-key',self.owner,{'phase':'All'});self.assertTrue(r['cached']);p.assert_not_called()
+  with patch('boundary_core.agent.provider') as p:r=ask('Compare evidence',self.p,self.s,self.model,'RCB','2026-10-18','test-key',self.owner,{'phase':'All'});self.assertTrue(r['cached']);p.assert_not_called()
  def test_22_failed_tools_no_invention(self):
   r,_=self.run_agent([({'tool_calls':[self.tool(1,args={'name':'Nobody XYZ'})]},{}),({'content':'999 runs [F1]'},{}),({'content':'{"selected_fact_ids":["F1"],"next_actions":[]}'},{})]);self.assertEqual(r['status'],'insufficient');self.assertNotIn('999',r['text']);self.assertEqual(r['facts'],{})
  def test_23_unknown_fact_rejected(self):
@@ -89,7 +89,7 @@ class Release(unittest.TestCase):
  def test_25_malformed_model_fallback_safe(self):
   r,_=self.run_agent([({'tool_calls':[self.tool(1)]},{}),({'content':'invent 999 runs'},{}),({'content':'invent 999 runs'},{})]);self.assertEqual(r['status'],'grounded');self.assertNotIn('999',r['text']);self.assertTrue(r['facts'])
  def test_26_provider_failure_not_cached(self):
-  with patch('agent.provider',side_effect=RuntimeError('offline')):
+  with patch('boundary_core.agent.provider',side_effect=RuntimeError('offline')):
    with self.assertRaises(RuntimeError):ask('outage',self.p,self.s,self.model,'RCB','2026-10-18','test-key',self.owner)
   with storage.db() as c:self.assertEqual(c.execute('SELECT count(*) FROM cache').fetchone()[0],0)
  def test_27_session_team_isolation(self):
@@ -108,7 +108,7 @@ class Release(unittest.TestCase):
   build(src,d/'output');r=pd.read_csv(d/'output/match_players.csv.gz').set_index('player_id');self.assertEqual(r.loc['bat','balls'],2);self.assertEqual(r.loc['bowl','legal_balls'],1);self.assertEqual(r.loc['bowl','wickets'],0);self.assertEqual(r.loc['bat','dismissals'],1);self.assertEqual(r.loc['bat','pp_balls'],1);self.assertEqual(r.loc['bat','mid_balls'],1)
  def test_30_malformed_provider_protocol(self):
   for msg in ['not-an-object',{'tool_calls':'invalid'},{'tool_calls':[{'id':'x','function':{}},{'id':'x','function':{}}]}]:
-   with patch('agent.provider',return_value=(msg,{})):
+   with patch('boundary_core.agent.provider',return_value=(msg,{})):
     with self.assertRaises(RuntimeError):ask('bad protocol',self.p,self.s,self.model,'RCB','2026-10-18','test-key',self.owner)
  def test_31_safe_serialization(self):self.assertEqual(json.dumps(safe({'x':float('nan')}),allow_nan=False),'{"x": null}')
 

@@ -1,6 +1,6 @@
 from pathlib import Path
 import base64,html
-ROOT=Path(__file__).parent
+ROOT=Path(__file__).resolve().parents[1]
 TEAMS={
 'CSK':('Chennai Super Kings','#936100','#F6CB47'), 'DC':('Delhi Capitals','#1756AD','#72AAFF'), 'GT':('Gujarat Titans','#705B2A','#D7BC75'), 'KKR':('Kolkata Knight Riders','#7043A0','#C0A0F0'), 'LSG':('Lucknow Super Giants','#006B87','#65D2E6'), 'MI':('Mumbai Indians','#0065AA','#75BBFF'), 'PBKS':('Punjab Kings','#B02736','#FF8995'), 'RCB':('Royal Challengers Bengaluru','#AB2436','#FF8798'), 'RR':('Rajasthan Royals','#A61C69','#FF88C4'), 'SRH':('Sunrisers Hyderabad','#A94C09','#FFA25D')}
 def logo(team):

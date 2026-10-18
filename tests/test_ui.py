@@ -31,7 +31,7 @@ with tempfile.TemporaryDirectory() as d:
  a.sidebar.selectbox[0].set_value('MI').run();clean(a,'team journal isolated');assert len(a.expander)==0
  a.sidebar.selectbox[0].set_value('RCB').run();assert len(a.expander)==1;checks.append('original team journal retained')
  a.sidebar.radio[0].set_value('Decision desk').run();find(a.radio,'Briefing mode').set_value('DeepSeek analyst').run()
- with patch('agent.ask',side_effect=RuntimeError('controlled outage')):find(a.button,'Prepare brief').click().run()
+ with patch('boundary_core.agent.ask',side_effect=RuntimeError('controlled outage')):find(a.button,'Prepare brief').click().run()
  clean(a,'failed request clears previous brief');assert 'brief' not in a.session_state;assert a.error
  a.sidebar.radio[0].set_value('Player dossier').run();find(a.text_input,'Player name or scorecard alias').set_value('T Natarajan').run();clean(a,'canonical identity dossier');assert find(a.selectbox,'Confirm identity').value['player_id']=='ce794613'
  a.sidebar.radio[0].set_value('Decision journal').run();find(a.sidebar.button,'Start a fresh private session').click().run();clean(a,'fresh session hides old journal');assert len(a.expander)==0

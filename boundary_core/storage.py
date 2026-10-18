@@ -2,7 +2,7 @@
 from pathlib import Path
 from contextlib import contextmanager
 import datetime,hashlib,json,os,sqlite3
-ROOT=Path(__file__).parent
+ROOT=Path(__file__).resolve().parents[1]
 @contextmanager
 def db():
  root=Path(os.getenv('BOUNDARY_RUNTIME_DIR',str(ROOT/'.runtime')));root.mkdir(parents=True,exist_ok=True);c=sqlite3.connect(root/'boundary-v2.sqlite3',timeout=10);c.execute('PRAGMA journal_mode=WAL')

@@ -15,3 +15,7 @@ Interface: franchise crests, scalable IPL text mark, ten franchise accent palett
 Remaining limits: partial squad verification, no current injury feed, no authenticated accounts, no durable shared-team database, no complete competition-rules certification, no proven forecast edge, no measured expert-quality score and no live-provider quality test in the restricted build environment. These are disclosed in the product and report.
 
 Actual regression, UI and browser results are stored in `data/release_checks.json` and its referenced artifacts. Local rendering does not prove the deployed host has completed its automatic rebuild.
+
+## Startup import correction
+
+Moved application helpers to boundary_core to avoid cached generic-module and installed-package import conflicts. Added explicit Altair dependency, fresh-install validation and startup regressions. See STARTUP_FIX.md for the reproduced failure and hosted recovery steps.

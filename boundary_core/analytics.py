@@ -4,7 +4,7 @@ import json,re,unicodedata
 import numpy as np
 import pandas as pd
 from scipy.optimize import Bounds,LinearConstraint,milp
-ROOT=Path(__file__).parent
+ROOT=Path(__file__).resolve().parents[1]
 CORRECTIONS={'ce794613':'T Natarajan','2c25d4f5':'Devdutt Padikkal'}
 def normal(s):return re.sub(r'[^a-z0-9]','',unicodedata.normalize('NFKD',str(s)).lower())
 def load():

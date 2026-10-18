@@ -1,0 +1,9 @@
+{
+  "checks_passed": 3,
+  "checks": [
+    "Light cold-start rendering and bundled marks",
+    "Dark cold-start rendering and bundled marks",
+    "Packaged local-evidence tool after rerun"
+  ],
+  "scope": "Chromium against a fresh installation of the declared dependencies; localhost, not the hosted app."
+}

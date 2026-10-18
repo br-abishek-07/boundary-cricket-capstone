@@ -144,5 +144,36 @@
     "Full current squad and availability verification remains incomplete.",
     "Session/team scoping does not provide authenticated accounts.",
     "No independently measured expert usefulness or proven predictive edge."
-  ]
+  ],
+  "startup": {
+    "tests_run": 3,
+    "failures": 0,
+    "errors": 0,
+    "tests": [
+      "test_cached_generic_modules_do_not_break_startup",
+      "test_packaged_resources_resolve_to_repository",
+      "test_startup_from_another_working_directory"
+    ],
+    "scope": "Fresh environment, simulated cached generic modules, rerun, foreign cwd and packaged resource paths. Hosted logs are unavailable; the screenshot failure is reproduced locally using the previous analytics module."
+  },
+  "startup_browser": {
+    "checks_passed": 3,
+    "checks": [
+      "Light cold-start rendering and bundled marks",
+      "Dark cold-start rendering and bundled marks",
+      "Packaged local-evidence tool after rerun"
+    ],
+    "scope": "Chromium against a fresh installation of the declared dependencies; localhost, not the hosted app."
+  },
+  "startup_fix_environment": {
+    "python": "3.12.14",
+    "dependencies": {
+      "streamlit": "1.66.0",
+      "pandas": "2.3.3",
+      "numpy": "2.5.4",
+      "scipy": "1.18.1",
+      "altair": "6.3.0"
+    },
+    "installation": "Fresh virtual environment installed from requirements.txt"
+  }
 }

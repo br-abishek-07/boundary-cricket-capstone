@@ -39,6 +39,8 @@ A `DEEPSEEK_API_KEY` environment variable or a private session override also wor
 - Added a stronger training-derived chase baseline. The research model failed its acceptance gate; the UI serves the baseline and retains model results for scrutiny.
 - Added bundled franchise crests and vector IPL text mark, team accents, Light/Dark control, readable research tables and responsive typography.
 
+The startup import fix moves application helpers into `boundary_core` and includes fresh-install and cached-module startup regressions. See [startup diagnosis and recovery](docs/STARTUP_FIX.md).
+
 ## Workspaces
 
 | Workspace | Purpose |
@@ -67,6 +69,7 @@ The retrospective research model is trained before 2023, validated on 2023, and 
 ```bash
 python tests/test_core.py
 python tests/test_ui.py
+python tests/test_startup.py
 ```
 
 The release artifacts in `data/release_checks.json`, `test_results.json`, `ui_results.json` and `browser_results.json` contain actual outcomes and scope. Provider fixtures do not spend API credit. The original-snapshot comparison is skipped when that external audit snapshot is absent; the other checks run from this repository.

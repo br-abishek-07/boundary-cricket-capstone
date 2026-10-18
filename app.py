@@ -1,14 +1,16 @@
-import datetime,hashlib,html,json,os,secrets,tomllib
+import datetime,hashlib,html,json,os,secrets,sys,tomllib
 from pathlib import Path
 from zoneinfo import ZoneInfo
+ROOT=Path(__file__).resolve().parent
+# Resolve this checkout when the hosting process launches from another directory.
+if str(ROOT) not in sys.path:sys.path.insert(0,str(ROOT))
 import altair as alt
 import pandas as pd
 import streamlit as st
-from analytics import load,scout,roster_scores,optimize,player_interval,resolve,squads_asof,window,select_window
-from prediction import predict
-from agent import ask,dispatch,fact_rows,render,safe,provider
-import storage,branding
-ROOT=Path(__file__).parent
+from boundary_core.analytics import load,scout,roster_scores,optimize,player_interval,resolve,squads_asof,window,select_window
+from boundary_core.prediction import predict
+from boundary_core.agent import ask,dispatch,fact_rows,render,safe,provider
+from boundary_core import storage,branding
 st.set_page_config(page_title='Boundary · Franchise intelligence',page_icon='🏏',layout='wide',initial_sidebar_state='auto')
 @st.cache_resource
 def data(signature):return load()

@@ -1,0 +1,11 @@
+{
+  "tests_run": 3,
+  "failures": 0,
+  "errors": 0,
+  "tests": [
+    "test_cached_generic_modules_do_not_break_startup",
+    "test_packaged_resources_resolve_to_repository",
+    "test_startup_from_another_working_directory"
+  ],
+  "scope": "Fresh environment, simulated cached generic modules, rerun, foreign cwd and packaged resource paths. Hosted logs are unavailable; the screenshot failure is reproduced locally using the previous analytics module."
+}

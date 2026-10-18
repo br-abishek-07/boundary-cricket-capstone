@@ -25,7 +25,7 @@ class Startup(unittest.TestCase):
             for name, module in stale.items():
                 sys.modules[name] = module
             with tempfile.TemporaryDirectory() as d, patch.dict(
-                os.environ, {"BOUNDARY_RUNTIME_DIR": d}
+                os.environ, {"CREASEIQ_RUNTIME_DIR": d}
             ):
                 a = self.run_app()
                 for name, module in stale.items():
@@ -46,7 +46,7 @@ class Startup(unittest.TestCase):
         before = os.getcwd()
         old_path = sys.path[:]
         with tempfile.TemporaryDirectory() as d, patch.dict(
-            os.environ, {"BOUNDARY_RUNTIME_DIR": d}
+            os.environ, {"CREASEIQ_RUNTIME_DIR": d}
         ):
             try:
                 os.chdir(d)
@@ -61,12 +61,12 @@ class Startup(unittest.TestCase):
             sys.path.insert(0, str(ROOT))
         for name in GENERIC_NAMES:
             with self.subTest(module=name):
-                module = importlib.import_module("boundary_core." + name)
+                module = importlib.import_module("creaseiq_core." + name)
                 self.assertEqual(module.ROOT, ROOT)
                 self.assertEqual(
-                    Path(module.__file__).resolve().parent, ROOT / "boundary_core"
+                    Path(module.__file__).resolve().parent, ROOT / "creaseiq_core"
                 )
-        from boundary_core import branding
+        from creaseiq_core import branding
 
         for team in (*branding.TEAMS, "IPL"):
             self.assertTrue(

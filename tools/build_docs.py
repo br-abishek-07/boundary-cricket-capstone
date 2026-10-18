@@ -29,7 +29,7 @@ styles["Heading1"].fontSize = 15
 styles["Heading1"].spaceBefore = 18
 styles["Heading1"].textColor = colors.HexColor("#AB2436")
 doc = Document()
-doc.core_properties.title = "Boundary project guide — version 3.0.2"
+doc.core_properties.title = "CreaseIQ project guide — version 3.1.0"
 doc.styles["Normal"].font.name = "Calibri"
 doc.styles["Normal"].font.size = Pt(11)
 story = []
@@ -107,20 +107,20 @@ for block in blocks:
 def footer(canvas, document):
     canvas.setFont("Helvetica", 8)
     canvas.setFillColor(colors.HexColor("#596B72"))
-    canvas.drawString(42, 28, "BOUNDARY 3.0.2 / EDUCATIONAL PROJECT")
+    canvas.drawString(42, 28, "CREASEIQ 3.1.0 / EDUCATIONAL PROJECT")
     canvas.drawRightString(550, 28, str(document.page))
 
 
 SimpleDocTemplate(
-    str(D / "Boundary_Project_Guide.pdf"),
-    title="Boundary Project Guide",
-    author="Boundary capstone",
+    str(D / "CreaseIQ_Project_Guide.pdf"),
+    title="CreaseIQ Project Guide",
+    author="CreaseIQ capstone",
     leftMargin=42,
     rightMargin=42,
     topMargin=40,
     bottomMargin=45,
 ).build(story, onFirstPage=footer, onLaterPages=footer)
 section = doc.sections[0]
-section.footer.paragraphs[0].text = "Boundary 3.0.2 | Independent educational project"
-doc.save(D / "Boundary_Project_Guide.docx")
+section.footer.paragraphs[0].text = "CreaseIQ 3.1.0 | Independent educational project"
+doc.save(D / "CreaseIQ_Project_Guide.docx")
 print("Generated the final guide in PDF and Word.")

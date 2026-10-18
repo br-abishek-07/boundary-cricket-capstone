@@ -158,7 +158,7 @@ def build(matches):
         "trained_before": "2023-01-01",
         "validation_year": "2023",
         "test_from": "2024-01-01",
-        "version": "boundary-temporal-2",
+        "version": "creaseiq-temporal-2",
     }
     training_rows = matches[
         (matches.competition == "IPL")

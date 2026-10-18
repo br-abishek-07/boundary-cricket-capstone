@@ -5,7 +5,7 @@ import sys, unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from boundary_core.analytics import (
+from creaseiq_core.analytics import (
     load,
     resolve,
     select_window,
@@ -13,7 +13,7 @@ from boundary_core.analytics import (
     roster_scores,
     optimize,
 )
-from boundary_core.agent import task_context, dispatch
+from creaseiq_core.agent import task_context, dispatch
 from streamlit.testing.v1 import AppTest
 
 

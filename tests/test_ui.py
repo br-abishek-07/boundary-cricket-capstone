@@ -12,7 +12,7 @@ sys.path.insert(0, str(ROOT))
 class Interface(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
-        self.env = patch.dict(os.environ, {"BOUNDARY_RUNTIME_DIR": self.temp.name})
+        self.env = patch.dict(os.environ, {"CREASEIQ_RUNTIME_DIR": self.temp.name})
         self.env.start()
         self.app = AppTest.from_file(str(ROOT / "app.py"), default_timeout=90).run()
         self.ok()

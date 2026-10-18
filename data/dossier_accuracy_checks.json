@@ -2,6 +2,6 @@
   "cases": 257,
   "passes": 257,
   "failures": [],
-  "seconds": 114.55,
+  "seconds": 190.01,
   "scope": "All 257 supplied squad rows through the real Streamlit runner; ID selected explicitly; default IPL overview totals independently summed from the stored input CSV. Missing archive identities must show no inferred totals."
 }

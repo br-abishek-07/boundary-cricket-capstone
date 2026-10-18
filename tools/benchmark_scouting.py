@@ -8,8 +8,8 @@ sys.path.insert(0, str(ROOT))
 import numpy as np
 import pandas as pd
 from scipy.stats import spearmanr
-from boundary_core.analytics import load, scout, window
-from boundary_core.branding import TEAMS
+from creaseiq_core.analytics import load, scout, window
+from creaseiq_core.branding import TEAMS
 
 
 def build():
@@ -26,7 +26,7 @@ def build():
                 future = scout(players, "IPL", cutoff, 30, discipline, end, phase)
                 metric = "strike_rate" if discipline == "Batting" else "economy"
                 ranks = {
-                    "Boundary descriptive score": train.sort_values(
+                    "CreaseIQ descriptive score": train.sort_values(
                         ["score", "player_id"], ascending=[False, True]
                     ),
                     "Raw historical rate": train.sort_values(
@@ -103,7 +103,7 @@ def build():
     frame.to_csv(ROOT / "data/scouting_benchmark.csv", index=False)
     report = {
         "design": "24 fixed rolling-origin settings: 2024, 2025 and available 2026 IPL follow-up; batting/bowling; all, powerplay, middle, death. Two ranking methods per setting. Three previous years of training only. Top five chosen before inspecting follow-up.",
-        "comparison": "Boundary descriptive score versus raw historical strike rate (batting) or economy (bowling). Follow-up rate is an unweighted average across selected players with sufficient future exposure. Bowling wicket-taking is also reported.",
+        "comparison": "CreaseIQ descriptive score versus raw historical strike rate (batting) or economy (bowling). Follow-up rate is an unweighted average across selected players with sufficient future exposure. Bowling wicket-taking is also reported.",
         "sample_rules": "At least 60 relevant training balls and 30 follow-up balls. No future exposure is used to choose the shortlist. Missing follow-up players stay counted in the exported denominator.",
         "limitations": [
             "Only three seasons, correlated players and overlapping training windows.",

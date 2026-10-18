@@ -28,7 +28,7 @@ def load_release(root):
     Existing sessions and unrelated modules keep their own references.
     """
     root = Path(root).resolve()
-    core = root / "boundary_core"
+    core = root / "creaseiq_core"
     paths = {path.stem: path for path in core.glob("*.py")}
     expected = {"__init__", *_MODULES}
     if set(paths) != expected:
@@ -37,7 +37,7 @@ def load_release(root):
     fingerprint = sha256(str(root).encode())
     for name, content in sorted(sources.items()):
         fingerprint.update(name.encode() + b"\0" + content + b"\0")
-    namespace = "_boundary_release_" + fingerprint.hexdigest()
+    namespace = "_creaseiq_release_" + fingerprint.hexdigest()
     with _LOCK:
         ready = sys.modules.get(namespace)
         if ready is not None and getattr(ready, "release_ready", False):

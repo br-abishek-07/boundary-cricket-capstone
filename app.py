@@ -1,4 +1,4 @@
-"""Boundary: an evidence-first cricket research studio."""
+"""CreaseIQ: an evidence-first cricket research studio."""
 
 import datetime, html, json, os, secrets, sys, tomllib
 from pathlib import Path
@@ -9,7 +9,7 @@ if str(ROOT) not in sys.path:
 import altair as alt
 import pandas as pd
 import streamlit as st
-from boundary_runtime import load_release
+from creaseiq_runtime import load_release
 
 release = load_release(ROOT)
 load = release.analytics.load
@@ -34,7 +34,7 @@ decision_pack = release.evidence.decision_pack
 storage, branding, downloads = release.storage, release.branding, release.downloads
 
 st.set_page_config(
-    page_title="Boundary · Franchise research", page_icon="🏏", layout="wide"
+    page_title="CreaseIQ · Franchise research", page_icon="🏏", layout="wide"
 )
 
 
@@ -151,7 +151,7 @@ def private_key():
 
 
 with st.sidebar:
-    st.markdown("## BOUNDARY")
+    st.markdown("## CREASEIQ")
     st.caption("FRANCHISE RESEARCH STUDIO")
     st.markdown(
         f'<img src="{branding.logo("IPL")}" width="76" alt="IPL identification mark" style="background:white;padding:10px;border-radius:5px;margin-bottom:8px">',
@@ -191,7 +191,7 @@ with st.sidebar:
         ss.pop("brief", None)
         ss.pop("brief_error", None)
         st.rerun()
-    st.caption("Boundary " + VERSION + " · Educational research")
+    st.caption("CreaseIQ " + VERSION + " · Educational research")
 style, palette = branding.css(team, ss.appearance)
 st.markdown(style, unsafe_allow_html=True)
 if ss.reduced_motion:
@@ -202,7 +202,7 @@ if ss.reduced_motion:
 owner = storage.scope(ss.private_session, team)
 quota_owner = storage.scope(ss.private_session, "__all_teams__")
 st.markdown(
-    f'<div class="folio"><span>BOUNDARY / EVIDENCE & DECISIONS</span><span>{team} · {ss.appearance.upper()} · BEFORE {until}</span></div>',
+    f'<div class="folio"><span>CREASEIQ / EVIDENCE & DECISIONS</span><span>{team} · {ss.appearance.upper()} · BEFORE {until}</span></div>',
     unsafe_allow_html=True,
 )
 if page != "Home":
@@ -385,9 +385,9 @@ def matchup_controls(prefix):
 
 def guide_downloads():
     for name, label, mime in [
-        ("Boundary_Project_Guide.pdf", "Download PDF guide", "application/pdf"),
+        ("CreaseIQ_Project_Guide.pdf", "Download PDF guide", "application/pdf"),
         (
-            "Boundary_Project_Guide.docx",
+            "CreaseIQ_Project_Guide.docx",
             "Download Word guide",
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         ),
@@ -398,7 +398,7 @@ def guide_downloads():
     st.download_button(
         "Download complete project ZIP",
         source_download((release.release_fingerprint, downloads.source_signature())),
-        "Boundary-v3-project.zip",
+        "CreaseIQ-v3-project.zip",
         "application/zip",
         on_click="ignore",
     )
@@ -414,7 +414,12 @@ if page == "Home":
     )
     heading(
         "From a cricket question\nto a defensible decision.",
-        "Boundary helps franchise analysts compare role evidence, build a supported XI and preserve the reasoning. Every brief starts with confirmed filters and ends with traceable calculations.",
+        "CreaseIQ helps franchise analysts compare role evidence, build a supported XI and preserve the reasoning. Every brief starts with confirmed filters and ends with traceable calculations.",
+    )
+    st.caption(
+        "**Why CreaseIQ?** The crease is a familiar line on a cricket pitch. "
+        "IQ stands for intelligence. Together, the name means cricket evidence "
+        "turned into informed decisions, with the analyst in control."
     )
     c = st.columns([1, 1, 1.4])
     c[0].button(
@@ -658,7 +663,7 @@ elif page == "Decision desk":
                         decision_pack(
                             facts, team, until, b["scenario"], intent, question, extras
                         ),
-                        "Boundary-brief.zip",
+                        "CreaseIQ-brief.zip",
                         "application/zip",
                         on_click="ignore",
                     )
@@ -1384,7 +1389,7 @@ elif page == "Evaluation & sources":
             st.download_button(
                 "Download official comparison CSV",
                 f.read_bytes(),
-                "boundary-official-comparisons.csv",
+                "creaseiq-official-comparisons.csv",
                 "text/csv",
                 on_click="ignore",
             )
@@ -1393,7 +1398,7 @@ elif page == "Evaluation & sources":
             st.download_button(
                 "Download accuracy audit",
                 f.read_bytes(),
-                "Boundary_Accuracy_Audit.md",
+                "CreaseIQ_Accuracy_Audit.md",
                 "text/markdown",
                 on_click="ignore",
             )
@@ -1464,7 +1469,7 @@ else:
             st.error(str(ex))
     st.json(storage.usage(quota_owner))
     st.caption(
-        "Limits: six provider calls per browser session across teams and thirty per installation per UTC day. A brief uses at most two provider calls. These caps are not an authenticated abuse boundary. Restrict access for sensitive team use. Local hosting storage may be ephemeral."
+        "Limits: six provider calls per browser session across teams and thirty per installation per UTC day. A brief uses at most two provider calls. These caps are not an authenticated abuse prevention system. Restrict access for sensitive team use. Local hosting storage may be ephemeral."
     )
     st.markdown(
         "IPL and franchise marks identify the subjects of this independent educational project. No league or franchise endorsement is implied. See Evaluation & sources for asset credits."

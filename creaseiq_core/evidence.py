@@ -6,7 +6,7 @@ import datetime, hashlib, io, json, math, zipfile
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "3.0.2"
+VERSION = "3.1.0"
 FILES = [
     "data/match_players.csv.gz",
     "data/matches.csv.gz",
@@ -16,13 +16,13 @@ FILES = [
     "data/player_registry.json",
     "data/attack_types.json",
     "data/prediction_model.json",
-    "boundary_core/analytics.py",
-    "boundary_core/agent.py",
-    "boundary_core/prediction.py",
-    "boundary_core/evidence.py",
+    "creaseiq_core/analytics.py",
+    "creaseiq_core/agent.py",
+    "creaseiq_core/prediction.py",
+    "creaseiq_core/evidence.py",
     "match_data.py",
     "app.py",
-    "boundary_runtime.py",
+    "creaseiq_runtime.py",
 ]
 CONTEXT_FIELDS = {
     "competition",
@@ -98,7 +98,7 @@ def context_key(question, team, until, scenario):
 
 def manifest(team, until, scenario, kind, question=""):
     return {
-        "application": "Boundary",
+        "application": "CreaseIQ",
         "version": VERSION,
         "created_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "task": kind,

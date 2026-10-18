@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 import pandas as pd
-from boundary_core.prediction import build
+from creaseiq_core.prediction import build
 
 if __name__ == "__main__":
     root = Path(__file__).resolve().parent

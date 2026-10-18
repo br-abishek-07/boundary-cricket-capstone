@@ -1,6 +1,6 @@
 {
-  "version": "3.0.2",
-  "checked_utc": "2026-10-18T15:27:30.992088+00:00",
+  "version": "3.1.0",
+  "checked_utc": "2026-10-18T18:23:09.560501+00:00",
   "status": "Local functional acceptance passed; external coverage and roster verification remain limited",
   "automated_tests": {
     "core": 44,
@@ -9,14 +9,15 @@
     "release_runtime": 6,
     "accuracy_regressions": 7,
     "dossier_ui": 1,
-    "total": 68,
+    "total": 71,
     "failures": 0,
     "errors": 0,
-    "seconds": 58.135,
-    "scope": "Full current suite, including all ten franchise desks and all ten workspaces, cached startup, provider fixtures, privacy, stale-context protection, exports, scheduling and new accuracy regressions. No live provider or hosted rebuild certification."
+    "seconds": 81.258,
+    "scope": "Full current suite, including all ten franchise desks and all ten workspaces, cached startup, provider fixtures, privacy, stale-context protection, exports, scheduling and new accuracy regressions. No live provider or hosted rebuild certification. Rename checks cover previous-store adoption, scoping, quota retention and new export identity.",
+    "rename_storage_exports": 3
   },
   "raw_reconciliation": {
-    "version": "Boundary 3.0.2",
+    "version": "CreaseIQ 3.1.0",
     "sources": [
       {
         "file": "sma_json.zip",
@@ -301,13 +302,13 @@
         "passes": true
       }
     ],
-    "seconds": 38.51
+    "seconds": 68.73
   },
   "all_supplied_roster_dossiers": {
     "cases": 257,
     "passes": 257,
     "failures": [],
-    "seconds": 114.55,
+    "seconds": 190.01,
     "scope": "All 257 supplied squad rows through the real Streamlit runner; ID selected explicitly; default IPL overview totals independently summed from the stored input CSV. Missing archive identities must show no inferred totals."
   },
   "official_comparison": {
@@ -414,9 +415,10 @@
     ]
   },
   "browser": {
-    "version": "3.0.2",
-    "checks_passed": 57,
+    "version": "3.1.0",
+    "checks_passed": 58,
     "checks": [
+      "Home explains the CreaseIQ name",
       "Home workflow and coverage rendered",
       "CSK bundled crest",
       "CSK themed appearance",
@@ -478,15 +480,15 @@
     "downloads": [
       {
         "label": "Download PDF guide",
-        "bytes": 26443
+        "bytes": 27083
       },
       {
         "label": "Download Word guide",
-        "bytes": 48593
+        "bytes": 48975
       },
       {
         "label": "Download complete project ZIP",
-        "bytes": 3899391
+        "bytes": 3400292
       },
       {
         "label": "Download CSV",
@@ -502,11 +504,11 @@
       },
       {
         "label": "Download decision pack",
-        "bytes": 4177
+        "bytes": 4178
       },
       {
         "label": "Download brief pack",
-        "bytes": 6690
+        "bytes": 6692
       },
       {
         "label": "Export private journal",
@@ -529,7 +531,7 @@
         "bytes": 11837
       }
     ],
-    "cold_browser_seconds": 3.979,
+    "cold_browser_seconds": 4.352,
     "scope": "Real local Chromium, isolated synthetic session data, desktop and 390px mobile. No hosted rebuild or live provider quality claim."
   },
   "source_sha256": {
@@ -540,14 +542,15 @@
     "data/roster_status.json": "e108b3273b1af03d6609906d5a3ad9dc1cc71f2bcea66cc4a89ee05bc3cb5c98",
     "data/player_registry.json": "49d447faa7db702fb68a8d968b29d08f0dce5975409bf0d59316962f8a3d3ce0",
     "data/attack_types.json": "ebeb8c01a79bdd9ee716d5e9082172248a2b064c194b286348aacc2a270c929a",
-    "data/prediction_model.json": "8e5dabeb918ec3174cd4d66ce2f40eba3d77a8caa7223eb9182b7c92b01160ab",
-    "boundary_core/analytics.py": "1c6fc5db5ba8bac50f33ee173ac2e7cd731c9c3f6047a321ab49316ed10b22c9",
-    "boundary_core/agent.py": "1fafd6c311f71914104dcd614b234adc61e476d993ba3658bd8e5fd462672dc1",
-    "boundary_core/prediction.py": "dc7cea4d11638f2e681ce46317d384b1d1e3d8309a194d59cc26413ffc2b48a2",
-    "boundary_core/evidence.py": "9e108c9bd03c3d4e95aa06ffde3a89c859513045dc1a2a2b802b719375eb307f",
+    "data/prediction_model.json": "66afdaafa7b542bcd9e1ae5bb91e4531deba567fd10f65f4d334b3df783d52eb",
+    "creaseiq_core/analytics.py": "1c6fc5db5ba8bac50f33ee173ac2e7cd731c9c3f6047a321ab49316ed10b22c9",
+    "creaseiq_core/agent.py": "bf82b9156cb84f4d76ef96e918db05656228f17d55e2765aa64fe1dd337caa2d",
+    "creaseiq_core/prediction.py": "5bad0e3542e7b0b9cb8013eae8278781d5c77471b48c96e1ae16a97c4da12661",
+    "creaseiq_core/evidence.py": "d789cb786cbb6a9c93e3c3c263a8d42aadfcc58bceee9c9b24dbd3496356f1c9",
     "match_data.py": "bdf6e7272186e4383debe9e843ea1939cbc5d7fb50e7fca477c97c5635df26b5",
-    "app.py": "41be0e41cbfa22c4f1b12c4314321289d51fe7652690ed3491840c8f2a18a11b",
-    "boundary_runtime.py": "1cc19ca0ee0467f593eda5032c8a0803d7970de7e6a19e12bcfd901610b1b661"
+    "app.py": "3eb7abc17dc5fa15f75d3ba3559ffd10362a087536abf731bf388c7a603986bb",
+    "creaseiq_runtime.py": "c8271e7d7b1fbaa16970ebe2879e63b66091ed1503053a831cd3535cf63c3f6e",
+    "creaseiq_core/storage.py": "3bc73fde4bcb0e73a01e72df73f607c82342360868b4885846e70999e8122797"
   },
   "temporal_scouting_study": {
     "settings": 24,
@@ -569,5 +572,53 @@
     "Public browser-session scoping is not authenticated durable team access.",
     "Full Impact Player and competition regulation certification are outside the twenty-over model.",
     "Local functional timings are not a cloud load or concurrency benchmark."
-  ]
+  ],
+  "rename_data_preservation": {
+    "scope": "Rename preserves supplied source data byte-for-byte and every numerical JSON model/evaluation value.",
+    "checks": [
+      {
+        "file": "data/match_players.csv.gz",
+        "byte_identical": true,
+        "sha256": "2c536bb0e5df04cf32b9ad869fdc7f7938db1dbe64d40cc4ba7b4ee705bc33f3"
+      },
+      {
+        "file": "data/matches.csv.gz",
+        "byte_identical": true,
+        "sha256": "6441d39c9e48febdc25cbec5b58d36b80bf21bce54298cc8b6d630f68eb563b1"
+      },
+      {
+        "file": "data/squads.csv",
+        "byte_identical": true,
+        "sha256": "fac16a8fbab01f903bb162ea59842321560de2149d93b5b4c77752804794155e"
+      },
+      {
+        "file": "data/auction.csv",
+        "byte_identical": true,
+        "sha256": "0860a08088de7d1c66f69316916d680df594e5c8f1f343e9ef0419660b3aa819"
+      },
+      {
+        "file": "data/player_registry.json",
+        "byte_identical": true,
+        "sha256": "49d447faa7db702fb68a8d968b29d08f0dce5975409bf0d59316962f8a3d3ce0"
+      },
+      {
+        "file": "data/attack_types.json",
+        "byte_identical": true,
+        "sha256": "ebeb8c01a79bdd9ee716d5e9082172248a2b064c194b286348aacc2a270c929a"
+      },
+      {
+        "file": "data/audit.json",
+        "byte_identical": true,
+        "sha256": "8d1546e96289cdbb95d6ade2d7e23aa47530014721e7f50b23d2aee53bb72e85"
+      },
+      {
+        "file": "data/prediction_model.json",
+        "numeric_fields_unchanged": 142
+      },
+      {
+        "file": "data/prediction_report.json",
+        "numeric_fields_unchanged": 102
+      }
+    ]
+  }
 }

@@ -1,0 +1,11 @@
+{
+  "name": "CreaseIQ",
+  "tagline": "Franchise Research Studio",
+  "version": "3.1.0",
+  "author": "B.R. Abishek",
+  "project_area": "AI Driven Data Science",
+  "repository_url": "https://github.com/br-abishek-07/creaseiq-cricket-capstone",
+  "application_url": "https://creaseiq.streamlit.app/",
+  "address_status": "GitHub repository rename verified. Streamlit public address supplied by the account owner.",
+  "name_meaning": "Crease refers to the markings on a cricket pitch. IQ stands for intelligence. CreaseIQ means using cricket evidence to support informed decisions, with the analyst in control."
+}

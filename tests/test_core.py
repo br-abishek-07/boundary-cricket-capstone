@@ -8,7 +8,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from boundary_core.analytics import (
+from creaseiq_core.analytics import (
     load,
     scout,
     roster_scores,
@@ -18,11 +18,11 @@ from boundary_core.analytics import (
     player_interval,
     select_window,
 )
-from boundary_core.prediction import chronology, predict, metrics, venue_key
+from creaseiq_core.prediction import chronology, predict, metrics, venue_key
 from match_data import build, overs_to_balls
-from boundary_core.agent import ask, dispatch, safe, prepare, task_context
-from boundary_core import storage, downloads
-from boundary_core.evidence import context_key, decision_pack, export_frame
+from creaseiq_core.agent import ask, dispatch, safe, prepare, task_context
+from creaseiq_core import storage, downloads
+from creaseiq_core.evidence import context_key, decision_pack, export_frame
 import io
 
 
@@ -41,7 +41,7 @@ class Release(unittest.TestCase):
 
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
-        self.env = patch.dict(os.environ, {"BOUNDARY_RUNTIME_DIR": self.temp.name})
+        self.env = patch.dict(os.environ, {"CREASEIQ_RUNTIME_DIR": self.temp.name})
         self.env.start()
 
     def tearDown(self):
@@ -304,7 +304,7 @@ class Release(unittest.TestCase):
             "overrides": {},
         }
         with patch(
-            "boundary_core.agent.optimize", return_value={"ok": False, "reason": "test"}
+            "creaseiq_core.agent.optimize", return_value={"ok": False, "reason": "test"}
         ) as opt:
             dispatch(
                 "optimize_xi",
@@ -337,7 +337,7 @@ class Release(unittest.TestCase):
                 )
 
     def live(self, replies, question="Compare death bowling evidence", scenario=None):
-        with patch("boundary_core.agent.provider", side_effect=replies) as mock:
+        with patch("creaseiq_core.agent.provider", side_effect=replies) as mock:
             r = ask(
                 question,
                 self.p,
@@ -357,7 +357,7 @@ class Release(unittest.TestCase):
         )
         self.assertEqual(r["status"], "evidence_checked")
         self.assertEqual(len(r["facts"]), 1)
-        with patch("boundary_core.agent.provider") as mock:
+        with patch("creaseiq_core.agent.provider") as mock:
             b = ask(
                 "Compare death bowling evidence",
                 self.p,
@@ -374,7 +374,7 @@ class Release(unittest.TestCase):
 
     def test_22_wrong_player_rejected_before_model(self):
         kohli = resolve(self.p, "Virat Kohli")[0]["player_id"]
-        with patch("boundary_core.agent.provider") as mock:
+        with patch("creaseiq_core.agent.provider") as mock:
             b = ask(
                 "Show Jasprit Bumrah evidence",
                 self.p,
@@ -423,7 +423,7 @@ class Release(unittest.TestCase):
                 self.assertTrue(r["model_selection_fallback"])
 
     def test_26_provider_outage_keeps_checked_local_evidence(self):
-        with patch("boundary_core.agent.provider", side_effect=RuntimeError("offline")):
+        with patch("creaseiq_core.agent.provider", side_effect=RuntimeError("offline")):
             r = ask(
                 "Outage scenario",
                 self.p,
@@ -548,10 +548,10 @@ class Release(unittest.TestCase):
     def test_34_source_zip_is_safe_and_complete(self):
         with zipfile.ZipFile(io.BytesIO(downloads.source_zip())) as z:
             names = z.namelist()
-            self.assertIn("boundary/app.py", names)
-            self.assertIn("boundary/boundary_runtime.py", names)
-            self.assertIn("boundary/data/player_registry.json", names)
-            self.assertIn("boundary/.streamlit/secrets.example.toml", names)
+            self.assertIn("creaseiq/app.py", names)
+            self.assertIn("creaseiq/creaseiq_runtime.py", names)
+            self.assertIn("creaseiq/data/player_registry.json", names)
+            self.assertIn("creaseiq/.streamlit/secrets.example.toml", names)
             self.assertFalse(
                 any(
                     "secrets.toml" in n
@@ -704,7 +704,7 @@ class Release(unittest.TestCase):
                     if i in [5, 6, 7]:
                         self.assertFalse(x["ok"])
         self.assertEqual(sum(counts.values()), 100)
-        (Path(os.environ["BOUNDARY_RUNTIME_DIR"]) / "scenario-counts.json").write_text(
+        (Path(os.environ["CREASEIQ_RUNTIME_DIR"]) / "scenario-counts.json").write_text(
             json.dumps(counts)
         )
 
@@ -792,7 +792,7 @@ class Release(unittest.TestCase):
         self.assertEqual(frame.loc["bat", "mid_balls"], 1)
 
     def test_44_provider_fallback_not_cached(self):
-        with patch("boundary_core.agent.provider", side_effect=RuntimeError("offline")):
+        with patch("creaseiq_core.agent.provider", side_effect=RuntimeError("offline")):
             r = ask(
                 "Retryable outage",
                 self.p,

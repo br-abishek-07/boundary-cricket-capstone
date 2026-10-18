@@ -14,14 +14,14 @@ parser.add_argument("--output", type=Path, default=Path("work/accuracy-audit"))
 O = parser.parse_args().output
 O.mkdir(parents=True, exist_ok=True)
 sys.path.insert(0, str(R))
-from boundary_core.analytics import load
+from creaseiq_core.analytics import load
 
 p, s, _ = load()
 raw = pd.read_csv(R / "data/match_players.csv.gz", dtype={"player_id": str})
 results = []
 start = time.perf_counter()
 with tempfile.TemporaryDirectory() as temp, patch.dict(
-    os.environ, {"BOUNDARY_RUNTIME_DIR": temp}
+    os.environ, {"CREASEIQ_RUNTIME_DIR": temp}
 ):
     app = AppTest.from_file(str(R / "app.py"), default_timeout=90).run()
     app.sidebar.radio[0].set_value("Player dossier").run()

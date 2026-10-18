@@ -1,6 +1,6 @@
-# Boundary accuracy and practical-use audit
+# CreaseIQ accuracy and practical-use audit
 
-Version 3.0.2 · Reviewed 18 October 2026
+Version 3.1.0 · Reviewed 18 October 2026
 
 The app is useful as an inspectable capstone research tool. It is not yet a certified franchise decision system. Calculations agree with the supplied delivery archive, but official coverage is incomplete in some competitions, current roster verification is partial, and the forecast has no demonstrated advantage over its baseline.
 
@@ -89,7 +89,7 @@ Live hosted sessions and DeepSeek output quality were not certified in this envi
 
 ## 7. Performance interpretation
 
-The 144 scouting checks, 90 team requests, 257 forced-selection requests and eleven question probes completed together in about 39 seconds in the local test environment. Individual scenario timings are in audit_team_scenarios.csv. These are local functional timings, not a cloud load test or a service-level guarantee. Cached source loading and data reuse are covered by regressions. Cold hosting startup, many simultaneous users, API latency and production memory use need separate measurement.
+The 144 scouting checks, 90 team requests, 257 forced-selection requests and eleven question probes completed together in about 69 seconds in the local test environment. Individual scenario timings are in audit_team_scenarios.csv. These are local functional timings, not a cloud load test or a service-level guarantee. Cached source loading and data reuse are covered by regressions. Cold hosting startup, many simultaneous users, API latency and production memory use need separate measurement.
 
 ## 8. Professional-use decision and priorities
 

@@ -8,21 +8,21 @@ from streamlit.testing.v1 import AppTest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from boundary_runtime import load_release
-from boundary_core.downloads import source_files
+from creaseiq_runtime import load_release
+from creaseiq_core.downloads import source_files
 
 
 class ReleaseRuntime(unittest.TestCase):
     def copy_core(self, root):
         shutil.copytree(
-            ROOT / "boundary_core",
-            root / "boundary_core",
+            ROOT / "creaseiq_core",
+            root / "creaseiq_core",
             ignore=shutil.ignore_patterns("__pycache__"),
         )
 
     def test_01_previous_package_cannot_break_home_or_brief(self):
-        names = ["boundary_core"] + [
-            "boundary_core." + n
+        names = ["creaseiq_core"] + [
+            "creaseiq_core." + n
             for n in [
                 "analytics",
                 "prediction",
@@ -35,16 +35,16 @@ class ReleaseRuntime(unittest.TestCase):
         ]
         original = {name: sys.modules.get(name) for name in names}
         stale = {name: types.ModuleType(name) for name in names}
-        stale["boundary_core"].__path__ = [str(ROOT / "boundary_core")]
+        stale["creaseiq_core"].__path__ = [str(ROOT / "creaseiq_core")]
         for name, module in stale.items():
             module.__file__ = str(
-                ROOT / "boundary_core" / (name.split(".")[-1] + ".py")
+                ROOT / "creaseiq_core" / (name.split(".")[-1] + ".py")
             )
         try:
             sys.modules.update(stale)
-            self.assertFalse(hasattr(stale["boundary_core.agent"], "prepare"))
+            self.assertFalse(hasattr(stale["creaseiq_core.agent"], "prepare"))
             with tempfile.TemporaryDirectory() as directory, patch.dict(
-                os.environ, {"BOUNDARY_RUNTIME_DIR": directory}
+                os.environ, {"CREASEIQ_RUNTIME_DIR": directory}
             ):
                 app = AppTest.from_file(str(ROOT / "app.py"), default_timeout=60)
                 app.session_state["brief"] = {
@@ -100,7 +100,7 @@ class ReleaseRuntime(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             self.copy_core(root)
-            path = root / "boundary_core/evidence.py"
+            path = root / "creaseiq_core/evidence.py"
             source = path.read_bytes()
             stamp = path.stat()
             py_compile.compile(str(path), doraise=True)
@@ -123,7 +123,7 @@ class ReleaseRuntime(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             self.copy_core(root)
-            path = root / "boundary_core/agent.py"
+            path = root / "creaseiq_core/agent.py"
             source = path.read_bytes()
             before = set(sys.modules)
             path.write_bytes(source + b"\ndef incomplete(\n")
@@ -132,7 +132,7 @@ class ReleaseRuntime(unittest.TestCase):
             leaked = {
                 n
                 for n in set(sys.modules) - before
-                if n.startswith("_boundary_release_")
+                if n.startswith("_creaseiq_release_")
             }
             self.assertEqual(leaked, set())
             path.write_bytes(source)
@@ -149,14 +149,14 @@ class ReleaseRuntime(unittest.TestCase):
 
     def test_06_code_update_invalidates_data_cache_in_same_session(self):
         with tempfile.TemporaryDirectory() as directory, patch.dict(
-            os.environ, {"BOUNDARY_RUNTIME_DIR": str(Path(directory) / "runtime")}
+            os.environ, {"CREASEIQ_RUNTIME_DIR": str(Path(directory) / "runtime")}
         ):
             root = Path(directory) / "project"
             for path in source_files():
                 target = root / path.relative_to(ROOT)
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(path, target)
-            path = root / "boundary_core/analytics.py"
+            path = root / "creaseiq_core/analytics.py"
             original = path.read_text()
             marked = original.replace(
                 "    return p, s, a",

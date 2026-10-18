@@ -1,4 +1,6 @@
-# Boundary — franchise research studio
+# CreaseIQ — franchise research studio
+
+**The name:** Crease refers to the markings on a cricket pitch. IQ stands for intelligence. CreaseIQ turns cricket evidence into informed decisions, with the analyst in control.
 
 An IPL analyst capstone with traceable scouting comparisons, player dossiers, a legal twenty-over XI planner, optional DeepSeek fact selection, research baselines and private session journals.
 
@@ -28,6 +30,11 @@ For deployment, select repository branch `main`, entry file `app.py`, Python 3.1
 
 Read [the accuracy audit](docs/ACCURACY_AUDIT.md) for exhaustive archive checks, all-team scenarios and sampled official-source comparisons. Player dossier defaults to a labeled archive overview; phase totals and incomplete career coverage are explicit. Selected dated 2026 unavailability notices block XI selection, while missing replacement metadata remains visible.
 
-## Capstone submission
 
-[Download the presentation, report, source and complete submission package](submission/README.md), prepared for B.R. Abishek — AI Driven Data Science. These documents describe the frozen v3.0.2 release; the application code is unchanged.
+## Public app and capstone submission
+
+- [Open CreaseIQ](https://creaseiq.streamlit.app/)
+- [Download the complete capstone submission ZIP](https://github.com/br-abishek-07/creaseiq-cricket-capstone/raw/refs/heads/main/submission/CreaseIQ_Capstone_Submission.zip)
+- [Browse the presentation, report and supporting files](https://github.com/br-abishek-07/creaseiq-cricket-capstone/tree/main/submission)
+
+The submission is prepared for B.R. Abishek, AI Driven Data Science. It includes editable presentation/report files, PDF copies, runnable source, the user guide, evidence, abstract and demo/viva notes. Open `submission/START_HERE.md` for the file map. Private keys and runtime records are excluded.

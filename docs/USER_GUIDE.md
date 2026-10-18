@@ -1,8 +1,8 @@
-# Boundary — project guide
+# CreaseIQ — project guide
 
-Version 3.0.2 · 18 October 2026
+Version 3.1.0 · 18 October 2026
 
-Boundary is an independent educational cricket research application. It is designed for an IPL franchise analyst or scout. It combines match records, clear calculations, a constrained AI workflow and a record of the analyst's reasoning.
+CreaseIQ is an independent educational cricket research application. It is designed for an IPL franchise analyst or scout. It combines match records, clear calculations, a constrained AI workflow and a record of the analyst's reasoning.
 
 Read this guide in order to understand and reproduce the project. Use the chapter selector in the app to find a topic. The same guide is available as PDF and Word files. The complete project ZIP contains the code, processed data, tests and this guide. It never contains the hosting API key or private journal.
 
@@ -10,7 +10,7 @@ Read this guide in order to understand and reproduce the project. Use the chapte
 
 An analyst usually starts with a decision, not a chart. For example: "Which death-bowling players deserve a closer review?" or "Can this squad cover all twenty overs when a leading bowler is unavailable?"
 
-Boundary supports four research tasks:
+CreaseIQ supports four research tasks:
 
 1. Scouting: rank and compare observed batting or bowling evidence in a selected phase.
 2. XI planning: choose eleven supported players and assign a bowler to every over.
@@ -42,7 +42,7 @@ The auction CSV contains historical 2013–2022 records. Currency units and tran
 ## 3. Run the project on your computer
 
 1. Download the complete project ZIP from Home or Project guide.
-2. Extract it. Open a terminal in the extracted boundary folder, where app.py is located.
+2. Extract it. Open a terminal in the extracted creaseiq folder, where app.py is located.
 3. Install Python 3.11 or a newer compatible version. Python 3.12 is a suitable choice.
 4. Create an isolated environment with `python -m venv .venv`.
 5. On Windows activate it with `.venv\Scripts\activate`. On macOS or Linux use `source .venv/bin/activate`.
@@ -146,7 +146,7 @@ Recent records receive more weight. A match 365 days older receives half the wei
 
 A 120-ball prior pulls small samples toward the selected competition/phase average. Sample weight equals recency-weighted relevant balls divided by that number plus 120. It measures effective evidence volume, not the chance that a player will succeed.
 
-Batting score rewards runs per ball above the scope average and penalizes dismissal rate above that average. The dismissal weight is 18. Bowling score rewards economy better than the scope average and wicket rate above that average. Its wicket weight is 12. These are transparent research choices, not scientifically proven optimal coefficients. boundary_core/analytics.py contains the exact formulas.
+Batting score rewards runs per ball above the scope average and penalizes dismissal rate above that average. The dismissal weight is 18. Bowling score rewards economy better than the scope average and wicket rate above that average. Its wicket weight is 12. These are transparent research choices, not scientifically proven optimal coefficients. creaseiq_core/analytics.py contains the exact formulas.
 
 The XI scenario utility is batting score / 10 plus bowling score. It is descriptive and can be negative. It is not money or expected match wins. The default XI evidence window is three years of IPL records, even when another scouting competition is selected.
 
@@ -230,9 +230,9 @@ Existing Cloud apps normally rebuild when their configured GitHub branch changes
 
 ## 16. Architecture and file map
 
-app.py contains the Streamlit pages, controls and display flow. boundary_runtime.py loads the complete boundary_core source snapshot under its own fingerprinted package name. Identical code is reused on reruns. Changed code and its Streamlit cache keys receive a new release fingerprint. Each loaded module resolves its data and assets relative to the project folder.
+app.py contains the Streamlit pages, controls and display flow. creaseiq_runtime.py loads the complete creaseiq_core source snapshot under its own fingerprinted package name. Identical code is reused on reruns. Changed code and its Streamlit cache keys receive a new release fingerprint. Each loaded module resolves its data and assets relative to the project folder.
 
-boundary_core/analytics.py loads linked evidence, computes scouting summaries and solves/validates the XI schedule. agent.py checks task context and optional DeepSeek selection. prediction.py builds chronological research forecasts. evidence.py creates fingerprints and decision manifests. storage.py stores scoped journals, cache and atomic request counts in SQLite. branding.py handles franchise colors and bundled identification marks. downloads.py creates an allowlisted source ZIP.
+creaseiq_core/analytics.py loads linked evidence, computes scouting summaries and solves/validates the XI schedule. agent.py checks task context and optional DeepSeek selection. prediction.py builds chronological research forecasts. evidence.py creates fingerprints and decision manifests. storage.py stores scoped journals, cache and atomic request counts in SQLite. branding.py handles franchise colors and bundled identification marks. downloads.py creates an allowlisted source ZIP.
 
 match_data.py processes raw delivery archives. The root prediction.py is the model-build entry point. tools contains reproducible studies, document generation and raw verification. data contains the processed release inputs and evaluation outputs. assets contains league/team identification marks and source credits. tests contains executable checks. docs contains this guide and its downloadable formats.
 
@@ -245,3 +245,10 @@ This is a strong, inspectable capstone foundation. Professional adoption also ne
 A careful next study would collect written analyst ratings for the twenty tasks, evaluate decisions under real role/venue constraints, and test descriptive weights on untouched seasons. Keep these as measured research tasks; do not label them completed without evidence.
 
 Use team colors and logos to identify the selected desk. Restrained transitions support orientation; tables stay stable. Reduced motion is available. Brand marks are used for educational identification and do not imply league or franchise endorsement. Asset credits are in assets/sources.json.
+
+
+## 18. Project name and hosting addresses
+
+The product name is CreaseIQ — Franchise Research Studio. Crease refers to the markings on a cricket pitch; IQ stands for intelligence. The name describes using cricket evidence to support informed decisions, with the analyst in control. The source uses `creaseiq_core`, `creaseiq_runtime.py` and the optional `CREASEIQ_RUNTIME_DIR` setting. Existing saved journal records are adopted once when exactly one compatible earlier store is found in the same runtime folder. Export private work before a hosting change. Several earlier stores are left untouched rather than merged.
+
+The public app is https://creaseiq.streamlit.app/ and the repository is https://github.com/br-abishek-07/creaseiq-cricket-capstone. Use `docs/HOSTING_HANDOFF.md` for deployment checks and `data/project_identity.json` for project identity.

@@ -1,0 +1,48 @@
+{
+  "scope": "Rename preserves supplied source data byte-for-byte and every numerical JSON model/evaluation value.",
+  "checks": [
+    {
+      "file": "data/match_players.csv.gz",
+      "byte_identical": true,
+      "sha256": "2c536bb0e5df04cf32b9ad869fdc7f7938db1dbe64d40cc4ba7b4ee705bc33f3"
+    },
+    {
+      "file": "data/matches.csv.gz",
+      "byte_identical": true,
+      "sha256": "6441d39c9e48febdc25cbec5b58d36b80bf21bce54298cc8b6d630f68eb563b1"
+    },
+    {
+      "file": "data/squads.csv",
+      "byte_identical": true,
+      "sha256": "fac16a8fbab01f903bb162ea59842321560de2149d93b5b4c77752804794155e"
+    },
+    {
+      "file": "data/auction.csv",
+      "byte_identical": true,
+      "sha256": "0860a08088de7d1c66f69316916d680df594e5c8f1f343e9ef0419660b3aa819"
+    },
+    {
+      "file": "data/player_registry.json",
+      "byte_identical": true,
+      "sha256": "49d447faa7db702fb68a8d968b29d08f0dce5975409bf0d59316962f8a3d3ce0"
+    },
+    {
+      "file": "data/attack_types.json",
+      "byte_identical": true,
+      "sha256": "ebeb8c01a79bdd9ee716d5e9082172248a2b064c194b286348aacc2a270c929a"
+    },
+    {
+      "file": "data/audit.json",
+      "byte_identical": true,
+      "sha256": "8d1546e96289cdbb95d6ade2d7e23aa47530014721e7f50b23d2aee53bb72e85"
+    },
+    {
+      "file": "data/prediction_model.json",
+      "numeric_fields_unchanged": 142
+    },
+    {
+      "file": "data/prediction_report.json",
+      "numeric_fields_unchanged": 102
+    }
+  ]
+}

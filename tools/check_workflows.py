@@ -14,7 +14,7 @@ parser.add_argument("--output", type=Path, default=Path("work/accuracy-audit"))
 O = parser.parse_args().output
 O.mkdir(parents=True, exist_ok=True)
 sys.path.insert(0, str(R))
-from boundary_core.analytics import (
+from creaseiq_core.analytics import (
     load,
     scout,
     roster_scores,
@@ -23,7 +23,7 @@ from boundary_core.analytics import (
     select_window,
     squads_asof,
 )
-from boundary_core import agent, storage
+from creaseiq_core import agent, storage
 
 p, s, a = load()
 model = json.loads((R / "data/prediction_model.json").read_text())
@@ -233,7 +233,7 @@ result["roster_pool_checks"] = rosters
 pd.DataFrame(missions).to_csv(O / "team_scenarios.csv", index=False)
 pd.DataFrame(forced).to_csv(O / "all_roster_player_locks.csv", index=False)
 with tempfile.TemporaryDirectory() as temp, patch.dict(
-    os.environ, {"BOUNDARY_RUNTIME_DIR": temp}
+    os.environ, {"CREASEIQ_RUNTIME_DIR": temp}
 ):
     owner = storage.scope("audit", "RCB")
     faults = []

@@ -14,7 +14,7 @@ parser.add_argument("--output", type=Path, default=Path("work/accuracy-audit"))
 O = parser.parse_args().output
 O.mkdir(parents=True, exist_ok=True)
 sys.path.insert(0, str(R))
-from boundary_core.analytics import load, resolve
+from creaseiq_core.analytics import load, resolve
 
 p, s, _ = load()
 m = pd.read_csv(

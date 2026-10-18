@@ -6,7 +6,7 @@ import io, zipfile
 ROOT = Path(__file__).resolve().parents[1]
 ROOT_FILES = {
     "app.py",
-    "boundary_runtime.py",
+    "creaseiq_runtime.py",
     "match_data.py",
     "prediction.py",
     "README.md",
@@ -16,7 +16,7 @@ ROOT_FILES = {
     "start.sh",
     ".gitignore",
 }
-DIRECTORIES = {"boundary_core", "assets", "data", "docs", "tests", "tools"}
+DIRECTORIES = {"creaseiq_core", "assets", "data", "docs", "tests", "tools"}
 SUFFIXES = {
     ".py",
     ".json",
@@ -70,5 +70,5 @@ def source_zip():
     out = io.BytesIO()
     with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as archive:
         for path in source_files():
-            archive.write(path, "boundary/" + str(path.relative_to(ROOT)))
+            archive.write(path, "creaseiq/" + str(path.relative_to(ROOT)))
     return out.getvalue()

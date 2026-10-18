@@ -6,8 +6,10 @@ The release includes 6,392 eligible men's matches and 141,377 player-match recor
 
 The player registry links supplied Cricsheet IDs, archive aliases and supplied squad names. Selected display corrections cite their review sources in data/player_registry.json. This is a local release registry, not the complete external Cricsheet register. Reference bowling styles are curated planning assumptions from data/attack_types.json. Unknown remains explicit.
 
-The supplied 2026 squad file is adjusted only by sourced dated events in data/squad_events.json. Complete current registration, replacement and availability are not verified. The historical 2013–2022 auction CSV is a manual lookup; currency and transaction types require verification. It is not a live market-price feed.
+The supplied 2026 squad file is adjusted by sourced dated trades in data/squad_events.json and selected 2026 selection blocks in data/roster_status.json. Documented replacements missing verified metadata are reported explicitly. Complete current registration, replacement and availability are not verified. The historical 2013–2022 auction CSV is a manual lookup; currency and transaction types require verification. It is not a live market-price feed.
 
 Asset source URLs and credits are in assets/sources.json. League and team marks identify the educational subjects. No endorsement is implied.
 
 See USER_GUIDE.md for delivery conventions, phase rules, score formulas, legal scheduling constraints, baseline gating, model/study limitations, rebuild commands and exports.
+
+Read [the accuracy audit](ACCURACY_AUDIT.md) and data/official_validation.csv for dated primary-source comparisons, coverage gaps and unresolved conflicts. Those are sampled external checks, not full official certification.

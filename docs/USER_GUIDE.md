@@ -1,6 +1,6 @@
 # Boundary — project guide
 
-Version 3.0.1 · 18 October 2026
+Version 3.0.2 · 18 October 2026
 
 Boundary is an independent educational cricket research application. It is designed for an IPL franchise analyst or scout. It combines match records, clear calculations, a constrained AI workflow and a record of the analyst's reasoning.
 
@@ -31,11 +31,11 @@ The included data is a frozen set of supplied Cricsheet archives. Only the eligi
 | T20I | 3,592 | 2005-02-17 | 2026-10-06 |
 | SMAT | 695 | 2016-01-02 | 2024-12-15 |
 
-There are 6,392 included matches and 141,377 player-match records. Yes, there is 2026 evidence. This does not mean every 2026 match is present, or that the app updates itself. SMAT ends in 2024. Check the selected date and the last relevant match for each player.
+There are 6,392 included matches and 141,377 player-match records. Yes, there is 2026 evidence. This does not mean every 2026 match is present, or that the app updates itself. SMAT ends in 2024. Check the selected date and the last relevant match for each player. Known coverage gaps affect full career totals. For example, the archive has 3,963 T20I runs for Virat Kohli, while the ICC records 4,188. The SMAT 2024/25 sample has only eight matches. Use archive totals as the supplied sample, not an official complete career record. Evaluation & sources contains the detailed accuracy audit and source-linked comparison download.
 
 Archive names, counts and SHA-256 fingerprints are in data/audit.json. The archive hashes identify the exact input files used to build this release. One voided IPL match, duplicate match IDs and other-gender matches are excluded. Super overs are not mixed into the regular innings totals.
 
-The squad file is a supplied 2026 snapshot with a small set of sourced, dated trade events. It has not been fully reverified against every current registration, replacement, injury or overseas availability. Earlier historical squads cannot be reconstructed from this snapshot. The app refuses to use it for a pre-2026 XI.
+The squad file is a supplied 2026 research pool. It can include a withdrawn player and a replacement together. Dated trades and fourteen selected availability notices are applied. Documented outgoing players are blocked after the notice date, even when a capability assumption is supplied. Existing replacements are blocked before their documented join date. Seven documented replacements are missing verified roster metadata; the app names them rather than inventing it. This is partial verification, not a complete current registration list. XI scenarios require a cutoff within 2026. Other seasons need their own verified roster.
 
 The auction CSV contains historical 2013–2022 records. Currency units and transaction types need verification. It is only a manual lookup and is not used to estimate a current price.
 
@@ -92,19 +92,21 @@ Loading an example does not call DeepSeek or automatically run a paid task.
 
 Home explains the purpose, workflow, examples, source coverage and downloads.
 
-Decision desk prepares a checked brief for one of the four tasks. Confirm a player or comparison identity where needed. The free-text question adds purpose; the structured controls define the calculation. Requests for a different phase, player or budget need matching controls. The app does not silently invent missing age, handedness or current price evidence.
+Decision desk prepares a checked brief for one of the four tasks. Confirm a player or comparison identity where needed. The free-text question adds purpose; the structured controls define the calculation. Requests for a different competition, discipline, phase, player, season, franchise, matchup or budget need matching controls. Named exclusions must be confirmed. Complete official career claims need a verified complete source; use Player overview for the supplied archive. A question asking for two phases needs separate scoped briefs. Unknown identity searches cannot produce an unrelated broad result. The app does not silently invent missing age, handedness or current price evidence.
 
 Scouting & comparison controls competition, batting/bowling discipline, phase, date window and minimum relevant balls. Search by display name, archive alias or player ID. Compare up to three identities. ALL keeps competitions in separate groups; it does not convert a BBL score into an IPL forecast.
 
 Squad & auction scenarios controls unavailable players, locked players, role minima, optional costs and capability assumptions. Every successful plan includes eleven players and a legal twenty-over assignment. The Alternatives tab supports a forced-player counterfactual. Constraint diagnostics explain unsupported scenarios.
 
-Player dossier requires identity confirmation, then shows the same scoped totals, seasons, match evidence and observed-rate interval. Two players with similar names are not merged. Historical auction lookup stays manual.
+Player dossier starts with Player overview: choose a competition and inspect all supplied phases from its earliest date to before the cutoff. Runs in archive means exactly that sample. Use active research filters switches to the selected research phase and dates. It shows both phase runs and all-phase runs for the same window. The minimum-ball threshold applies to scouting, not dossier visibility. Discipline selects the uncertainty measure; both batting and bowling totals still use the chosen phase. Identical names need an explicit registry choice, with observed teams shown to help. A name such as Rohit Sharma can identify several different people. Historical auction lookup stays manual.
+
+Example: Virat Kohli has 114 IPL Death-phase runs in the 2023-10-18 to before 2026-10-18 window, compared with 2,073 all-phase runs in that same window. The complete supplied IPL overview contains 9,336 runs through 2026-05-31. These are different scopes; do not compare a phase sample with a full career total.
 
 Match research shows the accepted baseline, held-out comparisons and a reproducible forecast export. Confirm Team A, Team B, venue and chasing team. Changing the XI does not change this baseline: player lineups are not model inputs. If the rating snapshot is after the chosen cutoff, current-snapshot estimates are disabled; use dated holdout rows.
 
 Decision journal holds saved briefs and scenarios for this browser session and selected franchise. A fresh session gets a new scope. Another franchise cannot read those records. Export the journal before closing, resetting or redeploying. This is not an authenticated, durable collaboration system.
 
-Evaluation & sources contains current release checks, a rolling historical scouting study, twenty unrated team review tasks, a private review form, data/asset sources and SWOT. A submitted rating is feedback, not proof of professional validation.
+Evaluation & sources contains the downloadable accuracy audit, official-source numeric checkpoints, current release checks, a rolling historical scouting study, twenty unrated team review tasks, a private review form, data/asset sources and SWOT. A submitted rating is feedback, not proof of professional validation.
 
 Project guide contains this explanation and PDF, Word and source ZIP downloads.
 
@@ -196,13 +198,17 @@ Place sma_json.zip, ipl_json.zip, hnd_json.zip, t20s_json.zip and bbl_json.zip i
 
 `python tools/benchmark_scouting.py`
 
-The player registry, supplied squad file, dated squad events and reference attack types are release inputs too. Preserve their sources and review any changes; rebuilding match aggregates alone does not verify current squads.
+The player registry, supplied squad file, dated squad events, roster_status.json availability notices and reference attack types are release inputs too. Preserve their sources and review any changes; rebuilding match aggregates alone does not verify current squads.
 
 Run the tests described in the next chapter. To rebuild PDF and Word documentation, install the optional packages with `python -m pip install -r requirements-docs.txt`, then run `python tools/build_docs.py`. These packages are not needed to run the app. Keep USER_GUIDE.md as the source of truth for the downloadable explanation.
 
 ## 14. Test the release
 
 Run `python -m unittest discover -s tests -v` from the project root. The tests exercise data conventions, identity lookup, supported schedules, scoped task behaviour, model-output rejection, private storage, downloads, startup and the Streamlit interface. Provider fixtures are simulated; they do not spend money or measure live model quality.
+
+Run `python tools/compare_official_checkpoints.py --output work/accuracy-audit` to recalculate the stored numeric checkpoints against the archive. Official values in that script were transcribed from the linked pages on 18 October 2026; this command does not fetch live records.
+
+The accuracy audit distinguishes complete raw-archive reconciliation from sampled official-source validation. Its comparison CSV keeps coverage gaps and conflicting values visible. A full per-player official certification still requires complete official scorecards and an independently reviewed registry.
 
 For raw reconciliation, run `python tools/verify_raw.py --source /path/to/raw-data` with the exact archived inputs. This independently recalculates base totals and phase totals from raw deliveries, then compares them with the processed records. The release checks report the actual comparison count and mismatches.
 

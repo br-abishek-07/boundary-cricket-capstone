@@ -6,12 +6,13 @@ import datetime, hashlib, io, json, math, zipfile
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "3.0.1"
+VERSION = "3.0.2"
 FILES = [
     "data/match_players.csv.gz",
     "data/matches.csv.gz",
     "data/squads.csv",
     "data/squad_events.json",
+    "data/roster_status.json",
     "data/player_registry.json",
     "data/attack_types.json",
     "data/prediction_model.json",
@@ -43,6 +44,7 @@ CONTEXT_FIELDS = {
     "target_names",
     "matchup",
     "candidate_ids",
+    "candidate_excluded_ids",
     "candidate_pool",
 }
 
@@ -107,6 +109,7 @@ def manifest(team, until, scenario, kind, question=""):
         "source_sha256": source_hashes(),
         "context_fingerprint": context_key(question, team, until, scenario),
         "assumptions": [
+            "Totals cover supplied match records only. Known T20I and SMAT coverage gaps prevent complete career or tournament claims.",
             "The supplied 2026 squad has partial dated verification. Confirm eligibility and current availability.",
             "Prices and capability overrides are analyst assumptions. Scores are descriptive and do not predict future value.",
             "Scouting comparisons remain separate by competition. No league-strength translation is assumed.",

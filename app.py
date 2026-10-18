@@ -18,6 +18,7 @@ roster_scores = release.analytics.roster_scores
 optimize = release.analytics.optimize
 player_interval = release.analytics.player_interval
 resolve = release.analytics.resolve
+identity_label = release.analytics.identity_label
 window = release.analytics.window
 select_window = release.analytics.select_window
 predict = release.prediction.predict
@@ -240,6 +241,8 @@ def table(df):
         "cricsheet_id": "Registry ID",
         "evidence_missing": "No observed evidence",
         "bowling_capacity": "Max overs",
+        "selection_blocked": "Dated selection block",
+        "status_note": "Registration / availability note",
         "pp_capacity": "PP max overs",
         "mid_capacity": "Middle max overs",
         "death_capacity": "Death max overs",
@@ -526,12 +529,13 @@ elif page == "Decision desk":
             key="mode_" + team,
         )
         scope = {**context, "intent": intent}
+        unresolved_query = False
         if intent in ["Scouting", "Player evidence"]:
             query = st.text_input(
                 "Find a player or alias (optional for scouting)",
                 key="target_query_" + team,
             )
-            hits = resolve(p, query) if query else []
+            hits = resolve(p[p.date < until], query) if query else []
             if query and not hits:
                 st.warning(
                     "No matching registry identity. No statistics will be inferred."
@@ -543,17 +547,31 @@ elif page == "Decision desk":
                     else "Confirm target player"
                 ),
                 hits,
-                format_func=lambda x: x["player"] + " · " + x["player_id"],
+                format_func=lambda x: identity_label(p, x, until),
                 max_selections=3 if intent == "Scouting" else 1,
                 key="target_" + intent + "_" + team,
             )
             scope["candidate_ids" if intent == "Scouting" else "target_ids"] = [
                 x["player_id"] for x in chosen
             ]
+            unresolved_query = bool(query and not hits) or (
+                intent == "Player evidence" and not chosen
+            )
             if intent == "Scouting":
+                omitted = st.multiselect(
+                    "Exclude comparison players",
+                    hits,
+                    format_func=lambda x: identity_label(p, x, until),
+                    key="omit_compare_" + team,
+                )
+                scope["candidate_excluded_ids"] = [x["player_id"] for x in omitted]
                 scope["candidate_pool"] = st.selectbox(
                     "Candidate pool",
-                    ["All observed players", "Current squad", "Outside current squad"],
+                    [
+                        "All observed players",
+                        "Supplied squad pool",
+                        "Outside supplied pool",
+                    ],
                     key="candidate_pool_" + team,
                 )
         elif intent == "Match research":
@@ -577,7 +595,7 @@ elif page == "Decision desk":
             "mode": mode,
             "question": question,
         }
-        if st.button("Prepare brief", type="primary"):
+        if st.button("Prepare brief", type="primary", disabled=unresolved_query):
             ss.pop("brief", None)
             ss.pop("brief_error", None)
             try:
@@ -701,7 +719,7 @@ elif page == "Scouting & comparison":
     if search:
         r = r[r.player_id.isin([x["player_id"] for x in resolve(p, search)])]
     cols = (
-        ["player"]
+        ["player", "player_id"]
         + (["competition"] if context["competition"] == "ALL" else [])
         + [
             "score",
@@ -723,7 +741,7 @@ elif page == "Scouting & comparison":
         r.player_id.drop_duplicates().tolist(),
         default=r.player_id.drop_duplicates().head(2).tolist(),
         max_selections=3,
-        format_func=lambda x: r[r.player_id == x].player.iloc[0],
+        format_func=lambda x: r[r.player_id == x].player.iloc[0] + " · " + x,
     )
     selected = r[r.player_id.isin(chosen)]
     if len(selected):
@@ -770,6 +788,31 @@ elif page == "Squad & auction scenarios":
     except ValueError as ex:
         st.warning(str(ex))
         st.stop()
+    st.warning(
+        "Research pool: supplied squad records can include withdrawn players and their replacements. This is not a fully verified current registration list. Check the sourced status table and availability before using a plan."
+    )
+    blocked = r[r.selection_blocked]
+    if len(blocked):
+        st.info(
+            "Excluded by dated 2026 notices: "
+            + ", ".join(blocked.player_name)
+            + ". Capability overrides cannot remove these sourced blocks."
+        )
+    review = json.loads((ROOT / "data/roster_status.json").read_text())
+    missing = [
+        n["replacement"]
+        for n in review["notices"]
+        if n["team"] == team
+        and n["published_date"] < until
+        and n["replacement"]
+        and not n["replacement_in_supplied_pool"]
+    ]
+    if missing:
+        st.warning(
+            "The supplied pool is missing documented replacements: "
+            + ", ".join(missing)
+            + ". A plan cannot evaluate those players until their roster metadata is verified and added."
+        )
     old = ss.scenarios.get(team, {})
     names = r.player_name.tolist()
     c = st.columns(2)
@@ -985,6 +1028,9 @@ elif page == "Squad & auction scenarios":
                     "mid_capacity",
                     "death_capacity",
                     "evidence_missing",
+                    "selection_blocked",
+                    "status_note",
+                    "status_source",
                 ]
             ]
         )
@@ -995,27 +1041,94 @@ elif page == "Squad & auction scenarios":
 elif page == "Player dossier":
     heading(
         "Confirm the identity.\nRead the underlying record.",
-        "Archive aliases and reviewed display names remain linked to the same player ID. An ambiguous search always needs an explicit selection.",
+        "Choose an archive overview or a scoped research sample. Identical names require an explicit registry selection.",
     )
-    filters()
+    view = st.radio(
+        "Dossier view",
+        ["Player overview", "Use active research filters"],
+        horizontal=True,
+        key="dossier_view_v302",
+    )
+    if view == "Use active research filters":
+        filters()
+        profile_context = dict(context)
+        st.caption(
+            "Both batting and bowling totals below use the chosen phase. Discipline selects the uncertainty measure. The minimum-ball threshold belongs to scouting rankings; it does not hide a dossier."
+        )
+    else:
+        competition = st.selectbox(
+            "Overview competition",
+            ["IPL", "T20I", "SMAT", "BBL", "Hundred"],
+            key="overview_comp",
+        )
+        beginning = next(
+            x["earliest"] for x in audit["sources"] if x["competition"] == competition
+        )
+        profile_context = {
+            **context,
+            "competition": competition,
+            "phase": "All",
+            "since": beginning,
+            "discipline": "Batting",
+        }
+        st.caption(
+            f"Archive overview: {competition} · all phases · {beginning} to before {until}. Coverage is limited to supplied match records."
+        )
     query = st.text_input("Player name, alias or registry ID", value="Virat Kohli")
-    hits = resolve(p, query)
+    hits = resolve(p[p.date < until], query)
     if not hits:
-        st.info("No matching identity. Try a scorecard alias or registry ID.")
+        st.info(
+            "No matching archive identity before this cutoff. Try a source alias or registry ID."
+        )
         st.stop()
     hit = st.selectbox(
         "Confirm identity",
         hits,
-        format_func=lambda x: x["player"] + " · " + x["player_id"],
+        index=0 if len(hits) == 1 else None,
+        placeholder="Select the intended player using the ID and observed teams",
+        format_func=lambda x: identity_label(p, x, until),
+        key="dossier_identity_v302_" + query.strip().lower(),
     )
+    if hit is None:
+        st.info(
+            "This name identifies more than one player. Confirm the observed team and registry ID before viewing statistics."
+        )
+        st.stop()
     z = select_window(
-        p, context["competition"], context["since"], until, context["phase"]
+        p,
+        profile_context["competition"],
+        profile_context["since"],
+        until,
+        profile_context["phase"],
     )
     z = z[z.player_id == hit["player_id"]]
     c = st.columns(3)
-    c[0].metric("Runs", int(z.runs.sum()))
-    c[1].metric("Wickets", int(z.wickets.sum()))
-    c[2].metric("Named appearances", len(z))
+    c[0].metric(
+        (
+            "Runs in archive"
+            if profile_context["phase"] == "All"
+            else "Runs in " + profile_context["phase"] + " phase"
+        ),
+        int(z.runs.sum()),
+    )
+    c[1].metric("Bowler-credited wickets", int(z.wickets.sum()))
+    c[2].metric("Matches with named record", z.match_id.nunique())
+    if profile_context["phase"] != "All":
+        whole = select_window(
+            p, profile_context["competition"], profile_context["since"], until, "All"
+        )
+        whole = whole[whole.player_id == hit["player_id"]]
+        active = z[z.balls.add(z.legal_balls) > 0].match_id.nunique()
+        st.info(
+            f"This sample contains {int(z.runs.sum()):,} {profile_context['phase'].lower()}-phase runs. All phases in the same date window contain {int(whole.runs.sum()):,} runs. {active} matches contain relevant phase balls; the named-record count includes other appearances in this window."
+        )
+    st.caption(
+        "Archive totals can be lower than official career or season figures when matches are missing. The earliest and latest dates do not establish complete coverage."
+    )
+    if profile_context["competition"] in ["T20I", "SMAT", "ALL"]:
+        st.warning(
+            "This source has known coverage gaps. Use these numbers as an archive sample, with the selected dates and phase. Compare complete career or season totals with an official record separately."
+        )
     season = z.groupby(["competition", "season"], as_index=False)[
         ["runs", "balls", "wickets", "legal_balls"]
     ].sum()
@@ -1032,15 +1145,15 @@ elif page == "Player dossier":
             player_interval(
                 p,
                 hit["player_id"],
-                context["discipline"],
+                profile_context["discipline"],
                 until,
-                context["since"],
-                context["competition"],
-                context["phase"],
+                profile_context["since"],
+                profile_context["competition"],
+                profile_context["phase"],
             )
         )
     )
-    exports(z, "player-dossier", {**context, "target_ids": [hit["player_id"]]})
+    exports(z, "player-dossier", {**profile_context, "target_ids": [hit["player_id"]]})
     with st.expander("Match evidence"):
         table(
             z[
@@ -1136,6 +1249,7 @@ elif page == "Evaluation & sources":
             "Human review",
             "Sources & squads",
             "SWOT",
+            "Accuracy audit",
         ]
     )
     with tabs[0]:
@@ -1221,6 +1335,7 @@ elif page == "Evaluation & sources":
     with tabs[3]:
         table(pd.DataFrame(audit["sources"]))
         st.json(json.loads((ROOT / "data/squad_events.json").read_text()))
+        st.json(json.loads((ROOT / "data/roster_status.json").read_text()))
         st.json(json.loads((ROOT / "assets/sources.json").read_text()))
         for note in audit["notes"]:
             st.caption(note)
@@ -1254,6 +1369,35 @@ elif page == "Evaluation & sources":
                 }
             )
         )
+
+    with tabs[5]:
+        st.warning(
+            "Archive consistency is not complete official coverage. The primary-source sample found five T20I coverage gaps and one unresolved one-run conflict. Current squads remain partially verified."
+        )
+        f = ROOT / "data/official_validation.csv"
+        if f.exists():
+            compared = pd.read_csv(f)
+            table(compared[compared.status.ne("MATCH")])
+            st.caption(
+                "194 numeric checkpoints from 15 primary pages: 188 matches, five coverage gaps and one conflicting figure. Includes all ten IPL teams. This sample does not certify every official player record. See the report for scope and methods."
+            )
+            st.download_button(
+                "Download official comparison CSV",
+                f.read_bytes(),
+                "boundary-official-comparisons.csv",
+                "text/csv",
+                on_click="ignore",
+            )
+        f = ROOT / "docs/ACCURACY_AUDIT.md"
+        if f.exists():
+            st.download_button(
+                "Download accuracy audit",
+                f.read_bytes(),
+                "Boundary_Accuracy_Audit.md",
+                "text/markdown",
+                on_click="ignore",
+            )
+            st.markdown(f.read_text())
 
 elif page == "Project guide":
     heading(

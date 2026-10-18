@@ -184,7 +184,7 @@ for archive in sorted(args.source.rglob("*_json.zip")):
     source["included"] = included
     sources.append(source)
 report = {
-    "version": "Boundary 3.0.0",
+    "version": "Boundary 3.0.2",
     "sources": sources,
     "matches": len(seen),
     "player_matches": len(keys),

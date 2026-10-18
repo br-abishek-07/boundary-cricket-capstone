@@ -1,0 +1,103 @@
+{
+  "checked_on": "2026-10-18",
+  "fields": 194,
+  "status_counts": {
+    "MATCH": 188,
+    "COVERAGE GAP": 5,
+    "MISMATCH": 1
+  },
+  "sources": 15,
+  "IPL_teams_compared": [
+    "CSK",
+    "DC",
+    "GT",
+    "KKR",
+    "LSG",
+    "MI",
+    "PBKS",
+    "RCB",
+    "RR",
+    "SRH"
+  ],
+  "scope": "Primary-source sample across all ten IPL teams and all five archive competitions, plus complete all-ten-team league P/W/L/NR/points comparisons. This is not an official record check of every player or match. Missing T20I coverage is retained as a failure to match full-career references; no runs are invented to fill it.",
+  "mismatches": [
+    {
+      "kind": "IPL match",
+      "subject": "Anshul Kamboj",
+      "metric": "conceded",
+      "official_value": 57,
+      "archive_value": 56,
+      "difference": -1,
+      "status": "MISMATCH",
+      "scope": "Match 1529309",
+      "source": "https://www.iplt20.com/news/article/tata-ipl-2026-match-66-gt-v-csk-match-report",
+      "checked_on": "2026-10-18",
+      "review_note": "Unresolved source conflict: IPL report says 57; archive and independently retrieved Cricbuzz scorecard say 56. Official dynamic scorecard did not expose bowling rows. Preserve archive value pending primary scorecard review. Secondary corroboration: https://m.cricbuzz.com/player-match-highlights/152229/1/14598/bowling"
+    },
+    {
+      "kind": "T20I career coverage",
+      "subject": "Virat Kohli",
+      "metric": "runs",
+      "official_value": 4188,
+      "archive_value": 3963,
+      "difference": -225,
+      "status": "COVERAGE GAP",
+      "scope": "Before 2024-07-01",
+      "source": "https://www.icc-cricket.com/news/india-s-big-conundrum-at-the-top-who-replaces-rohit-and-kohli-in-t20is",
+      "checked_on": "2026-10-18",
+      "review_note": ""
+    },
+    {
+      "kind": "T20I career coverage",
+      "subject": "Rohit Sharma",
+      "metric": "runs",
+      "official_value": 4231,
+      "archive_value": 4027,
+      "difference": -204,
+      "status": "COVERAGE GAP",
+      "scope": "Before 2024-07-01",
+      "source": "https://www.icc-cricket.com/news/india-s-big-conundrum-at-the-top-who-replaces-rohit-and-kohli-in-t20is",
+      "checked_on": "2026-10-18",
+      "review_note": ""
+    },
+    {
+      "kind": "T20I career coverage",
+      "subject": "Yashasvi Jaiswal",
+      "metric": "runs",
+      "official_value": 502,
+      "archive_value": 430,
+      "difference": -72,
+      "status": "COVERAGE GAP",
+      "scope": "Before 2024-07-01",
+      "source": "https://www.icc-cricket.com/news/india-s-big-conundrum-at-the-top-who-replaces-rohit-and-kohli-in-t20is",
+      "checked_on": "2026-10-18",
+      "review_note": ""
+    },
+    {
+      "kind": "T20I career coverage",
+      "subject": "Shubman Gill",
+      "metric": "runs",
+      "official_value": 335,
+      "archive_value": 312,
+      "difference": -23,
+      "status": "COVERAGE GAP",
+      "scope": "Before 2024-07-01",
+      "source": "https://www.icc-cricket.com/news/india-s-big-conundrum-at-the-top-who-replaces-rohit-and-kohli-in-t20is",
+      "checked_on": "2026-10-18",
+      "review_note": ""
+    },
+    {
+      "kind": "T20I career coverage",
+      "subject": "KL Rahul",
+      "metric": "runs",
+      "official_value": 2265,
+      "archive_value": 2134,
+      "difference": -131,
+      "status": "COVERAGE GAP",
+      "scope": "Before 2024-07-01",
+      "source": "https://www.icc-cricket.com/news/india-s-big-conundrum-at-the-top-who-replaces-rohit-and-kohli-in-t20is",
+      "checked_on": "2026-10-18",
+      "review_note": ""
+    }
+  ]
+}

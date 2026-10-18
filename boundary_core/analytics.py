@@ -68,10 +68,23 @@ def resolve(players, query):
     return pairs.loc[hits, ["player_id", "player"]].head(12).to_dict("records")
 
 
+def identity_label(players, hit, until):
+    rows = players[
+        (players.player_id == hit["player_id"]) & (players.date < until)
+    ].sort_values("date")
+    competitions = (
+        ", ".join(sorted(rows.competition.unique())) or "No earlier match records"
+    )
+    teams = " / ".join(rows.team[rows.team.ne("")].drop_duplicates().tail(2).tolist())
+    return f"{hit['player']} · {hit['player_id']} · {competitions}" + (
+        f" · {teams}" if teams else ""
+    )
+
+
 def squads_asof(squads, until):
-    if pd.Timestamp(until).year < 2026:
+    if pd.Timestamp(until).year != 2026:
         raise ValueError(
-            "The supplied roster is a 2026 snapshot. Historical squad reconstruction before 2026 is unavailable."
+            "The supplied roster is a 2026 snapshot used as a research pool. XI scenarios require a cutoff within 2026; other seasons need a separately verified roster."
         )
     r = squads.copy()
     events = json.loads((ROOT / "data/squad_events.json").read_text())
@@ -80,7 +93,40 @@ def squads_asof(squads, until):
             mask = r.player_name.eq(event["player"])
             r.loc[mask, "franchise_id"] = event["to"]
             r.loc[mask, "designation"] = "Player"
-    r["roster_source"] = "Supplied 2026 snapshot + sourced dated trade events"
+    r["selection_blocked"] = False
+    r["status_note"] = (
+        "Supplied pool; current registration and availability not fully verified"
+    )
+    r["status_source"] = ""
+    status_file = ROOT / "data/roster_status.json"
+    if status_file.exists():
+        for notice in json.loads(status_file.read_text())["notices"]:
+            if pd.Timestamp(until).year != notice["season"]:
+                continue
+            outgoing = r.cricsheet_id.eq(notice["player_id"])
+            incoming = r.cricsheet_id.eq(notice.get("replacement_id"))
+            if notice["published_date"] < until:
+                r.loc[outgoing, "selection_blocked"] = True
+                r.loc[outgoing, "status_note"] = (
+                    notice["status"] + "; published " + notice["published_date"]
+                )
+                r.loc[outgoing, "status_source"] = notice["source"]
+                r.loc[incoming, "status_note"] = (
+                    "Replacement recorded "
+                    + notice["published_date"]
+                    + "; current availability still needs verification"
+                )
+                r.loc[incoming, "status_source"] = notice["source"]
+            else:
+                r.loc[incoming, "selection_blocked"] = True
+                r.loc[incoming, "status_note"] = (
+                    "Replacement joined after this evidence cutoff"
+                )
+                r.loc[incoming, "status_source"] = notice["source"]
+    r["roster_source"] = (
+        "Supplied 2026 research pool + dated trades and selected availability notices"
+    )
+
     return r
 
 
@@ -342,6 +388,8 @@ def optimize(
         except (ValueError, TypeError):
             return fail("Capability and utility assumptions must be valid numbers.")
         override_notes.append({"player": name, **o})
+    if "selection_blocked" in r:
+        eligible &= ~r.selection_blocked.astype(bool)
     active = r[eligible]
     diagnostics = []
     checks = [
@@ -384,7 +432,7 @@ def optimize(
         return fail("The eligible players cannot cover twenty overs.", diagnostics)
     if any(not bool(eligible.loc[r.index[r.player_name.eq(n)][0]]) for n in locked):
         return fail(
-            "A locked player has no relevant evidence. Add a justified utility assumption to include that player.",
+            "A locked player lacks relevant evidence or has a dated selection block. Capability assumptions cannot override a sourced availability or registration block.",
             diagnostics,
         )
     if int(r[r.player_name.isin(locked)].is_overseas.sum()) > max_overseas:
@@ -562,7 +610,7 @@ def optimize(
     ].copy()
     alternatives["explanation"] = np.where(
         ~eligible.loc[alternatives.index],
-        "Needs a justified assumption before selection.",
+        "Not selectable: review missing evidence and any dated availability block.",
         "Outside the optimal XI for these constraints. Lock this player to compare a counterfactual.",
     )
     return {

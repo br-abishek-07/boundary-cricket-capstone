@@ -1,34 +1,421 @@
 {
-  "version": "3.0.1",
-  "checked_utc": "2026-10-18T14:33:20.631161+00:00",
-  "status": "Offline acceptance passed",
+  "version": "3.0.2",
+  "checked_utc": "2026-10-18T15:27:30.992088+00:00",
+  "status": "Local functional acceptance passed; external coverage and roster verification remain limited",
   "automated_tests": {
     "core": 44,
     "startup": 3,
     "ui": 7,
-    "total": 60,
+    "release_runtime": 6,
+    "accuracy_regressions": 7,
+    "dossier_ui": 1,
+    "total": 68,
     "failures": 0,
     "errors": 0,
-    "scope": "Full current suite: 60 tests, including cached package startup, coherent source snapshots, same-path/same-timestamp changes, failed-load cleanup, concurrent loading and data-cache invalidation. UI covers all ten franchise desks and pages. The cached-package scenario also checks that a legacy brief without a context fingerprint is safely hidden until recomputed.",
-    "release_runtime": 6
-  },
-  "team_scenarios": {
-    "teams": 10,
-    "scenarios": 100,
-    "rule": "Every successful plan independently checked for 11 distinct players, all 20 overs, no consecutive overs, workload/phase caps, exclusions and locks. Explicitly impossible cases rejected."
+    "seconds": 58.135,
+    "scope": "Full current suite, including all ten franchise desks and all ten workspaces, cached startup, provider fixtures, privacy, stale-context protection, exports, scheduling and new accuracy regressions. No live provider or hosted rebuild certification."
   },
   "raw_reconciliation": {
-    "sources": 5,
+    "version": "Boundary 3.0.2",
+    "sources": [
+      {
+        "file": "sma_json.zip",
+        "sha256_matches": true,
+        "included": 695
+      },
+      {
+        "file": "ipl_json.zip",
+        "sha256_matches": true,
+        "included": 1242
+      },
+      {
+        "file": "hnd_json.zip",
+        "sha256_matches": true,
+        "included": 201
+      },
+      {
+        "file": "t20s_json.zip",
+        "sha256_matches": true,
+        "included": 3592
+      },
+      {
+        "file": "bbl_json.zip",
+        "sha256_matches": true,
+        "included": 662
+      }
+    ],
     "matches": 6392,
     "player_matches": 141377,
-    "field_comparisons": 3393048,
-    "delivery_records": 1455366,
+    "counts": {
+      "deliveries": 1455366,
+      "field_comparisons": 3393048
+    },
     "mismatches": 0,
-    "source_hashes_match": true,
+    "examples": [],
+    "all_mismatches": [],
+    "extra_player_rows": 0,
+    "match_id_sets_equal": true,
+    "date_or_competition_mismatches": [],
+    "phase_metadata_coverage": {
+      "metadata_innings": 12703,
+      "fallback_innings": 6,
+      "reduced_target_innings": 322
+    },
+    "seconds": 12.41,
     "scope": "Full supplied archive reconciliation; target overs interpreted as cricket over.ball notation, not decimal overs. Fallback and analytical death labels are not proof of official field restrictions or source authenticity."
   },
+  "all_player_checks": {
+    "identities": {
+      "players": 6618,
+      "player_match_rows": 141377,
+      "all_raw_ids_in_registry": true,
+      "raw_alias_missing": [],
+      "display_name_mismatch_count": 0,
+      "duplicate_rows": 0
+    },
+    "all_player_season_phase_checks": {
+      "groups": 27236,
+      "numeric_comparisons": 163416,
+      "mismatches": 0
+    }
+  },
+  "expanded_workflows": {
+    "scouting_scopes": {
+      "cases": 144,
+      "failures": []
+    },
+    "team_scenarios": {
+      "cases": 90,
+      "failures": [],
+      "supported": 50
+    },
+    "all_roster_player_locks": {
+      "cases": 257,
+      "supported": 214,
+      "failures": []
+    },
+    "question_alignment_probes": [
+      {
+        "case": "Scouting exclusion",
+        "question": "Find death bowlers excluding Jasprit Bumrah",
+        "status": "clarification",
+        "context": {
+          "competition": "IPL",
+          "discipline": "Bowling",
+          "phase": "Death",
+          "min_balls": 120,
+          "since": "2023-10-18",
+          "intent": "Scouting"
+        },
+        "facts": [],
+        "text": "Confirm these named exclusions in the controls before running: Jasprit Bumrah",
+        "should_clarify": true,
+        "passes": true
+      },
+      {
+        "case": "Historical season",
+        "question": "Show Virat Kohli IPL 2016 performance",
+        "status": "clarification",
+        "context": {
+          "competition": "IPL",
+          "discipline": "Bowling",
+          "phase": "All",
+          "min_balls": 120,
+          "since": "2023-10-18",
+          "intent": "Player evidence",
+          "target_ids": [
+            "ba607b88"
+          ],
+          "target_names": [
+            "Virat Kohli"
+          ]
+        },
+        "facts": [],
+        "text": "The question requests 2016, but the active evidence window includes other years. Set the start and exclusive cutoff to the requested season.",
+        "should_clarify": true,
+        "passes": true
+      },
+      {
+        "case": "Middle phase",
+        "question": "Compare middle over bowling options",
+        "status": "clarification",
+        "context": {
+          "competition": "IPL",
+          "discipline": "Bowling",
+          "phase": "Death",
+          "min_balls": 120,
+          "since": "2023-10-18",
+          "intent": "Scouting"
+        },
+        "facts": [],
+        "text": "The question phase differs from the active phase. Set matching evidence filters.",
+        "should_clarify": true,
+        "passes": true
+      },
+      {
+        "case": "Under25",
+        "question": "Find under-25 death bowlers",
+        "status": "clarification",
+        "context": {
+          "competition": "IPL",
+          "discipline": "Bowling",
+          "phase": "Death",
+          "min_balls": 120,
+          "since": "2023-10-18",
+          "intent": "Scouting"
+        },
+        "facts": [],
+        "text": "Age eligibility is not available.",
+        "should_clarify": true,
+        "passes": true
+      },
+      {
+        "case": "Wrong match",
+        "question": "Compare RCB versus CSK",
+        "status": "clarification",
+        "context": {
+          "competition": "IPL",
+          "discipline": "Bowling",
+          "phase": "Death",
+          "min_balls": 120,
+          "since": "2023-10-18",
+          "intent": "Match research",
+          "matchup": {
+            "team1": "RCB",
+            "team2": "MI",
+            "chasing": null,
+            "venue": ""
+          }
+        },
+        "facts": [],
+        "text": "The question teams differ from the confirmed match controls. Update Team A and Team B before preparing the brief.",
+        "should_clarify": true,
+        "passes": true
+      },
+      {
+        "case": "Two phases",
+        "question": "Compare death and powerplay bowling",
+        "status": "clarification",
+        "context": {
+          "competition": "IPL",
+          "discipline": "Bowling",
+          "phase": "Death",
+          "min_balls": 120,
+          "since": "2023-10-18",
+          "intent": "Scouting"
+        },
+        "facts": [],
+        "text": "Compare one phase per brief. Run separate scoped briefs for a comparison between phases.",
+        "should_clarify": true,
+        "passes": true
+      },
+      {
+        "case": "Correct phase guard",
+        "question": "Compare powerplay bowling",
+        "status": "clarification",
+        "context": {
+          "competition": "IPL",
+          "discipline": "Bowling",
+          "phase": "Death",
+          "min_balls": 120,
+          "since": "2023-10-18",
+          "intent": "Scouting"
+        },
+        "facts": [],
+        "text": "The question phase differs from the active phase. Set matching evidence filters.",
+        "should_clarify": true,
+        "passes": true
+      },
+      {
+        "case": "Wrong discipline",
+        "question": "Find death batters",
+        "status": "clarification",
+        "context": {
+          "competition": "IPL",
+          "discipline": "Bowling",
+          "phase": "Death",
+          "min_balls": 120,
+          "since": "2023-10-18",
+          "intent": "Scouting"
+        },
+        "facts": [],
+        "text": "The question discipline differs from the active ranking. Choose Batting or Bowling and prepare separate briefs when comparing both.",
+        "should_clarify": true,
+        "passes": true
+      },
+      {
+        "case": "Wrong competition",
+        "question": "Compare T20I death bowlers",
+        "status": "clarification",
+        "context": {
+          "competition": "IPL",
+          "discipline": "Bowling",
+          "phase": "Death",
+          "min_balls": 120,
+          "since": "2023-10-18",
+          "intent": "Scouting"
+        },
+        "facts": [],
+        "text": "The question competition differs from the active evidence scope. Choose the requested competition; compare different competitions in separate briefs.",
+        "should_clarify": true,
+        "passes": true
+      },
+      {
+        "case": "Wrong XI franchise",
+        "question": "Build CSK XI",
+        "status": "clarification",
+        "context": {
+          "competition": "IPL",
+          "discipline": "Bowling",
+          "phase": "Death",
+          "min_balls": 120,
+          "since": "2023-10-18",
+          "intent": "XI planning"
+        },
+        "facts": [],
+        "text": "The XI question names a different franchise. Select the matching franchise desk before planning.",
+        "should_clarify": true,
+        "passes": true
+      },
+      {
+        "case": "Uncertified career",
+        "question": "Show Virat Kohli IPL career totals",
+        "status": "clarification",
+        "context": {
+          "competition": "IPL",
+          "discipline": "Bowling",
+          "phase": "All",
+          "min_balls": 120,
+          "since": "2023-10-18",
+          "intent": "Player evidence",
+          "target_ids": [
+            "ba607b88"
+          ],
+          "target_names": [
+            "Virat Kohli"
+          ]
+        },
+        "facts": [],
+        "text": "Complete career totals are not certified by this archive. Open Player overview for all supplied records, or request an explicitly dated archive sample.",
+        "should_clarify": true,
+        "passes": true
+      }
+    ],
+    "seconds": 38.51
+  },
+  "all_supplied_roster_dossiers": {
+    "cases": 257,
+    "passes": 257,
+    "failures": [],
+    "seconds": 114.55,
+    "scope": "All 257 supplied squad rows through the real Streamlit runner; ID selected explicitly; default IPL overview totals independently summed from the stored input CSV. Missing archive identities must show no inferred totals."
+  },
+  "official_comparison": {
+    "checked_on": "2026-10-18",
+    "fields": 194,
+    "status_counts": {
+      "MATCH": 188,
+      "COVERAGE GAP": 5,
+      "MISMATCH": 1
+    },
+    "sources": 15,
+    "IPL_teams_compared": [
+      "CSK",
+      "DC",
+      "GT",
+      "KKR",
+      "LSG",
+      "MI",
+      "PBKS",
+      "RCB",
+      "RR",
+      "SRH"
+    ],
+    "scope": "Primary-source sample across all ten IPL teams and all five archive competitions, plus complete all-ten-team league P/W/L/NR/points comparisons. This is not an official record check of every player or match. Missing T20I coverage is retained as a failure to match full-career references; no runs are invented to fill it.",
+    "mismatches": [
+      {
+        "kind": "IPL match",
+        "subject": "Anshul Kamboj",
+        "metric": "conceded",
+        "official_value": 57,
+        "archive_value": 56,
+        "difference": -1,
+        "status": "MISMATCH",
+        "scope": "Match 1529309",
+        "source": "https://www.iplt20.com/news/article/tata-ipl-2026-match-66-gt-v-csk-match-report",
+        "checked_on": "2026-10-18",
+        "review_note": "Unresolved source conflict: IPL report says 57; archive and independently retrieved Cricbuzz scorecard say 56. Official dynamic scorecard did not expose bowling rows. Preserve archive value pending primary scorecard review. Secondary corroboration: https://m.cricbuzz.com/player-match-highlights/152229/1/14598/bowling"
+      },
+      {
+        "kind": "T20I career coverage",
+        "subject": "Virat Kohli",
+        "metric": "runs",
+        "official_value": 4188,
+        "archive_value": 3963,
+        "difference": -225,
+        "status": "COVERAGE GAP",
+        "scope": "Before 2024-07-01",
+        "source": "https://www.icc-cricket.com/news/india-s-big-conundrum-at-the-top-who-replaces-rohit-and-kohli-in-t20is",
+        "checked_on": "2026-10-18",
+        "review_note": ""
+      },
+      {
+        "kind": "T20I career coverage",
+        "subject": "Rohit Sharma",
+        "metric": "runs",
+        "official_value": 4231,
+        "archive_value": 4027,
+        "difference": -204,
+        "status": "COVERAGE GAP",
+        "scope": "Before 2024-07-01",
+        "source": "https://www.icc-cricket.com/news/india-s-big-conundrum-at-the-top-who-replaces-rohit-and-kohli-in-t20is",
+        "checked_on": "2026-10-18",
+        "review_note": ""
+      },
+      {
+        "kind": "T20I career coverage",
+        "subject": "Yashasvi Jaiswal",
+        "metric": "runs",
+        "official_value": 502,
+        "archive_value": 430,
+        "difference": -72,
+        "status": "COVERAGE GAP",
+        "scope": "Before 2024-07-01",
+        "source": "https://www.icc-cricket.com/news/india-s-big-conundrum-at-the-top-who-replaces-rohit-and-kohli-in-t20is",
+        "checked_on": "2026-10-18",
+        "review_note": ""
+      },
+      {
+        "kind": "T20I career coverage",
+        "subject": "Shubman Gill",
+        "metric": "runs",
+        "official_value": 335,
+        "archive_value": 312,
+        "difference": -23,
+        "status": "COVERAGE GAP",
+        "scope": "Before 2024-07-01",
+        "source": "https://www.icc-cricket.com/news/india-s-big-conundrum-at-the-top-who-replaces-rohit-and-kohli-in-t20is",
+        "checked_on": "2026-10-18",
+        "review_note": ""
+      },
+      {
+        "kind": "T20I career coverage",
+        "subject": "KL Rahul",
+        "metric": "runs",
+        "official_value": 2265,
+        "archive_value": 2134,
+        "difference": -131,
+        "status": "COVERAGE GAP",
+        "scope": "Before 2024-07-01",
+        "source": "https://www.icc-cricket.com/news/india-s-big-conundrum-at-the-top-who-replaces-rohit-and-kohli-in-t20is",
+        "checked_on": "2026-10-18",
+        "review_note": ""
+      }
+    ]
+  },
   "browser": {
-    "checks_passed": 47,
+    "version": "3.0.2",
+    "checks_passed": 57,
     "checks": [
       "Home workflow and coverage rendered",
       "CSK bundled crest",
@@ -70,6 +457,16 @@
       "Review form and export",
       "Match research rendered",
       "Forecast export has target, teams and method provenance",
+      "Player dossier rendered",
+      "Kohli overview shows full supplied IPL archive 9336",
+      "Dossier export preserves its overview scope independently of research filters",
+      "Kohli scoped view explains 114 versus 2073 in same date window",
+      "Ambiguous Rohit name requires explicit selection and shows no guessed statistics",
+      "Confirmed India Rohit registry ID renders safely",
+      "T20I dossier carries explicit incomplete archive warning",
+      "Evaluation & sources rendered",
+      "Official audit download retains all six discrepancies and source links",
+      "Detailed audit is readable and downloadable inside the app",
       "Settings rendered",
       "Credentials hidden and test disabled without override",
       "Reduce motion removes animation",
@@ -81,15 +478,15 @@
     "downloads": [
       {
         "label": "Download PDF guide",
-        "bytes": 24046
+        "bytes": 26443
       },
       {
         "label": "Download Word guide",
-        "bytes": 47707
+        "bytes": 48593
       },
       {
         "label": "Download complete project ZIP",
-        "bytes": 3340044
+        "bytes": 3899391
       },
       {
         "label": "Download CSV",
@@ -97,23 +494,23 @@
       },
       {
         "label": "Download decision pack",
-        "bytes": 3548
+        "bytes": 3771
       },
       {
         "label": "Download CSV",
-        "bytes": 5353
+        "bytes": 6541
       },
       {
         "label": "Download decision pack",
-        "bytes": 3858
+        "bytes": 4177
       },
       {
         "label": "Download brief pack",
-        "bytes": 6220
+        "bytes": 6690
       },
       {
         "label": "Export private journal",
-        "bytes": 14908
+        "bytes": 15415
       },
       {
         "label": "Export private reviews",
@@ -122,11 +519,35 @@
       {
         "label": "Download CSV",
         "bytes": 112049
+      },
+      {
+        "label": "Download official comparison CSV",
+        "bytes": 29010
+      },
+      {
+        "label": "Download accuracy audit",
+        "bytes": 11837
       }
     ],
-    "cold_browser_seconds": 3.135,
-    "scope": "Real local Chromium, isolated synthetic session data, desktop and 390px mobile. No hosted rebuild or live provider quality claim.",
-    "tested_version": "3.0.0"
+    "cold_browser_seconds": 3.979,
+    "scope": "Real local Chromium, isolated synthetic session data, desktop and 390px mobile. No hosted rebuild or live provider quality claim."
+  },
+  "source_sha256": {
+    "data/match_players.csv.gz": "2c536bb0e5df04cf32b9ad869fdc7f7938db1dbe64d40cc4ba7b4ee705bc33f3",
+    "data/matches.csv.gz": "6441d39c9e48febdc25cbec5b58d36b80bf21bce54298cc8b6d630f68eb563b1",
+    "data/squads.csv": "fac16a8fbab01f903bb162ea59842321560de2149d93b5b4c77752804794155e",
+    "data/squad_events.json": "d5b1872c17171e36a123b6be39377497c5e90efc615940f8c64ae8e8b31a5c5f",
+    "data/roster_status.json": "e108b3273b1af03d6609906d5a3ad9dc1cc71f2bcea66cc4a89ee05bc3cb5c98",
+    "data/player_registry.json": "49d447faa7db702fb68a8d968b29d08f0dce5975409bf0d59316962f8a3d3ce0",
+    "data/attack_types.json": "ebeb8c01a79bdd9ee716d5e9082172248a2b064c194b286348aacc2a270c929a",
+    "data/prediction_model.json": "8e5dabeb918ec3174cd4d66ce2f40eba3d77a8caa7223eb9182b7c92b01160ab",
+    "boundary_core/analytics.py": "1c6fc5db5ba8bac50f33ee173ac2e7cd731c9c3f6047a321ab49316ed10b22c9",
+    "boundary_core/agent.py": "1fafd6c311f71914104dcd614b234adc61e476d993ba3658bd8e5fd462672dc1",
+    "boundary_core/prediction.py": "dc7cea4d11638f2e681ce46317d384b1d1e3d8309a194d59cc26413ffc2b48a2",
+    "boundary_core/evidence.py": "9e108c9bd03c3d4e95aa06ffde3a89c859513045dc1a2a2b802b719375eb307f",
+    "match_data.py": "bdf6e7272186e4383debe9e843ea1939cbc5d7fb50e7fca477c97c5635df26b5",
+    "app.py": "41be0e41cbfa22c4f1b12c4314321289d51fe7652690ed3491840c8f2a18a11b",
+    "boundary_runtime.py": "1cc19ca0ee0467f593eda5032c8a0803d7970de7e6a19e12bcfd901610b1b661"
   },
   "temporal_scouting_study": {
     "settings": 24,
@@ -138,46 +559,15 @@
     "task_count": 20,
     "authenticated_expert_reviews": 0
   },
-  "source_sha256": {
-    "data/match_players.csv.gz": "2c536bb0e5df04cf32b9ad869fdc7f7938db1dbe64d40cc4ba7b4ee705bc33f3",
-    "data/matches.csv.gz": "6441d39c9e48febdc25cbec5b58d36b80bf21bce54298cc8b6d630f68eb563b1",
-    "data/squads.csv": "fac16a8fbab01f903bb162ea59842321560de2149d93b5b4c77752804794155e",
-    "data/squad_events.json": "d5b1872c17171e36a123b6be39377497c5e90efc615940f8c64ae8e8b31a5c5f",
-    "data/player_registry.json": "49d447faa7db702fb68a8d968b29d08f0dce5975409bf0d59316962f8a3d3ce0",
-    "data/attack_types.json": "ebeb8c01a79bdd9ee716d5e9082172248a2b064c194b286348aacc2a270c929a",
-    "data/prediction_model.json": "8e5dabeb918ec3174cd4d66ce2f40eba3d77a8caa7223eb9182b7c92b01160ab",
-    "boundary_core/analytics.py": "bbc5da1075b31a4724d432fe9b9b883a29370d960ce5e4afcec4f07106970e37",
-    "boundary_core/agent.py": "6f196e45535e3ba093d882cb9681560d2a44c215be71a12ef088daa1df96c0ce",
-    "boundary_core/prediction.py": "dc7cea4d11638f2e681ce46317d384b1d1e3d8309a194d59cc26413ffc2b48a2",
-    "boundary_core/evidence.py": "3f535f19aad87365c4125a19bd2b6193b87d8f68fb89682b75180dd5975a2fb8",
-    "match_data.py": "bdf6e7272186e4383debe9e843ea1939cbc5d7fb50e7fca477c97c5635df26b5",
-    "app.py": "bc049b73882abbbdae189fb7e87328816b1f9fb44c5653fe216ff401b60f16ba",
-    "boundary_runtime.py": "1cc19ca0ee0467f593eda5032c8a0803d7970de7e6a19e12bcfd901610b1b661"
-  },
   "limits": [
-    "Hosted Streamlit rebuild and live DeepSeek connectivity/quality have not been verified from this environment.",
-    "Squad verification is partial. Current eligibility, availability, acquisition status and market prices require review.",
+    "Five measured T20I career coverage gaps and a very small 2024/25 SMAT sample. Archive consistency does not prove complete official coverage.",
+    "One unresolved source conflict: Kamboj conceded 56 in archive, 57 in IPL article; awaiting primary bowling card review.",
+    "Fourteen selected 2026 availability notices applied. Seven documented replacements lack verified roster metadata; other current eligibility and availability remain partially reviewed.",
+    "Some archive identities have only initials/source aliases. Complete full-name registry validation remains outstanding.",
+    "Hosted Streamlit rebuild and live DeepSeek connectivity/quality not verified from this environment.",
     "No demonstrated forecast advantage. The app serves a training-derived baseline.",
     "Public browser-session scoping is not authenticated durable team access.",
-    "Full Impact Player and competition regulation certification are outside this twenty-over model."
-  ],
-  "additional_checks": [
-    "Source ZIP retains platform launch scripts and excludes secrets/runtime records.",
-    "Unselected players with a justified utility override retain the correct assumption status."
-  ],
-  "startup_browser": {
-    "version": "3.0.1",
-    "checks_passed": 8,
-    "checks": [
-      "Home opens with previous packaged agent cached",
-      "Guided local brief succeeds with previous packaged agent cached",
-      "Brief export includes current version and bootstrap fingerprint",
-      "XI and complete legal schedule work after cached-package startup",
-      "Project ZIP includes runtime loader and regressions without private files",
-      "Updated guide downloads remain available",
-      "Rerun and theme change reuse a complete release",
-      "No uncaught browser errors"
-    ],
-    "scope": "Local Chromium against a Streamlit process with the previous packaged agent already imported. Hosted Cloud process and live provider remain unverified."
-  }
+    "Full Impact Player and competition regulation certification are outside the twenty-over model.",
+    "Local functional timings are not a cloud load or concurrency benchmark."
+  ]
 }

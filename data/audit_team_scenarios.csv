@@ -1,0 +1,91 @@
+team,case,ok,errors,reason,seconds
+CSK,Default,True,[],,0.0414
+CSK,Leading bowler excluded,True,[],,0.0395
+CSK,Two spin three pace,True,[],,0.051
+CSK,Budget25,True,[],,0.0449
+CSK,Impossible budget,False,[],"Even the eleven cheapest eligible players cost 16.50 Cr, above the 0.00 Cr budget.",0.0015
+CSK,All excluded,False,[],Fewer than eleven players remain after exclusions.,0.0005
+CSK,Conflicting lock,False,[],A locked player is excluded or is not in this dated squad.,0.0006
+CSK,Reordered pool,True,[],,0.0832
+CSK,All overseas locked,False,[],A locked player lacks relevant evidence or has a dated selection block. Capability assumptions cannot override a sourced availability or registration block.,0.0017
+DC,Default,True,[],,0.0383
+DC,Leading bowler excluded,True,[],,0.0758
+DC,Two spin three pace,True,[],,0.0447
+DC,Budget25,True,[],,0.0951
+DC,Impossible budget,False,[],"Even the eleven cheapest eligible players cost 17.00 Cr, above the 0.00 Cr budget.",0.0047
+DC,All excluded,False,[],Fewer than eleven players remain after exclusions.,0.0027
+DC,Conflicting lock,False,[],A locked player is excluded or is not in this dated squad.,0.0006
+DC,Reordered pool,True,[],,0.0761
+DC,All overseas locked,False,[],A locked player lacks relevant evidence or has a dated selection block. Capability assumptions cannot override a sourced availability or registration block.,0.0013
+GT,Default,True,[],,0.0929
+GT,Leading bowler excluded,True,[],,0.0539
+GT,Two spin three pace,True,[],,0.0664
+GT,Budget25,True,[],,0.0484
+GT,Impossible budget,False,[],"Even the eleven cheapest eligible players cost 17.00 Cr, above the 0.00 Cr budget.",0.0015
+GT,All excluded,False,[],Fewer than eleven players remain after exclusions.,0.0005
+GT,Conflicting lock,False,[],A locked player is excluded or is not in this dated squad.,0.0008
+GT,Reordered pool,True,[],,0.0555
+GT,All overseas locked,False,[],A locked player lacks relevant evidence or has a dated selection block. Capability assumptions cannot override a sourced availability or registration block.,0.0017
+KKR,Default,True,[],,0.0682
+KKR,Leading bowler excluded,True,[],,0.0382
+KKR,Two spin three pace,True,[],,0.0446
+KKR,Budget25,True,[],,0.0741
+KKR,Impossible budget,False,[],"Even the eleven cheapest eligible players cost 17.50 Cr, above the 0.00 Cr budget.",0.0015
+KKR,All excluded,False,[],Fewer than eleven players remain after exclusions.,0.0006
+KKR,Conflicting lock,False,[],A locked player is excluded or is not in this dated squad.,0.0006
+KKR,Reordered pool,True,[],,0.0418
+KKR,All overseas locked,False,[],The locked players already exceed the overseas limit.,0.0016
+LSG,Default,True,[],,0.0395
+LSG,Leading bowler excluded,True,[],,0.0627
+LSG,Two spin three pace,True,[],,0.0401
+LSG,Budget25,True,[],,0.0703
+LSG,Impossible budget,False,[],"Even the eleven cheapest eligible players cost 16.00 Cr, above the 0.00 Cr budget.",0.0016
+LSG,All excluded,False,[],Fewer than eleven players remain after exclusions.,0.0006
+LSG,Conflicting lock,False,[],A locked player is excluded or is not in this dated squad.,0.0006
+LSG,Reordered pool,True,[],,0.0707
+LSG,All overseas locked,False,[],The locked players already exceed the overseas limit.,0.0019
+MI,Default,True,[],,0.0438
+MI,Leading bowler excluded,True,[],,0.0439
+MI,Two spin three pace,True,[],,0.0398
+MI,Budget25,True,[],,0.0487
+MI,Impossible budget,False,[],"Even the eleven cheapest eligible players cost 18.00 Cr, above the 0.00 Cr budget.",0.0015
+MI,All excluded,False,[],Fewer than eleven players remain after exclusions.,0.0006
+MI,Conflicting lock,False,[],A locked player is excluded or is not in this dated squad.,0.0006
+MI,Reordered pool,True,[],,0.0399
+MI,All overseas locked,False,[],The locked players already exceed the overseas limit.,0.0017
+PBKS,Default,True,[],,0.0506
+PBKS,Leading bowler excluded,True,[],,0.0637
+PBKS,Two spin three pace,True,[],,0.0891
+PBKS,Budget25,True,[],,0.1021
+PBKS,Impossible budget,False,[],"Even the eleven cheapest eligible players cost 16.00 Cr, above the 0.00 Cr budget.",0.0016
+PBKS,All excluded,False,[],Fewer than eleven players remain after exclusions.,0.0006
+PBKS,Conflicting lock,False,[],A locked player is excluded or is not in this dated squad.,0.0006
+PBKS,Reordered pool,True,[],,0.0449
+PBKS,All overseas locked,False,[],The locked players already exceed the overseas limit.,0.0017
+RCB,Default,True,[],,0.0433
+RCB,Leading bowler excluded,True,[],,0.0675
+RCB,Two spin three pace,True,[],,0.0813
+RCB,Budget25,True,[],,0.0835
+RCB,Impossible budget,False,[],"Even the eleven cheapest eligible players cost 18.00 Cr, above the 0.00 Cr budget.",0.0017
+RCB,All excluded,False,[],Fewer than eleven players remain after exclusions.,0.0007
+RCB,Conflicting lock,False,[],A locked player is excluded or is not in this dated squad.,0.001
+RCB,Reordered pool,True,[],,0.0488
+RCB,All overseas locked,False,[],A locked player lacks relevant evidence or has a dated selection block. Capability assumptions cannot override a sourced availability or registration block.,0.0014
+RR,Default,True,[],,0.1258
+RR,Leading bowler excluded,True,[],,0.2643
+RR,Two spin three pace,True,[],,0.2074
+RR,Budget25,True,[],,0.0915
+RR,Impossible budget,False,[],"Even the eleven cheapest eligible players cost 16.50 Cr, above the 0.00 Cr budget.",0.0019
+RR,All excluded,False,[],Fewer than eleven players remain after exclusions.,0.0007
+RR,Conflicting lock,False,[],A locked player is excluded or is not in this dated squad.,0.0006
+RR,Reordered pool,True,[],,0.0846
+RR,All overseas locked,False,[],A locked player lacks relevant evidence or has a dated selection block. Capability assumptions cannot override a sourced availability or registration block.,0.0013
+SRH,Default,True,[],,0.1843
+SRH,Leading bowler excluded,True,[],,0.1416
+SRH,Two spin three pace,True,[],,0.1665
+SRH,Budget25,True,[],,0.0924
+SRH,Impossible budget,False,[],"Even the eleven cheapest eligible players cost 19.00 Cr, above the 0.00 Cr budget.",0.0016
+SRH,All excluded,False,[],Fewer than eleven players remain after exclusions.,0.0007
+SRH,Conflicting lock,False,[],A locked player is excluded or is not in this dated squad.,0.0006
+SRH,Reordered pool,True,[],,0.0475
+SRH,All overseas locked,False,[],A locked player lacks relevant evidence or has a dated selection block. Capability assumptions cannot override a sourced availability or registration block.,0.0354

@@ -25,3 +25,5 @@ The supplied archives include 6,392 men's matches. IPL ends on 31 May 2026; othe
 The engine fixes the task and filters before calculation. DeepSeek can select only retrieved fact IDs and approved actions. Complete XI/player facts cannot be omitted. Briefs become stale when context or sources change. Export packs preserve assumptions, dates, version and source fingerprints.
 
 For deployment, select repository branch `main`, entry file `app.py`, Python 3.12 and private hosting secrets. Confirm the hosted rebuild and live provider connection separately from local tests. Educational project; no IPL or franchise endorsement.
+
+Read [the accuracy audit](docs/ACCURACY_AUDIT.md) for exhaustive archive checks, all-team scenarios and sampled official-source comparisons. Player dossier defaults to a labeled archive overview; phase totals and incomplete career coverage are explicit. Selected dated 2026 unavailability notices block XI selection, while missing replacement metadata remains visible.

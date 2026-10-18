@@ -1,0 +1,319 @@
+{
+  "identities": {
+    "players": 6618,
+    "player_match_rows": 141377,
+    "all_raw_ids_in_registry": true,
+    "raw_alias_missing": [],
+    "display_name_mismatch_count": 0,
+    "duplicate_rows": 0
+  },
+  "all_player_season_phase_checks": {
+    "groups": 27236,
+    "numeric_comparisons": 163416,
+    "mismatches": 0
+  },
+  "scouting_scopes": {
+    "cases": 144,
+    "failures": []
+  },
+  "team_scenarios": {
+    "cases": 90,
+    "failures": [],
+    "supported": 50
+  },
+  "all_roster_player_locks": {
+    "cases": 257,
+    "supported": 214,
+    "failures": []
+  },
+  "roster_pool_checks": [
+    {
+      "team": "CSK",
+      "pool_players": 26,
+      "pool_overseas": 9,
+      "missing_IPL_evidence": 3,
+      "over_25_pool": true,
+      "over_8_overseas_pool": true
+    },
+    {
+      "team": "DC",
+      "pool_players": 25,
+      "pool_overseas": 8,
+      "missing_IPL_evidence": 2,
+      "over_25_pool": false,
+      "over_8_overseas_pool": false
+    },
+    {
+      "team": "GT",
+      "pool_players": 26,
+      "pool_overseas": 7,
+      "missing_IPL_evidence": 4,
+      "over_25_pool": true,
+      "over_8_overseas_pool": false
+    },
+    {
+      "team": "KKR",
+      "pool_players": 28,
+      "pool_overseas": 9,
+      "missing_IPL_evidence": 3,
+      "over_25_pool": true,
+      "over_8_overseas_pool": true
+    },
+    {
+      "team": "LSG",
+      "pool_players": 25,
+      "pool_overseas": 7,
+      "missing_IPL_evidence": 1,
+      "over_25_pool": false,
+      "over_8_overseas_pool": false
+    },
+    {
+      "team": "MI",
+      "pool_players": 25,
+      "pool_overseas": 8,
+      "missing_IPL_evidence": 3,
+      "over_25_pool": false,
+      "over_8_overseas_pool": false
+    },
+    {
+      "team": "PBKS",
+      "pool_players": 25,
+      "pool_overseas": 8,
+      "missing_IPL_evidence": 3,
+      "over_25_pool": false,
+      "over_8_overseas_pool": false
+    },
+    {
+      "team": "RCB",
+      "pool_players": 25,
+      "pool_overseas": 8,
+      "missing_IPL_evidence": 6,
+      "over_25_pool": false,
+      "over_8_overseas_pool": false
+    },
+    {
+      "team": "RR",
+      "pool_players": 26,
+      "pool_overseas": 9,
+      "missing_IPL_evidence": 1,
+      "over_25_pool": true,
+      "over_8_overseas_pool": true
+    },
+    {
+      "team": "SRH",
+      "pool_players": 26,
+      "pool_overseas": 9,
+      "missing_IPL_evidence": 6,
+      "over_25_pool": true,
+      "over_8_overseas_pool": true
+    }
+  ],
+  "question_alignment_probes": [
+    {
+      "case": "Scouting exclusion",
+      "question": "Find death bowlers excluding Jasprit Bumrah",
+      "status": "clarification",
+      "context": {
+        "competition": "IPL",
+        "discipline": "Bowling",
+        "phase": "Death",
+        "min_balls": 120,
+        "since": "2023-10-18",
+        "intent": "Scouting"
+      },
+      "facts": [],
+      "text": "Confirm these named exclusions in the controls before running: Jasprit Bumrah",
+      "should_clarify": true,
+      "passes": true
+    },
+    {
+      "case": "Historical season",
+      "question": "Show Virat Kohli IPL 2016 performance",
+      "status": "clarification",
+      "context": {
+        "competition": "IPL",
+        "discipline": "Bowling",
+        "phase": "All",
+        "min_balls": 120,
+        "since": "2023-10-18",
+        "intent": "Player evidence",
+        "target_ids": [
+          "ba607b88"
+        ],
+        "target_names": [
+          "Virat Kohli"
+        ]
+      },
+      "facts": [],
+      "text": "The question requests 2016, but the active evidence window includes other years. Set the start and exclusive cutoff to the requested season.",
+      "should_clarify": true,
+      "passes": true
+    },
+    {
+      "case": "Middle phase",
+      "question": "Compare middle over bowling options",
+      "status": "clarification",
+      "context": {
+        "competition": "IPL",
+        "discipline": "Bowling",
+        "phase": "Death",
+        "min_balls": 120,
+        "since": "2023-10-18",
+        "intent": "Scouting"
+      },
+      "facts": [],
+      "text": "The question phase differs from the active phase. Set matching evidence filters.",
+      "should_clarify": true,
+      "passes": true
+    },
+    {
+      "case": "Under25",
+      "question": "Find under-25 death bowlers",
+      "status": "clarification",
+      "context": {
+        "competition": "IPL",
+        "discipline": "Bowling",
+        "phase": "Death",
+        "min_balls": 120,
+        "since": "2023-10-18",
+        "intent": "Scouting"
+      },
+      "facts": [],
+      "text": "Age eligibility is not available.",
+      "should_clarify": true,
+      "passes": true
+    },
+    {
+      "case": "Wrong match",
+      "question": "Compare RCB versus CSK",
+      "status": "clarification",
+      "context": {
+        "competition": "IPL",
+        "discipline": "Bowling",
+        "phase": "Death",
+        "min_balls": 120,
+        "since": "2023-10-18",
+        "intent": "Match research",
+        "matchup": {
+          "team1": "RCB",
+          "team2": "MI",
+          "chasing": null,
+          "venue": ""
+        }
+      },
+      "facts": [],
+      "text": "The question teams differ from the confirmed match controls. Update Team A and Team B before preparing the brief.",
+      "should_clarify": true,
+      "passes": true
+    },
+    {
+      "case": "Two phases",
+      "question": "Compare death and powerplay bowling",
+      "status": "clarification",
+      "context": {
+        "competition": "IPL",
+        "discipline": "Bowling",
+        "phase": "Death",
+        "min_balls": 120,
+        "since": "2023-10-18",
+        "intent": "Scouting"
+      },
+      "facts": [],
+      "text": "Compare one phase per brief. Run separate scoped briefs for a comparison between phases.",
+      "should_clarify": true,
+      "passes": true
+    },
+    {
+      "case": "Correct phase guard",
+      "question": "Compare powerplay bowling",
+      "status": "clarification",
+      "context": {
+        "competition": "IPL",
+        "discipline": "Bowling",
+        "phase": "Death",
+        "min_balls": 120,
+        "since": "2023-10-18",
+        "intent": "Scouting"
+      },
+      "facts": [],
+      "text": "The question phase differs from the active phase. Set matching evidence filters.",
+      "should_clarify": true,
+      "passes": true
+    },
+    {
+      "case": "Wrong discipline",
+      "question": "Find death batters",
+      "status": "clarification",
+      "context": {
+        "competition": "IPL",
+        "discipline": "Bowling",
+        "phase": "Death",
+        "min_balls": 120,
+        "since": "2023-10-18",
+        "intent": "Scouting"
+      },
+      "facts": [],
+      "text": "The question discipline differs from the active ranking. Choose Batting or Bowling and prepare separate briefs when comparing both.",
+      "should_clarify": true,
+      "passes": true
+    },
+    {
+      "case": "Wrong competition",
+      "question": "Compare T20I death bowlers",
+      "status": "clarification",
+      "context": {
+        "competition": "IPL",
+        "discipline": "Bowling",
+        "phase": "Death",
+        "min_balls": 120,
+        "since": "2023-10-18",
+        "intent": "Scouting"
+      },
+      "facts": [],
+      "text": "The question competition differs from the active evidence scope. Choose the requested competition; compare different competitions in separate briefs.",
+      "should_clarify": true,
+      "passes": true
+    },
+    {
+      "case": "Wrong XI franchise",
+      "question": "Build CSK XI",
+      "status": "clarification",
+      "context": {
+        "competition": "IPL",
+        "discipline": "Bowling",
+        "phase": "Death",
+        "min_balls": 120,
+        "since": "2023-10-18",
+        "intent": "XI planning"
+      },
+      "facts": [],
+      "text": "The XI question names a different franchise. Select the matching franchise desk before planning.",
+      "should_clarify": true,
+      "passes": true
+    },
+    {
+      "case": "Uncertified career",
+      "question": "Show Virat Kohli IPL career totals",
+      "status": "clarification",
+      "context": {
+        "competition": "IPL",
+        "discipline": "Bowling",
+        "phase": "All",
+        "min_balls": 120,
+        "since": "2023-10-18",
+        "intent": "Player evidence",
+        "target_ids": [
+          "ba607b88"
+        ],
+        "target_names": [
+          "Virat Kohli"
+        ]
+      },
+      "facts": [],
+      "text": "Complete career totals are not certified by this archive. Open Player overview for all supplied records, or request an explicitly dated archive sample.",
+      "should_clarify": true,
+      "passes": true
+    }
+  ],
+  "seconds": 38.51
+}

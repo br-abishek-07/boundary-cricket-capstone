@@ -12,6 +12,7 @@ from .analytics import (
     normal,
 )
 from .prediction import predict
+from .branding import TEAMS
 from .evidence import ROOT, safe, context_key, manifest, context_only
 from . import storage
 
@@ -63,28 +64,86 @@ def task_context(question, p, team, until, scenario):
     }
     errors = []
     intent = scope["intent"]
-    mentioned = mentioned_players(p[p.date < until], question)
+    available = p[p.date < until]
+    mentioned = mentioned_players(available, question)
     if intent not in INTENTS:
         errors.append("Choose a supported research task.")
-    q = normal(question)
     if not question.strip():
         errors.append("Enter a decision question.")
-    if intent in ["Scouting", "Player evidence"]:
-        requested_phase = next(
-            (
-                v
-                for k, v in [
-                    ("death", "Death"),
-                    ("powerplay", "Powerplay"),
-                    ("middleovers", "Middle"),
-                ]
-                if k in q
-            ),
-            None,
-        )
-        if requested_phase and scope["phase"] not in [requested_phase]:
+    requested_competitions = set()
+    for pattern, competition in [
+        (r"\bipl\b|indian premier league", "IPL"),
+        (r"\bbbl\b|big bash", "BBL"),
+        (r"\bt20is?\b|t20 internationals?", "T20I"),
+        (r"\bsmat\b|\bsyed mushtaq ali\b", "SMAT"),
+        (r"\bhundred\b", "Hundred"),
+    ]:
+        if re.search(pattern, question, re.I):
+            requested_competitions.add(competition)
+    if intent in ["Scouting", "Player evidence"] and requested_competitions:
+        if requested_competitions != {scope["competition"]}:
             errors.append(
-                f'The question requests {requested_phase}, but the active phase is {scope["phase"]}. Set matching evidence filters.'
+                "The question competition differs from the active evidence scope. Choose the requested competition; compare different competitions in separate briefs."
+            )
+    if intent == "Scouting":
+        requested_disciplines = set()
+        if re.search(r"\bbatt(?:ing|ers?)\b|\bbats(?:man|men)\b", question, re.I):
+            requested_disciplines.add("Batting")
+        if re.search(r"\bbowl(?:ing|ers?)\b", question, re.I):
+            requested_disciplines.add("Bowling")
+        if requested_disciplines and requested_disciplines != {scope["discipline"]}:
+            errors.append(
+                "The question discipline differs from the active ranking. Choose Batting or Bowling and prepare separate briefs when comparing both."
+            )
+    # Named exclusions are separate from the positive player comparison.
+    negative = {}
+    for match in re.finditer(
+        r"\b(?:without|excluding|exclude)\b([^.!?;\n]+)", question, re.I
+    ):
+        fragment = re.split(
+            r"\b(?:but|while|then|include|compare)\b",
+            match.group(1),
+            maxsplit=1,
+            flags=re.I,
+        )[0]
+        negative.update(mentioned_players(available, fragment))
+    for match in re.finditer(
+        r"([^.!?;\n]+)\b(?:is|are)\s+(?:unavailable|injured|sidelined)\b",
+        question,
+        re.I,
+    ):
+        negative.update(mentioned_players(available, match.group(1)))
+    excluded_ids = set(scope.get("candidate_excluded_ids", []))
+    excluded_names = set(scope.get("excluded", []))
+    if intent in ["Scouting", "XI planning"] and negative:
+        missing = [
+            name
+            for pid, name in negative.items()
+            if pid not in excluded_ids and name not in excluded_names
+        ]
+        if missing:
+            errors.append(
+                "Confirm these named exclusions in the controls before running: "
+                + ", ".join(sorted(set(missing)))
+            )
+    mentioned = {pid: name for pid, name in mentioned.items() if pid not in negative}
+    if intent in ["Scouting", "Player evidence"]:
+        phases = set()
+        for pattern, label in [
+            (r"\bdeath(?:[ -]?overs?)?\b", "Death"),
+            (r"\bpower[ -]?play\b", "Powerplay"),
+            (r"\bmiddle(?:[ -]?overs?)?\b", "Middle"),
+            (r"\ball[ -]?(?:phases|overs)\b", "All"),
+        ]:
+            if re.search(pattern, question, re.I):
+                phases.add(label)
+        if len(phases) > 1:
+            errors.append(
+                "Compare one phase per brief. Run separate scoped briefs for a comparison between phases."
+            )
+        elif phases and scope["phase"] != next(iter(phases)):
+            errors.append(
+                "The question phase differs from the active phase. Set matching evidence filters."
             )
         unsupported = [
             (
@@ -92,7 +151,7 @@ def task_context(question, p, team, until, scenario):
                 "Handedness is not verified in this dataset.",
             ),
             (
-                r"under\s*\d+\s*(?:years|years old)|under[ -]?\d+\s*age",
+                r"\b(?:under[ -]?\d{1,2}|u[ -]?\d{2})\b",
                 "Age eligibility is not available.",
             ),
             (
@@ -101,45 +160,146 @@ def task_context(question, p, team, until, scenario):
             ),
         ]
         for pattern, message in unsupported:
-            if re.search(pattern, question.lower()):
+            if re.search(pattern, question, re.I):
                 errors.append(message)
+        years = {
+            int(y)
+            for y in re.findall(
+                r"\b(?:ipl|in|during|season(?:\s+of)?|year)\s+(20\d{2})\b",
+                question,
+                re.I,
+            )
+        }
+        years.update(
+            int(y)
+            for y in re.findall(
+                r"\b(20\d{2})\s+(?:season|ipl|stats|statistics|performance|records)\b",
+                question,
+                re.I,
+            )
+        )
+        if len(years) > 1:
+            errors.append(
+                "Use one explicitly dated season per brief, then compare the exported results."
+            )
+        elif years:
+            year = next(iter(years))
+            if scope["since"] < f"{year}-01-01" or until > f"{year+1}-01-01":
+                errors.append(
+                    f"The question requests {year}, but the active evidence window includes other years. Set the start and exclusive cutoff to the requested season."
+                )
+
+    # An explicit registry selection disambiguates identical names; it cannot authorize a different name.
+    def mismatch(selected):
+        selected_names = {
+            normal(n)
+            for n in available[available.player_id.isin(selected)].player.unique()
+        }
+        return {
+            pid: name
+            for pid, name in mentioned.items()
+            if pid not in selected and normal(name) not in selected_names
+        }
+
+    def ambiguous():
+        names = {}
+        for pid, name in mentioned.items():
+            names.setdefault(normal(name), []).append(pid)
+        return any(len(ids) > 1 for ids in names.values())
+
     if intent == "Player evidence":
-        target = scope.get("target_ids", [])
-        if not target and len(mentioned) == 1:
-            target = list(mentioned)
-        if not target:
-            errors.append("Confirm a unique player in the target field.")
-        elif not set(target) <= set(p.player_id):
-            errors.append("The target player has no registry-linked match evidence.")
-        if mentioned and target and not set(mentioned) <= set(target):
+        if re.search(r"\bcareer\b|\ball[ -]time\b", question, re.I):
+            errors.append(
+                "Complete career totals are not certified by this archive. Open Player overview for all supplied records, or request an explicitly dated archive sample."
+            )
+        targets = scope.get("target_ids", [])
+        if not targets and len(mentioned) == 1:
+            targets = list(mentioned)
+        if not targets:
+            errors.append("Confirm a unique player registry ID in the target field.")
+        elif not set(targets) <= set(available.player_id):
+            errors.append(
+                "The selected player has no registry-linked match evidence before the cutoff."
+            )
+        if targets and mismatch(targets):
             errors.append(
                 "The question and selected player do not match. Confirm the intended player."
             )
-        scope["target_ids"] = target
+        scope["target_ids"] = targets
         scope["target_names"] = (
-            p[p.player_id.isin(target)][["player_id", "player"]]
+            available[available.player_id.isin(targets)][["player_id", "player"]]
             .drop_duplicates("player_id")
             .player.tolist()
         )
     if intent == "Scouting":
         selected = scope.get("candidate_ids", [])
-        if selected and mentioned and not set(mentioned) <= set(selected):
+        if selected and mismatch(selected):
             errors.append(
                 "The question names a player outside the selected comparison. Confirm the comparison players."
             )
-        if not selected and mentioned:
-            scope["candidate_ids"] = list(mentioned)
-    if intent == "XI planning" and re.search(
-        r"\b(without|exclude|unavailable|injured|sidelined)\b", question.lower()
-    ):
-        missing = set(mentioned.values()) - set(scope.get("excluded", []))
-        if missing:
+        if not selected and ambiguous():
             errors.append(
-                "Add these players to Unavailable / exclude before planning: "
-                + ", ".join(sorted(missing))
+                "This player name identifies more than one person. Confirm the intended registry ID before comparing."
+            )
+        elif not selected and mentioned:
+            scope["candidate_ids"] = list(mentioned)
+        if set(scope.get("candidate_ids", [])) & excluded_ids:
+            errors.append(
+                "A comparison player is also excluded. Resolve the conflict in the controls."
+            )
+    if intent == "XI planning":
+        requested_teams = {
+            x.upper()
+            for x in re.findall(r"\b(" + "|".join(TEAMS) + r")\b", question, re.I)
+        }
+        requested_teams.update(
+            code
+            for code, values in TEAMS.items()
+            if normal(values[0]) in normal(question)
+        )
+        if requested_teams - {team}:
+            errors.append(
+                "The XI question names a different franchise. Select the matching franchise desk before planning."
+            )
+        for match in re.finditer(
+            r"\b(?:must include|include|lock|keep)\b([^.!?;\n]+)", question, re.I
+        ):
+            fragment = re.split(
+                r"\b(?:without|excluding|but)\b", match.group(1), maxsplit=1, flags=re.I
+            )[0]
+            missing = set(mentioned_players(available, fragment).values()) - set(
+                scope.get("locked", [])
+            )
+            if missing:
+                errors.append(
+                    "Confirm these required players in Must include: "
+                    + ", ".join(sorted(missing))
+                )
+    if intent == "Match research":
+        requested = set()
+        codes = "|".join(TEAMS)
+        requested.update(
+            x.upper() for x in re.findall(r"\b(" + codes + r")\b", question, re.I)
+        )
+        for left, right in re.findall(
+            r"(" + codes + r")\s*(?:vs\.?|versus|v\.?)\s*(" + codes + r")",
+            question,
+            re.I,
+        ):
+            requested.update([left.upper(), right.upper()])
+        normalized = normal(question)
+        for code, values in TEAMS.items():
+            if normal(values[0]) in normalized:
+                requested.add(code)
+        matchup = scope.get(
+            "matchup", {"team1": team, "team2": "MI" if team != "MI" else "CSK"}
+        )
+        if requested - {matchup["team1"], matchup["team2"]}:
+            errors.append(
+                "The question teams differ from the confirmed match controls. Update Team A and Team B before preparing the brief."
             )
     money = re.findall(
-        r"(\d+(?:\.\d+)?)\s*(?:crore|cr\b)", question.lower()
+        r"(\d+(?:\.\d+)?)\s*(?:crore|cr\b)", question, re.I
     ) + re.findall(r"₹\s*(\d+(?:\.\d+)?)", question)
     if money:
         if intent != "XI planning":
@@ -191,6 +351,7 @@ def dispatch(name, args, p, s, model, team, until, scenario):
             p, since=scenario.get("since") or window(until), until=until, **filters
         )
         data = data[~data.player.isin(scenario.get("excluded", []))]
+        data = data[~data.player_id.isin(scenario.get("candidate_excluded_ids", []))]
         ids = scenario.get("candidate_ids", [])
         if ids:
             data = data[data.player_id.isin(ids)]
@@ -204,12 +365,16 @@ def dispatch(name, args, p, s, model, team, until, scenario):
             "All observed players",
             "Current squad",
             "Outside current squad",
+            "Supplied squad pool",
+            "Outside supplied pool",
         ]:
             raise ValueError("Choose a supported candidate pool.")
         if pool != "All observed players":
             roster = roster_scores(p, s, team, until)
             inside = data.player_id.isin(roster.cricsheet_id)
-            data = data[inside if pool == "Current squad" else ~inside]
+            data = data[
+                inside if pool in ["Current squad", "Supplied squad pool"] else ~inside
+            ]
         if data.empty:
             return {
                 "kind": "insufficient",

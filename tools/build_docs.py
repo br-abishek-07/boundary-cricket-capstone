@@ -29,7 +29,7 @@ styles["Heading1"].fontSize = 15
 styles["Heading1"].spaceBefore = 18
 styles["Heading1"].textColor = colors.HexColor("#AB2436")
 doc = Document()
-doc.core_properties.title = "Boundary project guide — version 3.0.1"
+doc.core_properties.title = "Boundary project guide — version 3.0.2"
 doc.styles["Normal"].font.name = "Calibri"
 doc.styles["Normal"].font.size = Pt(11)
 story = []
@@ -107,7 +107,7 @@ for block in blocks:
 def footer(canvas, document):
     canvas.setFont("Helvetica", 8)
     canvas.setFillColor(colors.HexColor("#596B72"))
-    canvas.drawString(42, 28, "BOUNDARY 3.0.1 / EDUCATIONAL PROJECT")
+    canvas.drawString(42, 28, "BOUNDARY 3.0.2 / EDUCATIONAL PROJECT")
     canvas.drawRightString(550, 28, str(document.page))
 
 
@@ -121,6 +121,6 @@ SimpleDocTemplate(
     bottomMargin=45,
 ).build(story, onFirstPage=footer, onLaterPages=footer)
 section = doc.sections[0]
-section.footer.paragraphs[0].text = "Boundary 3.0.1 | Independent educational project"
+section.footer.paragraphs[0].text = "Boundary 3.0.2 | Independent educational project"
 doc.save(D / "Boundary_Project_Guide.docx")
 print("Generated the final guide in PDF and Word.")

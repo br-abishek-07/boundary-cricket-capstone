@@ -1,0 +1,11 @@
+{
+  "python": "3.12",
+  "tested_top_level_dependencies": {
+    "streamlit": "1.65.0",
+    "pandas": "3.0.6",
+    "numpy": "2.5.4",
+    "scipy": "1.18.1"
+  },
+  "live_api_evaluation": "Blocked by outbound destination policy; not performed",
+  "secret_status": "Configured privately; value omitted"
+}

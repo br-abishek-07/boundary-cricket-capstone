@@ -1,0 +1,170 @@
+{
+  "validation": {
+    "pre": {
+      "n": 73,
+      "accuracy": 0.47945,
+      "accuracy_95_wilson": [
+        0.36877,
+        0.59219
+      ],
+      "brier": 0.248802,
+      "log_loss": 0.690748
+    },
+    "post": {
+      "n": 73,
+      "accuracy": 0.45205,
+      "accuracy_95_wilson": [
+        0.34314,
+        0.56576
+      ],
+      "brier": 0.256501,
+      "log_loss": 0.706181
+    },
+    "constant_50_forecast": {
+      "n": 73,
+      "accuracy": 0.54795,
+      "accuracy_95_wilson": [
+        0.43424,
+        0.65686
+      ],
+      "brier": 0.25,
+      "log_loss": 0.693147
+    },
+    "elo": {
+      "n": 73,
+      "accuracy": 0.46575,
+      "accuracy_95_wilson": [
+        0.35592,
+        0.57901
+      ],
+      "brier": 0.249473,
+      "log_loss": 0.691911
+    }
+  },
+  "test": {
+    "pre": {
+      "n": 215,
+      "accuracy": 0.51163,
+      "accuracy_95_wilson": [
+        0.4452,
+        0.57765
+      ],
+      "brier": 0.250995,
+      "log_loss": 0.69514
+    },
+    "post": {
+      "n": 215,
+      "accuracy": 0.54884,
+      "accuracy_95_wilson": [
+        0.48204,
+        0.61391
+      ],
+      "brier": 0.248129,
+      "log_loss": 0.689425
+    },
+    "constant_50_forecast": {
+      "n": 215,
+      "accuracy": 0.45116,
+      "accuracy_95_wilson": [
+        0.38609,
+        0.51796
+      ],
+      "brier": 0.25,
+      "log_loss": 0.693147
+    },
+    "elo": {
+      "n": 215,
+      "accuracy": 0.49767,
+      "accuracy_95_wilson": [
+        0.43147,
+        0.56396
+      ],
+      "brier": 0.258632,
+      "log_loss": 0.711064
+    }
+  },
+  "test_by_season": {
+    "2024": {
+      "pre": {
+        "n": 71,
+        "accuracy": 0.50704,
+        "accuracy_95_wilson": [
+          0.39341,
+          0.61995
+        ],
+        "brier": 0.252137,
+        "log_loss": 0.697426
+      },
+      "post": {
+        "n": 71,
+        "accuracy": 0.50704,
+        "accuracy_95_wilson": [
+          0.39341,
+          0.61995
+        ],
+        "brier": 0.253517,
+        "log_loss": 0.700241
+      }
+    },
+    "2025": {
+      "pre": {
+        "n": 71,
+        "accuracy": 0.47887,
+        "accuracy_95_wilson": [
+          0.36677,
+          0.59314
+        ],
+        "brier": 0.251675,
+        "log_loss": 0.696501
+      },
+      "post": {
+        "n": 71,
+        "accuracy": 0.52113,
+        "accuracy_95_wilson": [
+          0.40686,
+          0.63323
+        ],
+        "brier": 0.25146,
+        "log_loss": 0.696135
+      }
+    },
+    "2026": {
+      "pre": {
+        "n": 73,
+        "accuracy": 0.54795,
+        "accuracy_95_wilson": [
+          0.43424,
+          0.65686
+        ],
+        "brier": 0.249224,
+        "log_loss": 0.691594
+      },
+      "post": {
+        "n": 73,
+        "accuracy": 0.61644,
+        "accuracy_95_wilson": [
+          0.50174,
+          0.7195
+        ],
+        "brier": 0.23965,
+        "log_loss": 0.672379
+      }
+    }
+  },
+  "calibration": [
+    {
+      "bin": "0.4\u20130.5",
+      "n": 215,
+      "predicted": 0.44793690903578715,
+      "observed": 0.4511627906976744
+    }
+  ],
+  "method": {
+    "training_matches": 946,
+    "design": "Fixed regularized logistic model trained before 2023; validation 2023; untouched test 2024 onward. Team ratings update after each match date, using past results only.",
+    "uncertainty": "Wilson intervals assume independent binary outcomes; season dependence is not captured.",
+    "features": "Pre: team Elo and exponential result form. Post: same plus chasing indicator and prior venue chase record. No player-lineup, injury or weather inputs.",
+    "selection": "No model selection or tuning on validation/test; fixed regularization and rating constants.",
+    "claim": "Research probabilities; no guarantee of predictive advantage. Current ratings use all uploaded IPL history for future scenarios."
+  }
+}

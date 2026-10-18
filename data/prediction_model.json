@@ -1,0 +1,299 @@
+{
+  "weights": {
+    "pre": [
+      0.49294132954257425,
+      -0.01879455910277745
+    ],
+    "post": [
+      0.4951863233654919,
+      -0.00355973050303849,
+      0.20785127124128755,
+      -0.06857313766183631
+    ]
+  },
+  "state": {
+    "elo": {
+      "RCB": 1610.5366428776124,
+      "KKR": 1528.744806751706,
+      "PBKS": 1518.0809946172474,
+      "CSK": 1482.3417949681048,
+      "DC": 1528.90881723993,
+      "RR": 1510.0539254310165,
+      "MI": 1470.8337698823598,
+      "Deccan Chargers": 1434.2654190821122,
+      "Kochi Tuskers Kerala": 1483.9635373991698,
+      "Pune Warriors": 1379.0262803249477,
+      "SRH": 1532.7650996853072,
+      "Rising Pune Supergiants": 1475.2985326240455,
+      "Gujarat Lions": 1465.1164884891853,
+      "Rising Pune Supergiant": 1545.9672855328497,
+      "LSG": 1462.4995584100989,
+      "GT": 1571.5970466843066
+    },
+    "form": {
+      "RCB": 0.4799242659533029,
+      "KKR": 0.10336376492664207,
+      "PBKS": -0.2344285279291798,
+      "CSK": -0.2845316399954458,
+      "DC": 0.2470869714295644,
+      "RR": 0.018510466994222513,
+      "MI": -0.4451434335422741,
+      "Deccan Chargers": -0.10055234650408795,
+      "Kochi Tuskers Kerala": -0.21011103236096004,
+      "Pune Warriors": -0.22001620227245483,
+      "SRH": 0.1602384848552174,
+      "Rising Pune Supergiants": -0.01584843833344013,
+      "Gujarat Lions": -0.5022839414375245,
+      "Rising Pune Supergiant": 0.23287342903459846,
+      "LSG": -0.48946493265967644,
+      "GT": 0.050648274796679105
+    },
+    "venues": {
+      "M Chinnaswamy Stadium": [
+        43.0,
+        75.0
+      ],
+      "Punjab Cricket Association Stadium, Mohali": [
+        26.0,
+        47.0
+      ],
+      "Feroz Shah Kotla": [
+        38.0,
+        71.0
+      ],
+      "Wankhede Stadium": [
+        43.0,
+        85.0
+      ],
+      "Eden Gardens": [
+        53.0,
+        89.0
+      ],
+      "Sawai Mansingh Stadium": [
+        38.0,
+        59.0
+      ],
+      "Rajiv Gandhi International Stadium, Uppal": [
+        36.0,
+        61.0
+      ],
+      "MA Chidambaram Stadium, Chepauk": [
+        23.0,
+        60.0
+      ],
+      "Dr DY Patil Sports Academy": [
+        16.0,
+        29.0
+      ],
+      "Newlands": [
+        8.0,
+        19.0
+      ],
+      "St George's Park": [
+        10.0,
+        19.0
+      ],
+      "Kingsmead": [
+        13.0,
+        27.0
+      ],
+      "SuperSport Park": [
+        14.0,
+        24.0
+      ],
+      "Buffalo Park": [
+        7.0,
+        15.0
+      ],
+      "New Wanderers Stadium": [
+        11.0,
+        20.0
+      ],
+      "De Beers Diamond Oval": [
+        8.0,
+        15.0
+      ],
+      "OUTsurance Oval": [
+        7.0,
+        14.0
+      ],
+      "Brabourne Stadium": [
+        10.0,
+        22.0
+      ],
+      "Sardar Patel Stadium, Motera": [
+        12.0,
+        24.0
+      ],
+      "Barabati Stadium": [
+        9.0,
+        19.0
+      ],
+      "Brabourne Stadium, Mumbai": [
+        15.0,
+        29.0
+      ],
+      "Vidarbha Cricket Association Stadium, Jamtha": [
+        7.0,
+        15.0
+      ],
+      "Himachal Pradesh Cricket Association Stadium": [
+        10.0,
+        21.0
+      ],
+      "Nehru Stadium": [
+        8.0,
+        17.0
+      ],
+      "Holkar Cricket Stadium": [
+        14.0,
+        21.0
+      ],
+      "Dr. Y.S. Rajasekhara Reddy ACA-VDCA Cricket Stadium": [
+        13.0,
+        25.0
+      ],
+      "Subrata Roy Sahara Stadium": [
+        12.0,
+        28.0
+      ],
+      "Maharashtra Cricket Association Stadium": [
+        20.0,
+        34.0
+      ],
+      "Shaheed Veer Narayan Singh International Stadium": [
+        10.0,
+        18.0
+      ],
+      "JSCA International Stadium Complex": [
+        11.0,
+        19.0
+      ],
+      "Sheikh Zayed Stadium": [
+        22.0,
+        41.0
+      ],
+      "Sharjah Cricket Stadium": [
+        24.0,
+        40.0
+      ],
+      "Dubai International Cricket Stadium": [
+        29.0,
+        58.0
+      ],
+      "Punjab Cricket Association IS Bindra Stadium, Mohali": [
+        12.0,
+        23.0
+      ],
+      "Saurashtra Cricket Association Stadium": [
+        13.0,
+        22.0
+      ],
+      "Green Park": [
+        10.0,
+        16.0
+      ],
+      "M.Chinnaswamy Stadium": [
+        13.0,
+        26.0
+      ],
+      "Punjab Cricket Association IS Bindra Stadium": [
+        12.0,
+        22.0
+      ],
+      "Rajiv Gandhi International Stadium": [
+        13.0,
+        27.0
+      ],
+      "MA Chidambaram Stadium": [
+        11.0,
+        21.0
+      ],
+      "Arun Jaitley Stadium": [
+        13.0,
+        26.0
+      ],
+      "MA Chidambaram Stadium, Chepauk, Chennai": [
+        29.0,
+        53.0
+      ],
+      "Wankhede Stadium, Mumbai": [
+        41.0,
+        71.0
+      ],
+      "Narendra Modi Stadium, Ahmedabad": [
+        27.0,
+        53.0
+      ],
+      "Arun Jaitley Stadium, Delhi": [
+        22.0,
+        42.0
+      ],
+      "Zayed Cricket Stadium, Abu Dhabi": [
+        11.0,
+        20.0
+      ],
+      "Dr DY Patil Sports Academy, Mumbai": [
+        16.0,
+        32.0
+      ],
+      "Maharashtra Cricket Association Stadium, Pune": [
+        9.0,
+        25.0
+      ],
+      "Eden Gardens, Kolkata": [
+        19.0,
+        40.0
+      ],
+      "Punjab Cricket Association IS Bindra Stadium, Mohali, Chandigarh": [
+        8.0,
+        17.0
+      ],
+      "Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium, Lucknow": [
+        22.0,
+        40.0
+      ],
+      "Rajiv Gandhi International Stadium, Uppal, Hyderabad": [
+        18.0,
+        37.0
+      ],
+      "M Chinnaswamy Stadium, Bengaluru": [
+        19.0,
+        36.0
+      ],
+      "Barsapara Cricket Stadium, Guwahati": [
+        10.0,
+        20.0
+      ],
+      "Sawai Mansingh Stadium, Jaipur": [
+        18.0,
+        33.0
+      ],
+      "Himachal Pradesh Cricket Association Stadium, Dharamsala": [
+        9.0,
+        21.0
+      ],
+      "Maharaja Yadavindra Singh International Cricket Stadium, Mullanpur": [
+        11.0,
+        22.0
+      ],
+      "Dr. Y.S. Rajasekhara Reddy ACA-VDCA Cricket Stadium, Visakhapatnam": [
+        8.0,
+        16.0
+      ],
+      "Maharaja Yadavindra Singh International Cricket Stadium, New Chandigarh": [
+        10.0,
+        19.0
+      ],
+      "Shaheed Veer Narayan Singh International Stadium, Raipur": [
+        8.0,
+        14.0
+      ]
+    },
+    "last_date": "2026-05-31"
+  },
+  "trained_before": "2023-01-01",
+  "validation_year": "2023",
+  "test_from": "2024-01-01",
+  "version": "boundary-temporal-1"
+}

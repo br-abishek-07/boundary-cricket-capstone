@@ -1,0 +1,61 @@
+{
+  "sources": [
+    {
+      "file": "sma_json.zip",
+      "competition": "SMAT",
+      "sha256": "8e4e376ec5dc68315c62eb5311b093e1c5910b7a241801cb1470148bec2a4d69",
+      "earliest": "2016-01-02",
+      "latest": "2024-12-15",
+      "files": 695,
+      "included": 695
+    },
+    {
+      "file": "ipl_json.zip",
+      "competition": "IPL",
+      "sha256": "5757e04287179767ff8495f02902bd13812b9572ec8fa2ac1347ec2e9c6d4709",
+      "earliest": "2008-04-18",
+      "latest": "2026-05-31",
+      "files": 1243,
+      "included": 1242,
+      "excluded_voided": 1
+    },
+    {
+      "file": "hnd_json.zip",
+      "competition": "Hundred",
+      "sha256": "9d70759fa15f4b79b1cc6f1c6ae353c7a5fecf8cdf32ee9d1caa8eb5b48761fe",
+      "earliest": "2021-07-22",
+      "latest": "2026-08-16",
+      "files": 389,
+      "included": 201,
+      "excluded_other_gender": 188
+    },
+    {
+      "file": "t20s_json.zip",
+      "competition": "T20I",
+      "sha256": "3b35ddaaa2fd9ac914a640a8511389682f7f1ea3876b13f07f4416c7f9e987da",
+      "earliest": "2005-02-17",
+      "latest": "2026-10-06",
+      "files": 5775,
+      "included": 3592,
+      "excluded_other_gender": 2183
+    },
+    {
+      "file": "bbl_json.zip",
+      "competition": "BBL",
+      "sha256": "7946b113c55ff4be695b2f0f7fccd12b8ce8afd652a67784a81bd6109f9b5907",
+      "earliest": "2011-12-16",
+      "latest": "2026-01-25",
+      "files": 662,
+      "included": 662
+    }
+  ],
+  "match_player_rows": 141377,
+  "matches": 6392,
+  "notes": [
+    "Men only; voided IPL match 1473495 and duplicate match IDs excluded.",
+    "As-of queries include matches strictly earlier than the selected cutoff date.",
+    "Powerplay/middle/death phases use full-format boundaries, not rain-adjusted official conditions.",
+    "Hundred phase boundary: 25-ball powerplay, final 20 balls death. Economy displayed per six balls.",
+    "Squad snapshot and auction source need independent verification."
+  ]
+}

@@ -54,8 +54,8 @@
   "notes": [
     "Men only; voided IPL match 1473495 and duplicate match IDs excluded.",
     "As-of queries include matches strictly earlier than the selected cutoff date.",
-    "Powerplay/middle/death phases use full-format boundaries, not rain-adjusted official conditions.",
-    "Hundred phase boundary: 25-ball powerplay, final 20 balls death. Economy displayed per six balls.",
+    "Powerplay follows recorded innings metadata. Death is a documented analytical final-fifth window of scheduled innings, after the powerplay; not an official field restriction.",
+    "Hundred uses five-ball over groups; rates normalized per six legal balls. Missing powerplay metadata uses a labeled proportional fallback.",
     "Squad snapshot and auction source need independent verification."
   ]
 }

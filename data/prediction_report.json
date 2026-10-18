@@ -17,8 +17,8 @@
         0.34314,
         0.56576
       ],
-      "brier": 0.256501,
-      "log_loss": 0.706181
+      "brier": 0.256489,
+      "log_loss": 0.706168
     },
     "constant_50_forecast": {
       "n": 73,
@@ -39,6 +39,16 @@
       ],
       "brier": 0.249473,
       "log_loss": 0.691911
+    },
+    "training_chase_baseline": {
+      "n": 73,
+      "accuracy": 0.45205,
+      "accuracy_95_wilson": [
+        0.34314,
+        0.56576
+      ],
+      "brier": 0.25744,
+      "log_loss": 0.708088
     }
   },
   "test": {
@@ -59,8 +69,8 @@
         0.48204,
         0.61391
       ],
-      "brier": 0.248129,
-      "log_loss": 0.689425
+      "brier": 0.248577,
+      "log_loss": 0.690326
     },
     "constant_50_forecast": {
       "n": 215,
@@ -81,6 +91,16 @@
       ],
       "brier": 0.258632,
       "log_loss": 0.711064
+    },
+    "training_chase_baseline": {
+      "n": 215,
+      "accuracy": 0.54884,
+      "accuracy_95_wilson": [
+        0.48204,
+        0.61391
+      ],
+      "brier": 0.247619,
+      "log_loss": 0.688377
     }
   },
   "test_by_season": {
@@ -102,8 +122,8 @@
           0.39341,
           0.61995
         ],
-        "brier": 0.253517,
-        "log_loss": 0.700241
+        "brier": 0.25391,
+        "log_loss": 0.701026
       }
     },
     "2025": {
@@ -124,8 +144,8 @@
           0.40686,
           0.63323
         ],
-        "brier": 0.25146,
-        "log_loss": 0.696135
+        "brier": 0.251887,
+        "log_loss": 0.696998
       }
     },
     "2026": {
@@ -146,8 +166,8 @@
           0.50174,
           0.7195
         ],
-        "brier": 0.23965,
-        "log_loss": 0.672379
+        "brier": 0.24017,
+        "log_loss": 0.673429
       }
     }
   },
@@ -155,7 +175,7 @@
     {
       "bin": "0.4\u20130.5",
       "n": 215,
-      "predicted": 0.44793690903578715,
+      "predicted": 0.4490709115226769,
       "observed": 0.4511627906976744
     }
   ],
@@ -166,5 +186,10 @@
     "features": "Pre: team Elo and exponential result form. Post: same plus chasing indicator and prior venue chase record. No player-lineup, injury or weather inputs.",
     "selection": "No model selection or tuning on validation/test; fixed regularization and rating constants.",
     "claim": "Research probabilities; no guarantee of predictive advantage. Current ratings use all uploaded IPL history for future scenarios."
+  },
+  "gate": {
+    "passed": false,
+    "rule": "Research model must beat training-derived chase-rate Brier in validation AND held-out test. Otherwise serve the baseline, not the model.",
+    "baseline_chase_rate": 0.5507399577167019
   }
 }

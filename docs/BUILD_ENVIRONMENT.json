@@ -1,11 +1,12 @@
 {
-  "python": "3.12",
-  "tested_top_level_dependencies": {
-    "streamlit": "1.65.0",
-    "pandas": "3.0.6",
-    "numpy": "2.5.4",
-    "scipy": "1.18.1"
+  "python": "3.12.14",
+  "core_test_dependencies": {
+    "pandas": "2.2.3",
+    "numpy": "2.3.5",
+    "scipy": "1.17.0"
   },
-  "live_api_evaluation": "Blocked by outbound destination policy; not performed",
-  "secret_status": "Configured privately; value omitted"
+  "ui_test_environment": "Streamlit 1.65.0 in isolated Python 3.12 environment",
+  "browser": "Local Chromium desktop 1440px and mobile 390px",
+  "provider": "Network policy prevents a live provider-quality test",
+  "secret_status": "No credential included in public source"
 }

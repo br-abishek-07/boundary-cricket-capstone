@@ -1,0 +1,148 @@
+{
+  "release": "Boundary corrective release",
+  "date": "2026-10-18",
+  "status": "Passed within documented offline/local scope",
+  "core": {
+    "tests_run": 31,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "tests": [
+      "test_01_unique_and_counts",
+      "test_02_phase_reconciliation",
+      "test_03_reduced_chase",
+      "test_04_raw_totals_unchanged",
+      "test_05_identity_aliases",
+      "test_06_dated_trades_and_historical_guard",
+      "test_07_cutoff_invariance",
+      "test_08_phase_filter_and_samples",
+      "test_09_competitions_separate",
+      "test_10_interval_same_scope",
+      "test_11_all_ten_workload_plans",
+      "test_12_availability_and_locks",
+      "test_13_budget_validation",
+      "test_14_override_validation",
+      "test_15_prediction_gate_and_symmetry",
+      "test_16_venue_aliases",
+      "test_17_forecast_future_invariance",
+      "test_18_tool_filters_and_allowlist",
+      "test_19_agent_dossier_phase_scope",
+      "test_20_agent_inherits_exact_scenario",
+      "test_21_grounded_cache",
+      "test_22_failed_tools_no_invention",
+      "test_23_unknown_fact_rejected",
+      "test_24_tool_overflow_protocol",
+      "test_25_malformed_model_fallback_safe",
+      "test_26_provider_failure_not_cached",
+      "test_27_session_team_isolation",
+      "test_28_atomic_allowance",
+      "test_29_parser_extras_and_wickets",
+      "test_30_malformed_provider_protocol",
+      "test_31_safe_serialization"
+    ],
+    "scope": "Offline regression and controlled provider fixtures. No live-provider quality or authentication claim."
+  },
+  "ui": {
+    "checks_passed": 41,
+    "checks": [
+      "initial decision desk",
+      "Light / Decision desk",
+      "Light / Scouting & comparison",
+      "Light / Squad & auction scenarios",
+      "Light / Player dossier",
+      "Light / Match research",
+      "Light / Decision journal",
+      "Light / Evaluation & sources",
+      "Light / Settings",
+      "Dark / Decision desk",
+      "Dark / Scouting & comparison",
+      "Dark / Squad & auction scenarios",
+      "Dark / Player dossier",
+      "Dark / Match research",
+      "Dark / Decision journal",
+      "Dark / Evaluation & sources",
+      "Dark / Settings",
+      "theme cannot deselect into missing state",
+      "workload XI / CSK",
+      "workload XI / DC",
+      "workload XI / GT",
+      "workload XI / KKR",
+      "workload XI / LSG",
+      "workload XI / MI",
+      "workload XI / PBKS",
+      "workload XI / RCB",
+      "workload XI / RR",
+      "workload XI / SRH",
+      "all unavailable abstains",
+      "budget editor",
+      "insufficient budget abstains",
+      "scouting alternate league phase",
+      "filters travel to decision desk",
+      "local tool-backed brief",
+      "private journal save",
+      "team journal isolated",
+      "original team journal retained",
+      "failed request clears previous brief",
+      "canonical identity dossier",
+      "fresh session hides old journal",
+      "second visitor journal isolated"
+    ],
+    "scope": "Headless Streamlit, ten team workload plans, themes, isolation, filtered evidence and controlled outage. No live-provider test."
+  },
+  "browser": {
+    "checks": [
+      {
+        "view": "Dark desktop desk",
+        "loaded_images": [
+          {
+            "alt": "Indian Premier League text mark",
+            "complete": true,
+            "width": 270
+          },
+          {
+            "alt": "RCB logo",
+            "complete": true,
+            "width": 145
+          }
+        ]
+      },
+      {
+        "view": "Light desktop desk",
+        "loaded_images": [
+          {
+            "alt": "Indian Premier League text mark",
+            "complete": true,
+            "width": 270
+          },
+          {
+            "alt": "RCB logo",
+            "complete": true,
+            "width": 145
+          }
+        ]
+      },
+      {
+        "view": "light desktop workload table"
+      },
+      {
+        "view": "dark desktop workload table"
+      },
+      {
+        "view": "mobile desk 390px",
+        "width": {
+          "w": 390,
+          "scroll": 390
+        }
+      }
+    ],
+    "checks_passed": 5,
+    "scope": "Local Chromium render with bundled assets; deployed host not reachable from the build network."
+  },
+  "limitations": [
+    "Live deployed host could not be reached from the restricted build network.",
+    "Provider orchestration uses controlled fixtures; live DeepSeek response quality was not measured.",
+    "Full current squad and availability verification remains incomplete.",
+    "Session/team scoping does not provide authenticated accounts.",
+    "No independently measured expert usefulness or proven predictive edge."
+  ]
+}

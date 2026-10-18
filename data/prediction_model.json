@@ -5,10 +5,10 @@
       -0.01879455910277745
     ],
     "post": [
-      0.4951863233654919,
-      -0.00355973050303849,
-      0.20785127124128755,
-      -0.06857313766183631
+      0.49511763466190906,
+      -0.004742613230309693,
+      0.20202451917350658,
+      -0.006155218833859327
     ]
   },
   "state": {
@@ -49,25 +49,25 @@
       "GT": 0.050648274796679105
     },
     "venues": {
-      "M Chinnaswamy Stadium": [
-        43.0,
-        75.0
+      "M Chinnaswamy Stadium, Bengaluru": [
+        63.0,
+        113.0
       ],
       "Punjab Cricket Association Stadium, Mohali": [
         26.0,
         47.0
       ],
-      "Feroz Shah Kotla": [
-        38.0,
-        71.0
+      "Arun Jaitley Stadium, Delhi": [
+        61.0,
+        115.0
       ],
-      "Wankhede Stadium": [
-        43.0,
-        85.0
+      "Wankhede Stadium, Mumbai": [
+        78.0,
+        144.0
       ],
-      "Eden Gardens": [
-        53.0,
-        89.0
+      "Eden Gardens, Kolkata": [
+        66.0,
+        117.0
       ],
       "Sawai Mansingh Stadium": [
         38.0,
@@ -77,9 +77,9 @@
         36.0,
         61.0
       ],
-      "MA Chidambaram Stadium, Chepauk": [
-        23.0,
-        60.0
+      "MA Chidambaram Stadium, Chennai": [
+        51.0,
+        110.0
       ],
       "Dr DY Patil Sports Academy": [
         16.0,
@@ -121,9 +121,9 @@
         10.0,
         22.0
       ],
-      "Sardar Patel Stadium, Motera": [
-        12.0,
-        24.0
+      "Narendra Modi Stadium, Ahmedabad": [
+        33.0,
+        65.0
       ],
       "Barabati Stadium": [
         9.0,
@@ -193,10 +193,6 @@
         10.0,
         16.0
       ],
-      "M.Chinnaswamy Stadium": [
-        13.0,
-        26.0
-      ],
       "Punjab Cricket Association IS Bindra Stadium": [
         12.0,
         22.0
@@ -204,30 +200,6 @@
       "Rajiv Gandhi International Stadium": [
         13.0,
         27.0
-      ],
-      "MA Chidambaram Stadium": [
-        11.0,
-        21.0
-      ],
-      "Arun Jaitley Stadium": [
-        13.0,
-        26.0
-      ],
-      "MA Chidambaram Stadium, Chepauk, Chennai": [
-        29.0,
-        53.0
-      ],
-      "Wankhede Stadium, Mumbai": [
-        41.0,
-        71.0
-      ],
-      "Narendra Modi Stadium, Ahmedabad": [
-        27.0,
-        53.0
-      ],
-      "Arun Jaitley Stadium, Delhi": [
-        22.0,
-        42.0
       ],
       "Zayed Cricket Stadium, Abu Dhabi": [
         11.0,
@@ -241,10 +213,6 @@
         9.0,
         25.0
       ],
-      "Eden Gardens, Kolkata": [
-        19.0,
-        40.0
-      ],
       "Punjab Cricket Association IS Bindra Stadium, Mohali, Chandigarh": [
         8.0,
         17.0
@@ -256,10 +224,6 @@
       "Rajiv Gandhi International Stadium, Uppal, Hyderabad": [
         18.0,
         37.0
-      ],
-      "M Chinnaswamy Stadium, Bengaluru": [
-        19.0,
-        36.0
       ],
       "Barsapara Cricket Stadium, Guwahati": [
         10.0,
@@ -295,5 +259,7 @@
   "trained_before": "2023-01-01",
   "validation_year": "2023",
   "test_from": "2024-01-01",
-  "version": "boundary-temporal-1"
+  "version": "boundary-temporal-2",
+  "training_chase_rate": 0.5507399577167019,
+  "gate_passed": false
 }

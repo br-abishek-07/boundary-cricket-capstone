@@ -1,179 +1,187 @@
-"""Boundary — one integrated capstone release."""
-import datetime,html,json,os,tomllib
+import datetime,hashlib,html,json,os,secrets,tomllib
 from pathlib import Path
 from zoneinfo import ZoneInfo
+import altair as alt
 import pandas as pd
 import streamlit as st
-from analytics import load,scout,roster_scores,optimize,player_interval
+from analytics import load,scout,roster_scores,optimize,player_interval,resolve,squads_asof,window,select_window
 from prediction import predict
-from agent import ask,demonstration,safe,provider
-import storage
+from agent import ask,dispatch,fact_rows,render,safe,provider
+import storage,branding
 ROOT=Path(__file__).parent
-st.set_page_config(page_title='Boundary · Franchise research',page_icon='◉',layout='wide',initial_sidebar_state='auto')
-st.markdown('''<style>
-.block-container{padding:2.7rem 3rem;max-width:1460px}h1{font-family:Georgia,'Times New Roman',serif;font-size:3.4rem!important;line-height:1.05!important;letter-spacing:-1.8px;font-weight:500!important;margin-bottom:1rem!important}h2,h3{letter-spacing:-.6px} [data-testid="stSidebar"]{border-right:1px solid #d9ddd5;background:#edf0e8} .eyebrow{font-size:10px;letter-spacing:2.6px;color:#176b55;font-weight:700;margin-bottom:14px}.intro{font-size:17px;line-height:1.65;color:#586969;max-width:760px;margin:0 0 25px}.folio{display:flex;justify-content:space-between;border-bottom:1px solid #ccd3c9;padding-bottom:15px;margin-bottom:28px;font-size:10px;letter-spacing:1.6px;color:#5e6d63}.research-note{border-left:3px solid #b08742;padding:9px 16px;background:#f1eee4;font-size:13px;line-height:1.6;color:#595944;margin:12px 0 25px} div[data-testid="stMetric"]{border-top:2px solid #176b55;padding-top:12px} [data-testid="stMetricValue"]{font-family:Georgia,serif}button{border-radius:4px!important}.stCaption{line-height:1.65} @media(max-width:700px){.block-container{padding:4.2rem 1rem}h1{font-size:2.5rem!important}}
-</style>''',unsafe_allow_html=True)
-@st.cache_data
-def data():return load()
-p,s,a=data();audit=json.loads((ROOT/'data/audit.json').read_text());model=json.loads((ROOT/'data/prediction_model.json').read_text());report=json.loads((ROOT/'data/prediction_report.json').read_text())
+st.set_page_config(page_title='Boundary · Franchise intelligence',page_icon='🏏',layout='wide',initial_sidebar_state='auto')
+@st.cache_resource
+def data(signature):return load()
+signature=tuple((ROOT/'data'/f).stat().st_mtime_ns for f in ['match_players.csv.gz','squads.csv','squad_events.json']);p,s,a=data(signature)
+audit=json.loads((ROOT/'data/audit.json').read_text());model=json.loads((ROOT/'data/prediction_model.json').read_text());report=json.loads((ROOT/'data/prediction_report.json').read_text())
+if 'private_session' not in st.session_state:st.session_state.private_session=secrets.token_urlsafe(32)
+if 'scenarios' not in st.session_state:st.session_state.scenarios={}
+if 'filters' not in st.session_state:st.session_state.filters={'competition':'IPL','discipline':'Bowling','phase':'Death','min_balls':120}
 def key():
  if st.session_state.get('private_key'):return st.session_state.private_key
  if os.getenv('DEEPSEEK_API_KEY'):return os.getenv('DEEPSEEK_API_KEY')
- secret=ROOT/'.streamlit/secrets.toml'
- if secret.exists():return tomllib.loads(secret.read_text()).get('DEEPSEEK_API_KEY','')
+ local=ROOT/'.streamlit/secrets.toml'
+ if local.exists():return tomllib.loads(local.read_text()).get('DEEPSEEK_API_KEY','')
  try:return st.secrets.get('DEEPSEEK_API_KEY','')
  except FileNotFoundError:return ''
-def table(frame,**kw):st.dataframe(frame,hide_index=True,width='stretch',**kw)
-def download(frame,name):st.download_button('Export CSV',frame.to_csv(index=False),file_name=name,mime='text/csv')
-def heading(title,description):
- title_html=html.escape(title).replace('\n','<br>')
- st.markdown(f'<h1 style="font-family:Georgia,serif;font-size:3.4rem;font-weight:400;line-height:1.08;letter-spacing:-1.8px;margin:0 0 22px">{title_html}</h1><div class="intro">{html.escape(description)}</div>',unsafe_allow_html=True)
-def note(text):st.markdown(f'<div class="research-note">{html.escape(text)}</div>',unsafe_allow_html=True)
 with st.sidebar:
- st.markdown('## BOUNDARY');st.caption('FRANCHISE RESEARCH STUDIO')
- st.divider();team=st.selectbox('Franchise desk',sorted(s.franchise_id.unique()),index=7)
- page=st.radio('Workspace',['Decision desk','Scouting & comparison','Squad & auction scenarios','Player dossier','Match research','Decision journal','Evaluation & SWOT','Settings'])
- st.divider();today=datetime.datetime.now(ZoneInfo('Asia/Kolkata')).date();cutoff=st.date_input('Use matches before',value=today,min_value=datetime.date(2008,1,1),max_value=today+datetime.timedelta(days=365));until=cutoff.isoformat()
- st.caption('Historical squad membership is not reconstructed. The supplied squad snapshot remains fixed when you change the match cutoff.')
- st.caption('CAPSTONE · INTEGRATED RELEASE\n\nDeepSeek: '+('private key configured' if key() else 'key required for live analysis'))
-st.markdown(f'<div class="folio"><span>BOUNDARY / RESEARCH EDITION</span><span>{html.escape(team)} DESK · DATA BEFORE {until}</span></div>',unsafe_allow_html=True)
+ st.markdown('## BOUNDARY');st.caption('IPL FRANCHISE RESEARCH STUDIO')
+ st.markdown(f'<img src="{branding.logo("IPL")}" width="72" alt="Indian Premier League text mark" style="background:#fff;padding:10px;border-radius:5px;margin-bottom:14px">',unsafe_allow_html=True)
+ def keep_theme():
+  if st.session_state.appearance is None:st.session_state.appearance=st.session_state.get('last_theme','Dark')
+  else:st.session_state.last_theme=st.session_state.appearance
+ theme=st.segmented_control('Appearance',['Light','Dark'],default=None if 'appearance' in st.session_state else 'Dark',key='appearance',on_change=keep_theme)
+ team=st.selectbox('Franchise desk',list(branding.TEAMS),index=7)
+ page=st.radio('Workspace',['Decision desk','Scouting & comparison','Squad & auction scenarios','Player dossier','Match research','Decision journal','Evaluation & sources','Settings'])
+ today=datetime.datetime.now(ZoneInfo('Asia/Kolkata')).date();cutoff=st.date_input('Use matches before',value=today,min_value=datetime.date(2008,1,1),max_value=today+datetime.timedelta(days=365));until=cutoff.isoformat()
+ st.caption('Your journal is private to this browser session and team. Export before closing. No account authentication is configured for this public capstone.')
+ if st.button('Start a fresh private session'):st.session_state.private_session=secrets.token_urlsafe(32);st.session_state.pop('brief',None);st.rerun()
+style,palette=branding.css(team,theme or 'Light');st.markdown(style,unsafe_allow_html=True);owner=storage.scope(st.session_state.private_session,team);quota_owner=storage.scope(st.session_state.private_session,'__all_teams__')
+st.markdown(f'<div class="folio"><span>BOUNDARY / EVIDENCE & DECISIONS</span><span>{team} · {theme} · DATA BEFORE {until}</span></div>',unsafe_allow_html=True);st.markdown(branding.desk(team,until),unsafe_allow_html=True)
+saved_since=st.session_state.filters.get('since') or window(until)
+if saved_since>=until:saved_since=window(until)
+context={**st.session_state.filters,'since':saved_since,**st.session_state.scenarios.get(team,{})}
+def heading(title,desc):st.markdown('<h1>'+html.escape(title).replace('\n','<br>')+'</h1><div class="deck">'+html.escape(desc)+'</div>',unsafe_allow_html=True)
+def table(df):
+ labels={'player_name':'Player','player':'Player','attack_type':'Style (reference)','utility':'Scenario score','legal_balls':'Bowling balls','pp_allocated_balls':'PP balls','mid_allocated_balls':'Middle balls','death_allocated_balls':'Death balls','strike_rate':'Strike rate','score':'Descriptive score','reliability':'Sample weight','player_id':'Registry ID','cricsheet_id':'Registry ID','evidence_missing':'No observed evidence','bowling_capacity':'Max overs','pp_capacity':'PP max overs','mid_capacity':'Middle max overs','death_capacity':'Death max overs'}
+ st.dataframe(df.head(500).style.format(precision=2).set_properties(**{'background-color':palette['panel'],'color':palette['text']}),hide_index=True,width='stretch',column_config={k:v for k,v in labels.items() if k in df})
+ if len(df)>500:st.caption('Showing 500 rows. Export retains the full selection.')
+def download(df,name):st.download_button('Export CSV',df.to_csv(index=False),name,'text/csv')
+def chart(df,x,y):
+ c=alt.Chart(df).mark_bar(color=palette['accent'],cornerRadiusTopLeft=3,cornerRadiusTopRight=3).encode(x=alt.X(x,sort=None),y=alt.Y(y),tooltip=list(df.columns)).properties(height=230).configure(background=palette['bg']).configure_axis(labelColor=palette['text'],titleColor=palette['text'],gridColor=palette['border']).configure_view(stroke=None);st.altair_chart(c,width='stretch')
+def planning_kwargs():return {k:context[k] for k in ['excluded','locked','costs','budget','min_bowlers','min_batters','min_spin','min_pace','overrides'] if k in context}
 if page=='Decision desk':
- heading('Make the next decision\nwith evidence.','Find a role fit, test a replacement, or investigate a matchup. Your analyst works with local tools and leaves a trace of the evidence used.')
+ heading('Decisions with\nan evidence trail.','Your filters, roster date, exclusions and budget travel with the brief. Numerical facts are rendered from successful tools; the model selects evidence and next actions.')
  left,right=st.columns([1.8,1],gap='large')
  with left:
-  st.subheader('Brief the analyst')
-  mode=st.radio('Briefing mode',['Live DeepSeek','Saved demonstration'],horizontal=True,index=0 if key() else 1)
-  q=st.text_area('What decision are you making?',value=f'Find death-bowling options for {team}. Compare evidence and explain what remains unknown.',height=110,max_chars=2000)
-  st.caption('The analyst retrieves evidence before writing. Inspect the sources and assumptions beside each saved brief.')
+  intent=st.selectbox('Research task',['Scouting','XI planning','Player evidence','Match research']);mode=st.radio('Briefing mode',['Local evidence','DeepSeek analyst'],horizontal=True)
+  player_query=st.text_input('Player name or alias') if intent=='Player evidence' else ''
+  q=st.text_area('Decision question',value=f'Compare {context["phase"].lower()} options for {team} using the active evidence and scenario.',max_chars=2000,height=100)
   if st.button('Prepare brief',type='primary'):
+   # Clear previous output BEFORE the request; failures cannot display an old answer.
+   st.session_state.pop('brief',None);st.session_state.pop('brief_error',None)
    try:
-    with st.spinner('Researching the decision…'):
-     st.session_state.brief=ask(q,p,s,model,team,until,key()) if mode=='Live DeepSeek' else {'text':demonstration(),'mode':'Saved demonstration','trace':[],'team':team,'until':until,'question':q}
-    st.session_state.brief['question']=q
-   except (ValueError,RuntimeError) as ex:st.error(str(ex))
+    if mode=='DeepSeek analyst':
+     with st.spinner('Retrieving, checking and selecting evidence…'):b=ask(q+(' Player: '+player_query if player_query else ''),p,s,model,team,until,key(),owner,{**context,'intent':intent},quota_owner=quota_owner)
+    else:
+     tool={'Scouting':'scout_players','XI planning':'optimize_xi','Player evidence':'player_dossier','Match research':'match_prediction'}[intent];args={'name':player_query} if intent=='Player evidence' else ({'team1':team,'team2':'MI' if team!='MI' else 'CSK'} if intent=='Match research' else {})
+     result=safe(dispatch(tool,args,p,s,model,team,until,context));facts={};fact_rows(result,facts);ids=list(facts)[:32];b={'text':render(ids,facts,['availability','compare'] if ids else ['sample']),'question':q,'team':team,'until':until,'scenario':context,'facts':facts,'trace':[{'tool':tool,'result':result}],'mode':'Local evidence · no API call','status':'grounded' if ids else 'insufficient'}
+    st.session_state.brief=b
+   except (ValueError,RuntimeError) as ex:st.session_state.brief_error=str(ex)
+  if st.session_state.get('brief_error'):st.error(st.session_state.brief_error)
   if 'brief' in st.session_state:
-   brief=st.session_state.brief;st.caption(f"{brief['mode']} · {brief['team']} · cutoff {brief['until']}"+(' · cached' if brief.get('cached') else ''))
-   if brief['team']!=team or brief['until']!=until:st.warning('This saved response uses a different team or cutoff. Prepare a new brief to apply the current selection.')
-   st.markdown(brief['text'])
-   if brief.get('citations_present') is False:st.warning('Source markers are missing. Verify factual claims before using this brief.')
-   x,y=st.columns(2);x.download_button('Download brief',brief['text'],'boundary-brief.md')
-   if y.button('Save to journal'):storage.save('briefs',brief['question'][:100],safe(brief));st.success('Saved locally with evidence and settings.')
-   with st.expander('Tool calls, evidence and token usage'):st.json({k:brief.get(k) for k in ['trace','usage','cached']})
+   b=st.session_state.brief
+   if b['team']!=team or b['until']!=until:st.info('A previous brief uses a different desk or date. Prepare a new one to apply this context.')
+   st.caption(f"{b['mode']} · {b['team']} · before {b['until']}");st.markdown('**Question:** '+b['question']);st.markdown(b['text'])
+   c=st.columns(2);c[0].download_button('Download brief',b['text'],'boundary-brief.md')
+   if c[1].button('Save private brief'):
+    if b['team']!=team:st.error('Switch to the brief’s desk before saving.')
+    else:storage.save(owner,'briefs',b['question'][:100],safe(b));st.success('Saved to this private session and team.')
+   with st.expander('Evidence, filters and tool trace'):st.json(safe({k:b.get(k) for k in ['facts','trace','usage','scenario']}))
  with right:
-  st.subheader('The evidence base')
-  for src in audit['sources']:
-   st.markdown(f"**{src['competition']}** / {src['included']:,} men’s matches");st.caption(f"{src['earliest']} — {src['latest']}")
-  note('Current availability and market prices require verification. Scores describe historical evidence; a recommendation remains a human decision.')
+  st.subheader('Active research context');st.write(f"**{team}** · {context['competition']} · {context['discipline']} · {context['phase']}");st.caption('Set evidence filters in Scouting; set availability, costs and capability assumptions in Squad scenarios.')
+  if context.get('excluded'):st.write('Excluded: '+', '.join(context['excluded']))
+  st.subheader('Evidence coverage')
+  for source in audit['sources']:st.caption(f"{source['competition']} / {source['included']:,} matches / through {source['latest']}")
+  st.info('No verified current injury feed. Historical auction prices are not current valuations.')
 elif page=='Scouting & comparison':
- heading('Find the role.\nThen find the player.','Filter the evidence before ranking it. Compare candidates on sample size, phase performance and uncertainty.')
- c=st.columns(4);league=c[0].selectbox('Competition',['IPL','ALL','BBL','SMAT','Hundred','T20I']);discipline=c[1].selectbox('Discipline',['Batting','Bowling']);phase=c[2].selectbox('Phase',['All','Powerplay','Middle','Death']);sample=c[3].number_input('Minimum relevant balls',min_value=1,max_value=2000,value=120,step=30)
- since=st.selectbox('Window starts',['2024-01-01','2022-01-01','2008-01-01']);ranked=scout(p,league,since,int(sample),discipline,until,phase)
- search=st.text_input('Search within shortlist')
- if search:ranked=ranked[ranked.player.str.contains(search,case=False,regex=False)]
- display=['player','score','reliability','runs','balls','strike_rate','legal_balls','economy','death_economy'];display=[x for x in display if x in ranked]
- table(ranked[display],column_config={'reliability':st.column_config.ProgressColumn('Sample weight',min_value=0,max_value=1,format='%.2f'),'score':st.column_config.NumberColumn('Descriptive score',format='%.2f')});download(ranked,'scouting-shortlist.csv')
- note('Score measures shrunk performance relative to the selected pool: batting per 100 balls, bowling per six balls. Sample weight is not a confidence probability. Combined leagues are not strength-adjusted. Phase wickets are omitted because they are not attributed in this shortlist.')
- st.subheader('Side-by-side evidence')
- names=ranked.player.tolist();chosen=st.multiselect('Compare up to three',names,default=names[:2],max_selections=3)
- if chosen:
-  table(ranked[ranked.player.isin(chosen)][display].set_index('player').T.reset_index(names='Measure'))
-  st.bar_chart(ranked[ranked.player.isin(chosen)].set_index('player')[['score']],color='#176b55')
-  for row in ranked[ranked.player.isin(chosen)].itertuples():
-   interval=player_interval(p[(p.competition==league) if league!='ALL' else p.competition.notna()],row.player_id,discipline,until)
-   st.caption(f"{row.player}: whole-career selected-competition observed-rate interval {interval.get('interval')} ({interval['matches']} match samples). This interval uses all phases and all dates before cutoff; it does not describe the filtered score.")
+ heading('Find the role.\nInspect the evidence.','Scores include scoring rate, dismissals or wicket taking, with one-year recency decay and a 120-ball shrinkage prior. Weights remain transparent research assumptions.')
+ c=st.columns(4);competition=c[0].selectbox('Competition',['IPL','BBL','SMAT','Hundred','T20I','ALL'],index=['IPL','BBL','SMAT','Hundred','T20I','ALL'].index(context['competition']),key='filter_comp');discipline=c[1].selectbox('Discipline',['Bowling','Batting'],index=['Bowling','Batting'].index(context['discipline']),key='filter_discipline');phase=c[2].selectbox('Phase',['Death','Powerplay','Middle','All'],index=['Death','Powerplay','Middle','All'].index(context['phase']),key='filter_phase');minimum=c[3].number_input('Minimum phase balls',1,2000,int(context['min_balls']),30,key='filter_min')
+ since=st.date_input('Evidence window starts',value=pd.Timestamp(context['since']).date(),max_value=cutoff-datetime.timedelta(days=1)).isoformat();st.session_state.filters={'competition':competition,'discipline':discipline,'phase':phase,'min_balls':int(minimum),'since':since}
+ r=scout(p,competition,since,int(minimum),discipline,until,phase);search=st.text_input('Find a player or alias')
+ if search:
+  ids={x['player_id'] for x in resolve(p,search)};r=r[r.player_id.isin(ids)]
+ cols=['player']+(['competition'] if competition=='ALL' else [])+['score','reliability','runs','balls','dismissals','wickets','legal_balls','strike_rate','economy'];table(r[cols]);download(r,'scouting.csv')
+ st.caption('ALL shows separate competition groups; scores are not IPL-equivalent projections. Raw totals remain unweighted. Sample weight uses recency-adjusted workload, not probability of success.')
+ chosen=st.multiselect('Compare up to three player IDs',r.player_id.drop_duplicates().tolist(),default=r.player_id.drop_duplicates().head(2).tolist(),max_selections=3,format_func=lambda x:r[r.player_id==x].player.iloc[0])
+ selected=r[r.player_id.isin(chosen)]
+ if len(selected):
+  table(selected[cols]);chart(selected.assign(label=selected.player+(' / '+selected.competition if competition=='ALL' else '')),'label:N','score:Q')
+  for row in selected.itertuples():st.caption(row.player+' · '+json.dumps(player_interval(p,row.player_id,discipline,until,since,getattr(row,'competition',competition),phase)))
 elif page=='Squad & auction scenarios':
- heading('Build a feasible plan.\nKeep an alternative.','Exact XI optimization with explicit roles, availability, locked selections and optional scenario costs.')
- roster=roster_scores(p,s,team,until);c=st.columns(2);excluded=c[0].multiselect('Unavailable / exclude',roster.player_name.tolist());locked=c[1].multiselect('Must include',roster.player_name.tolist())
- c=st.columns(3);min_bowl=c[0].slider('Minimum bowling options',4,7,5);min_bat=c[1].slider('Minimum batting options',4,7,5);use_budget=c[2].checkbox('Apply a scenario budget')
+ heading('Build the XI.\nAccount for every over.','Selection is constrained by observed workload, phase experience and dated squad membership. No unobserved player receives an automatic performance value.')
+ try:r=roster_scores(p,s,team,until)
+ except ValueError as ex:st.warning(str(ex));st.stop()
+ old=st.session_state.scenarios.get(team,{})
+ c=st.columns(2);excluded=c[0].multiselect('Unavailable / exclude',r.player_name.tolist(),default=[n for n in old.get('excluded',[]) if n in set(r.player_name)],key='exclude_'+team);locked=c[1].multiselect('Must include',r.player_name.tolist(),default=[n for n in old.get('locked',[]) if n in set(r.player_name)],key='lock_'+team)
+ c=st.columns(4);min_spin=c[0].slider('Minimum spin options',0,3,old.get('min_spin',1),key='spin_'+team);min_pace=c[1].slider('Minimum pace options',0,5,old.get('min_pace',2),key='pace_'+team);budget_on=c[2].checkbox('Apply XI budget',value=old.get('budget') is not None,key='budget_on_'+team);edit=c[3].checkbox('Capability assumptions',value=bool(old.get('overrides')),key='override_on_'+team)
+ overrides=old.get('overrides',{}) if edit else {}
+ if edit:
+  st.caption('Reference attack types are curated planning tags. Confirm them. A manual workload/utility override needs a written reason and remains a scenario assumption.')
+  name=st.selectbox('Override player',r.player_name.tolist());cap=st.number_input('Maximum overs assumption',0.,4.,4.,.5);attack=st.selectbox('Attack type assumption',['Pace','Spin','Unknown']);reason=st.text_input('Justification / source');utility=st.number_input('Utility assumption for an unobserved player',value=0.)
+  if reason.strip():overrides={name:{'capacity':cap,'pp':cap,'mid':cap,'death':cap,'attack_type':attack,'reason':reason,'utility':utility}}
  costs=None;budget=None
- if use_budget:
-  st.caption('Enter your own prices in crore. Defaults are ₹1 Cr placeholders, not valuations or actual salaries. Budget applies only to the selected XI, not an entire auction squad.')
-  budget=st.number_input('XI scenario budget (₹ Cr)',min_value=0.,max_value=500.,value=30.,step=1.)
-  costframe=st.data_editor(pd.DataFrame({'Player':roster.player_name,'Scenario cost (₹ Cr)':1.}),hide_index=True,disabled=['Player'],column_config={'Scenario cost (₹ Cr)':st.column_config.NumberColumn(min_value=0.,max_value=100.,step=.1)},key=f'costs_{team}');costs=dict(zip(costframe.Player,costframe['Scenario cost (₹ Cr)']))
- result=optimize(roster,excluded,min_bowlers=min_bowl,min_batters=min_bat,costs=costs,budget=budget,locked=locked)
+ if budget_on:
+  budget=st.number_input('XI scenario budget (₹ Cr)',0.,500.,float(old.get('budget') or 30.),1.,key='budget_'+team);st.caption('Prices are analyst assumptions, not estimated market values. Defaults are placeholders.')
+  editor=st.data_editor(pd.DataFrame({'Player':r.player_name,'Cost (₹ Cr)':r.player_name.map(old.get('costs') or {}).fillna(1.)}),hide_index=True,disabled=['Player'],column_config={'Cost (₹ Cr)':st.column_config.NumberColumn(min_value=0.,max_value=100.)},key='cost_'+team);costs=dict(zip(editor.Player,editor['Cost (₹ Cr)']))
+ scenario={'excluded':excluded,'locked':locked,'min_spin':min_spin,'min_pace':min_pace,'min_bowlers':5,'min_batters':5,'costs':costs,'budget':budget,'overrides':overrides};st.session_state.scenarios[team]=scenario
+ result=optimize(r,**scenario)
  if result['ok']:
-  c=st.columns(4);c[0].metric('Players',11);c[1].metric('Overseas',f"{result['overseas']} / 4");c[2].metric('Bowling options',result['bowlers']);c[3].metric('Scenario cost',f"₹{result['cost']:.1f} Cr" if result['cost'] is not None else 'Not applied')
-  cols=['player_name','role','nationality','utility','balls','legal_balls','evidence_missing']+(['scenario_cost_cr'] if budget is not None else []);table(result['players'][cols]);download(result['players'][cols],'scenario-XI.csv')
-  payload=safe({'team':team,'until':until,'excluded':excluded,'locked':locked,'budget':budget,'costs':costs,'min_bowlers':min_bowl,'min_batters':min_bat,'players':result['players'][cols].to_dict('records'),'utility':result['utility']})
-  if st.button('Save scenario to journal'):storage.save('briefs',f'{team} XI scenario',payload);st.success('Scenario saved.')
+  c=st.columns(4);c[0].metric('Selected',11);c[1].metric('Overseas',str(result['overseas'])+' / 4');c[2].metric('Workload-supported options',result['bowlers']);c[3].metric('Allocated balls',120)
+  cols=['player_name','attack_type','utility','legal_balls','pp_allocated_balls','mid_allocated_balls','death_allocated_balls'];table(result['players'][cols]);download(result['players'][cols],'XI-and-bowling-plan.csv')
+  st.caption('Powerplay / middle / death allocation: 36 / 60 / 24 legal balls. Maximum 24 balls per player. This is a full twenty-over planning model; no Impact Player certification or pitch suitability is implied.')
+  if st.button('Save private scenario'):storage.save(owner,'briefs',team+' XI and workload scenario',safe({'team':team,'until':until,'scenario':scenario,'players':result['players'][cols].to_dict('records')}));st.success('Saved privately.')
  else:st.warning(result['reason'])
- with st.expander('Full roster and objective'):
-  table(roster[['player_name','role','bat_score','bowl_score','utility','evidence_missing']]);st.write('Utility: batting score/10 for batting roles + bowling score for bowling roles. All-rounders count toward both. Missing evidence receives −1 utility. The captain is not forced. These are transparent planning weights, not trained future player values. No Impact Player rule certification is claimed.')
+ with st.expander('Evidence coverage and assumptions'):
+  table(r[['player_name','attack_type','role','balls','legal_balls','bowling_capacity','pp_capacity','mid_capacity','death_capacity','evidence_missing']]);st.write('Default bowling evidence: 120 total balls, plus 36 PP / 36 middle / 24 death balls for phase eligibility. These are explicit planning thresholds, not official eligibility rules. Each selected player is capped at four overs. Missing evidence blocks selection unless you supply a justified assumption. Known trade events are sourced; the rest of the supplied roster has not been fully reverified.')
 elif page=='Player dossier':
- heading('A career is more\nthan one number.','Read match evidence, seasonal trends and sample uncertainty before making a scouting judgment.')
- names=p[['player_id','player']].drop_duplicates().sort_values('player');label=names.player+' · '+names.player_id;selected=st.selectbox('Player',label.tolist());pid=selected.rsplit(' · ',1)[1];view=p[(p.player_id==pid)&(p.date<until)].copy()
- c=st.columns(3);c[0].metric('Runs',int(view.runs.sum()));c[1].metric('Wickets',int(view.wickets.sum()));c[2].metric('Named appearances',len(view))
- seasons=view.groupby(['competition','season'],as_index=False)[['runs','balls','legal_balls','conceded','wickets']].sum();seasons['strike_rate']=100*seasons.runs/seasons.balls.replace(0,float('nan'));seasons['economy']=6*seasons.conceded/seasons.legal_balls.replace(0,float('nan'));table(seasons)
- if len(seasons):st.bar_chart(seasons.assign(label=seasons.season+' / '+seasons.competition).set_index('label')[['runs']],color='#176b55')
- c=st.columns(2)
- for col,d in zip(c,['Batting','Bowling']):
-  interval=player_interval(p,pid,d,until);col.markdown('**'+d+' observed-rate uncertainty**');col.json(interval)
- with st.expander('Match records'):table(view[['date','competition','team','runs','balls','wickets','legal_balls','conceded']].sort_values('date',ascending=False))
- st.subheader('Historical auction evidence');st.caption('2013–2022 supplied records. Name search is literal and approximate; amounts are raw source values, with units and transaction types unverified. This is not a current valuation.')
- query=st.text_input('Auction player name',value=selected.split(' · ')[0].split()[-1]);table(a[a.Player.str.contains(query,case=False,regex=False)])
+ heading('Resolve the player.\nRead the relevant sample.','Official display corrections preserve archive aliases and registry IDs. Uncertainty uses the same competition, phase and dates as the selected evidence.')
+ query=st.text_input('Player name or scorecard alias',value=st.session_state.get('dossier_query','Virat Kohli'),key='dossier_search');hits=resolve(p,query)
+ if not hits:st.info('No match. Check an alias or registry ID. No statistics have been inferred.');st.stop()
+ hit=st.selectbox('Confirm identity',hits,format_func=lambda x:x['player']+' · '+x['player_id']);st.session_state.dossier_query=hit['player'];z=select_window(p,context['competition'],context['since'],until,context['phase']);z=z[z.player_id==hit['player_id']]
+ st.caption(f"Active scope: {context['competition']} / {context['phase']} / {context['since']} to before {until}.")
+ c=st.columns(3);c[0].metric('Runs',int(z.runs.sum()));c[1].metric('Wickets',int(z.wickets.sum()));c[2].metric('Named appearances',len(z))
+ season=z.groupby(['competition','season'],as_index=False)[['runs','balls','wickets','legal_balls']].sum();table(season)
+ if len(season):chart(season.assign(label=season.season+' / '+season.competition),'label:N','runs:Q')
+ st.caption('Uncertainty for active filters: '+json.dumps(player_interval(p,hit['player_id'],context['discipline'],until,context['since'],context['competition'],context['phase'])))
+ with st.expander('Match evidence'):table(z[['date','competition','team','runs','balls','wickets','legal_balls']].sort_values('date',ascending=False))
+ st.subheader('Historical auction lookup');st.caption('2013–2022 source records; units and transaction types remain unverified. Search is manual to avoid false identity joins. Not a current valuation.');auction_q=st.text_input('Auction name',value=hit['player']);table(a[a.Player.str.contains(auction_q,case=False,regex=False)])
 elif page=='Match research':
- heading('Probabilities,\nwith their evidence.','A chronological IPL model using prior team ratings, form and venue chase history. The evaluated pipeline also serves the scenario forecast.')
- c=st.columns(2);teams=sorted(s.franchise_id.unique());t1=c[0].selectbox('Team A',teams,index=7);t2=c[1].selectbox('Team B',teams,index=0);venue=st.selectbox('Venue',sorted(model['state']['venues']));chasing=st.selectbox('Chasing team',['Unknown',t1,t2])
- if until<=model['state']['last_date']:st.info('The current model snapshot contains later matches than this cutoff. Inspect historical holdouts below; live scenario forecasting is disabled for this date.')
- elif t1==t2:st.warning('Choose distinct teams.')
+ heading('A benchmark must\nearn its place.','The research model did not beat a training-derived chase-rate baseline in validation and held-out testing. That baseline is the main scenario estimate; the model remains visible for scrutiny.')
+ teams=list(branding.TEAMS);c=st.columns(2);t1=c[0].selectbox('Team A',teams,index=teams.index(team),key='t1_'+team);t2=c[1].selectbox('Team B',[t for t in teams if t!=t1],key='t2_'+team);chase=st.selectbox('Chasing team',['Unknown',t1,t2]);venue=st.selectbox('Canonical venue',sorted(model['state']['venues']))
+ if until<=model['state']['last_date']:st.info('The snapshot is after this cutoff. Current scenario estimates are disabled; use the dated holdout records below.')
  else:
-  pr=predict(model,t1,t2,venue,None if chasing=='Unknown' else chasing);c=st.columns(2);c[0].metric(f'Pre-toss · {t1}',f"{pr['pre']:.1%}");c[1].metric(f'Post-toss · {t1}',f"{pr['post']:.1%}" if pr['post'] is not None else 'Choose chasing team');st.caption('Rating snapshot: '+pr['as_of']+'. These probabilities do not incorporate player availability, selected XI, weather or pitch reports.')
- st.subheader('Untouched test / 2024–2026');table(pd.DataFrame(report['test']).T.reset_index(names='Forecast'))
- note('Post-toss accuracy is 54.9% on 215 matches; the 95% Wilson interval is 48.2–61.4%. The interval includes chance. A constant 50% forecast has Brier 0.25; its displayed classification accuracy uses the deterministic Team A tie-break, not a random coin flip.')
- st.subheader('Calibration');cal=pd.DataFrame(report['calibration']);table(cal);st.line_chart(cal.set_index('bin')[['predicted','observed']])
- with st.expander('Validation, per-season results and methodology'):st.json(report)
- holdout=pd.read_csv(ROOT/'data/prediction_holdout.csv');download(holdout,'historical-predictions.csv')
+  pr=predict(model,t1,t2,venue,None if chase=='Unknown' else chase);c=st.columns(2);c[0].metric('Pre-toss baseline', '50% · no validated edge');c[1].metric(t1+' post-toss baseline',f"{pr['post']:.1%}" if pr['post'] is not None else 'Select chasing team');st.caption(pr['method']+'. Squad edits are not prediction inputs; this is not an injury or weather simulator.')
+ st.subheader('Held-out forecasts and stronger baselines');table(pd.DataFrame(report['test']).T.reset_index(names='Method'));st.json(report['gate'])
+ with st.expander('Season results, calibration and assumptions'):st.json(report)
+ download(pd.read_csv(ROOT/'data/prediction_holdout.csv'),'historical-forecasts.csv')
 elif page=='Decision journal':
- heading('Keep the reasoning.\nReview the outcome.','Saved briefs preserve evidence and scenario settings. Storage is local to this installation; export important work before redeployment.')
- rows=storage.records()
- if not rows:st.info('Save an analyst brief or XI scenario to begin the journal.')
- else:
-  for row in rows:
-   with st.expander(f"{row['id']:03d} · {row['title']} · {row['created'][:10]}"):
-    if 'text' in row['payload']:st.markdown(row['payload']['text'])
-    st.json(row['payload'])
-  st.download_button('Export complete journal',json.dumps(rows,indent=2),'decision-journal.json')
-elif page=='Evaluation & SWOT':
- heading('Make the claims\nreviewable.','Quantitative checks, honest research performance, qualitative review and the product strategy in one place.')
- tabs=st.tabs(['Quantitative','Qualitative','SWOT & architecture','Data provenance'])
+ heading('Private research.\nA record of the reasoning.','Only this browser session and selected franchise can read these records. Legacy shared records are never loaded. Account-based durable team access is outside this public demo.')
+ rows=storage.records(owner)
+ for row in rows:
+  with st.expander(row['title']+' · '+row['created'][:10]):
+   if row['payload'].get('text'):st.markdown(row['payload']['text'])
+   st.json(row['payload'])
+ if not rows:st.info('Save a brief or scenario from this desk to begin.')
+ else:st.download_button('Export private journal',json.dumps(rows,indent=2),'private-journal.json')
+elif page=='Evaluation & sources':
+ heading('Claims that can\nbe checked.','Read the actual regression results, source dates, accepted baseline and known boundaries. Submitted feedback is not presented as independently verified expert validation.')
+ tabs=st.tabs(['Checks','Review','Sources & squads','SWOT'])
  with tabs[0]:
-  tests=ROOT/'data/test_results.json'
-  if tests.exists():st.json(json.loads(tests.read_text()))
-  else:st.info('Run python tests/test_core.py to generate actual results.')
-  st.caption('Automated checks do not establish expert usefulness or live model factuality. No pass status is inferred for tests that have not run.')
-  st.json(report['test']);st.write('Live DeepSeek evaluation status: network access to api.deepseek.com is blocked by this build environment’s destination policy. Configure that destination in the hosting environment to perform a live check. Offline provider mocks verify tool orchestration and failure handling.')
+  f=ROOT/'data/release_checks.json'
+  st.json(json.loads(f.read_text()) if f.exists() else {'status':'Checks pending; no pass status inferred.'});st.write('Provider connectivity depends on this deployment. Live model quality is not established by offline mocks. Settings shows a scoped connection test when you supply a session key.');st.json(report['gate'])
  with tabs[1]:
-  st.write('Record real reviews. No expert scores are prefilled as results. Suggested tasks: compare two bowlers; handle an unknown player; explain a weak sample; report an infeasible XI; reject unsupported current-price claims.')
   with st.form('review'):
-   reviewer=st.text_input('Reviewer name or alias');task=st.text_area('Task and response evaluated');ratings={k:st.slider(k,1,5,3) for k in ['Evidence support','Cricket relevance','Tradeoff clarity','Usability','Appropriate uncertainty']};comments=st.text_area('Observations / failure examples');submit=st.form_submit_button('Submit review')
+   reviewer=st.text_input('Reviewer alias');task=st.text_area('Task and brief evaluated');ratings={x:st.select_slider(x,['Not assessed',1,2,3,4,5],value='Not assessed') for x in ['Evidence support','Role relevance','Clarity','Usefulness']};notes=st.text_area('Observed failure or supporting evidence');submit=st.form_submit_button('Save private review')
    if submit:
-    if not reviewer.strip() or not task.strip():st.error('Enter a reviewer and the task before submitting.')
-    else:storage.save('reviews',reviewer,{'task':task,'ratings':ratings,'comments':comments});st.success('Real review saved.')
-  reviews=storage.records('reviews')
-  if reviews:
-   table(pd.DataFrame([{'reviewer':x['title'],'task':x['payload']['task'],**x['payload']['ratings']} for x in reviews]));st.download_button('Export reviews',json.dumps(reviews,indent=2),'qualitative-reviews.json')
-  else:st.info('No reviews submitted. Qualitative usefulness remains unvalidated.')
+    if not reviewer.strip() or not task.strip():st.error('Identify the reviewer and evaluated task.')
+    else:storage.save(owner,'reviews',reviewer,{'task':task,'ratings':ratings,'notes':notes});st.success('Saved privately; not an authenticated expert rating.')
+  reviews=storage.records(owner,'reviews')
+  if reviews:st.download_button('Export private reviews',json.dumps(reviews,indent=2),'reviews.json')
  with tabs[2]:
-  table(pd.DataFrame({'Strengths':['Uploaded multi-league history','Exact planning solver','Traceable local tools'],'Weaknesses':['Heuristic scouting weights','Old auction records','No verified live availability'],'Opportunities':['Historical scouting validation','Expert-guided role models','More current squad evidence'],'Threats':['Stale inputs and identity aliases','Overconfident language','Public API cost and data rights']}))
-  st.code('Match archives → dated evidence → scouting / optimization / forecast tools\n                                    ↓\n                         DeepSeek selects approved tools\n                                    ↓\n                         cited brief → human review → journal',language=None)
-  st.write('Reliability: strict cutoffs, typed tool validation, solver feasibility, global local-installation call allowance, caching and explicit outages. Intelligence: tool choice and evidence synthesis. Predictability: repeatable numerical tools, cached repeated briefs and documented model inputs. AI wording can vary. These controls reduce risk; they do not prove every recommendation correct.')
+  table(pd.DataFrame(audit['sources']));st.json(json.loads((ROOT/'data/squad_events.json').read_text()))
+  for note in audit['notes']:st.caption(note)
  with tabs[3]:
-  table(pd.DataFrame(audit['sources']));st.caption(f"{audit['match_player_rows']:,} named player-match records / {audit['matches']:,} matches")
-  for n in audit['notes']:st.write('• '+n)
-  st.download_button('Download provenance',json.dumps(audit,indent=2),'data-audit.json')
+  table(pd.DataFrame({'Strength':['Traceable match records','Exact workload solver','Scoped evidence rendering'],'Weakness':['Heuristic scoring weights','Partial squad verification','No demonstrated forecast edge'],'Opportunity':['Expert role evaluation','Dated squad registry','Historical scouting validation'],'Threat':['Stale eligibility','Source rights and drift','Public API allowance abuse']}))
 else:
- heading('Private configuration.\nClear operating limits.','DeepSeek is a server-side integration. Credentials are excluded from source archives, exports and the journal.')
- st.success('DeepSeek key configured privately.' if key() else 'DeepSeek key is not configured.')
- newkey=st.text_input('Replace key for this session',type='password',placeholder='Enter only if replacing the configured key')
- if st.button('Use session key'):
-  if newkey.startswith('sk-') and len(newkey)>12:st.session_state.private_key=newkey;st.success('Session key updated; not written to source or journal.')
-  else:st.error('Enter a valid provider key.')
- if st.button('Test provider connection'):
-  if not key():st.error('Configure a key first.')
-  else:
-   try:
-    with st.spinner('Checking provider…'):msg,usage=provider([{'role':'user','content':'Reply with OK only.'}],key())
-    st.success('Provider responded.');st.json({'usage':usage})
-   except RuntimeError as ex:st.error(str(ex))
- st.write('One local SQLite ledger limits this installation to thirty provider calls per UTC day. Each brief uses at most three requests, each with at most 1,100 output tokens. A separate server replica has its own ledger. These are operational limits, not a guaranteed rupee spending cap. Public deployment should add authentication and provider billing controls.')
- st.caption('The key you previously supplied is configured in this runnable workspace only. Rotate it before publishing because it was shared in chat. Deployment packages intentionally contain a secret template; hosting secrets must be configured separately.')
+ heading('Clear boundaries.\nPrivate credentials.','The shared hosting key is never displayed or exported. Session overrides stay in server memory. This public demonstration does not provide authenticated accounts.')
+ st.success('Hosting or session key configured.' if key() else 'No DeepSeek key configured. Local research remains available.')
+ new=st.text_input('Use your own key for this session',type='password')
+ if st.button('Set session key'):
+  if new.startswith('sk-') and len(new)>12:st.session_state.private_key=new;st.success('Session override saved in memory; authentication is checked only by the provider.')
+  else:st.error('Enter a provider key.')
+ if st.button('Test my session key',disabled=not bool(st.session_state.get('private_key'))):
+  try:provider([{'role':'user','content':'Return {"selected_fact_ids":[],"next_actions":[]}'}],st.session_state.private_key,quota_owner);st.success('Provider responded. This does not validate analytical quality.')
+  except RuntimeError as ex:st.error(str(ex))
+ st.json(storage.usage(quota_owner));st.caption('Six provider calls per private session across teams per UTC day; thirty per installation. Resetting a session is not an abuse-resistant identity boundary. Restrict public access or add authenticated hosting for sensitive use. Local storage can be ephemeral: export work before closing or redeploying.')
+ st.markdown('IPL and franchise marks identify the subjects of this independent educational project; no league or franchise endorsement is implied.')

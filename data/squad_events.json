@@ -1,0 +1,34 @@
+{
+  "baseline_season": 2026,
+  "baseline_label": "Supplied 2026 squad snapshot; not a complete official roster audit",
+  "events": [
+    {
+      "date": "2026-06-23",
+      "player": "Rishabh Pant",
+      "from": "LSG",
+      "to": "DC",
+      "source": "https://www.iplt20.com/news/article/rishabh-pant-and-kuldeep-yadav-complete-high-profile-trade-between-dc-and-lsg"
+    },
+    {
+      "date": "2026-06-23",
+      "player": "Kuldeep Yadav",
+      "from": "DC",
+      "to": "LSG",
+      "source": "https://www.iplt20.com/news/article/rishabh-pant-and-kuldeep-yadav-complete-high-profile-trade-between-dc-and-lsg"
+    },
+    {
+      "date": "2026-10-14",
+      "player": "T Natarajan",
+      "from": "DC",
+      "to": "SRH",
+      "source": "https://www.iplt20.com/news/article/t-natarajan-returns-to-sunrisers-hyderabad-zeeshan-ansari-moves-to-delhi-capitals"
+    },
+    {
+      "date": "2026-10-14",
+      "player": "Zeeshan Ansari",
+      "from": "SRH",
+      "to": "DC",
+      "source": "https://www.iplt20.com/news/article/t-natarajan-returns-to-sunrisers-hyderabad-zeeshan-ansari-moves-to-delhi-capitals"
+    }
+  ]
+}

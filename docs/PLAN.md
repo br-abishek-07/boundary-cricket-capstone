@@ -1,51 +1,9 @@
-# Integrated product blueprint
+# Capstone design and evaluation plan
 
-## Objective and scope
-A single capstone release for franchise analysts and scouts, combining data engineering, local decision tools, AI research, custom UX and evaluation. The deliverable is one runnable application rather than separately released stages. Live feeds, video understanding and guaranteed predictive superiority are outside the available evidence/resources.
+The integrated product supports a franchise analyst's complete research path: define a role, retrieve scoped match evidence, compare candidates, confirm identity, construct a supported XI/workload scenario, inspect uncertainty, preserve a brief and collect a real review.
 
-## SWOT and response
-| Dimension | Finding | Implemented response |
-|---|---|---|
-| Strength | Rich uploaded match history | Unified match-level database and source manifest |
-| Strength | Structured squad roles | Exact feasibility solver and full-bench accounting |
-| Weakness | Season aggregates can leak future matches | Strict match-date cutoffs |
-| Weakness | Auction data ends in 2022 | Historical lookup and explicit scenario prices |
-| Weakness | Limited demonstrated prediction edge | Untouched test, Brier/log loss, calibration and uncertainty |
-| Opportunity | Explainable scouting decisions | Compare candidates, dossiers and inspectable AI tool traces |
-| Opportunity | Learning from decisions | Local journal and actual review form |
-| Threat | Unsupported AI claims | Bounded tool access, evidence requirement and human review |
-| Threat | Stale availability | User-defined exclusions with source-status disclosure |
-| Threat | API spending | Persistent local allowance, token limits and caching |
+SWOT: strengths are traceable match records, exact local constraints and visible assumptions; weaknesses are heuristic weights, partial squad verification and absent forecast edge; opportunities are dated roster registries, expert role assessment and historical decision evaluation; threats are stale availability, unsupported evidence, source drift and public credential spend.
 
-## Architecture
-```mermaid
-flowchart TD
- A[Uploaded match archives] --> B[Eligibility and identity checks]
- B --> C[Dated match and player records]
- C --> D[Scouting and observed-rate intervals]
- C --> E[Temporal prediction research]
- C --> F[Exact XI planning]
- S[Supplied squad snapshot] --> F
- U[User question and constraints] --> G[DeepSeek tool selection]
- G --> D
- G --> E
- G --> F
- D --> H[Evidence and tool trace]
- E --> H
- F --> H
- H --> G
- G --> I[Cited brief]
- I --> J[Human review and decision journal]
-```
+Quantitative acceptance: unique identities and records; phase/total reconciliation; strict cutoff invariance; matching filters; feasible supported plans for all ten franchises; bounded grounded agent output; isolated records; prediction gate against a stronger learned baseline. UI acceptance: all eight workspaces, ten teams, both themes, mobile layout, working bundled marks and visible failure states.
 
-## Intelligence and reliability
-DeepSeek chooses four approved tool types: scouting, dossier, lineup solving and match research. The local tools calculate numbers. The analyst must retrieve evidence before a final brief is accepted, but generated prose is not claim-by-claim verified. Typed arguments, source separation, bounded turns, finite JSON serialization, explicit failure states, caching and private credentials constrain execution. A second language-model reviewer is not simulated or claimed.
-
-## Evaluation
-37 offline behavioral checks and 12 UI workflow checks are recorded in the delivered reports. Desktop/mobile browser screenshots were inspected. Prediction uses a fixed temporal train/validation/test protocol with no test tuning. Qualitative evaluation is implemented as a real review workflow; reviewer ratings remain pending. Live API answer quality is not established because provider-host access is unavailable in the build environment.
-
-## UX rationale
-Editorial headings, restrained franchise-research colors, whitespace and evidence-focused tables replace decorative agent activity. Eight workspaces follow research tasks. Explain limitations at the point of use, keep costs labeled as assumptions, and preserve scenario settings in the journal. Browser rendering checks are not a substitute for usability testing with analysts.
-
-## Scientific and practical limits
-No learned scouting forecast, competition-strength translation, real-time injury feed, official rule certification or current market valuation is asserted. The probability model excludes player lineups and weather. Wilson intervals do not model season dependence. Dataset availability does not establish redistribution rights. Storage and rate accounting are local to one replica. These boundaries are documented in the app and project report.
+Qualitative assessment requires real reviewers completing named tasks with evidence support, role relevance, clarity and usefulness ratings. No expert judgment is simulated. Future improvements should start with verified date-versioned squads, authenticated durable storage and expert-labelled scouting tasks, followed by historical role-fit validation. No extra paid data is required to demonstrate the current capstone.

@@ -1,89 +1,89 @@
-# Boundary — integrated franchise analyst & scouting capstone
+# Boundary — IPL franchise research studio
 
-One application includes data provenance, scouting and comparisons, observed uncertainty, exact XI and budget scenarios, evaluated match probabilities, a DeepSeek tool-calling analyst, decision history, quantitative checks, qualitative review forms, SWOT and project documentation.
+An independent capstone for analysts and scouts: dated match evidence, phase scouting, player dossiers, constrained XI and bowling plans, baseline match research, private-session journals and a bounded DeepSeek assistant.
 
-## Deploy on Streamlit Community Cloud
+**Live app:** https://br-abishek-07-boundary-cricket-capstone-app-g4476m.streamlit.app/
 
-1. Open https://share.streamlit.io/ and create an app from this repository.
-2. Repository: `br-abishek-07/boundary-cricket-capstone`; branch: `main`; main file: `app.py`.
-3. Advanced settings: select Python 3.12 and add `DEEPSEEK_API_KEY = "your-provider-key"` to Secrets.
-4. Deploy, then open Settings → Test provider connection.
+![Dark research desk](docs/previews/dark-desk.png)
 
-The processed database and model are included; no file uploads are needed. For download, use GitHub Code → Download ZIP.
+## Run
 
-## Start
-
-Python 3.11 or 3.12 is recommended. Run `start.sh` on macOS/Linux or `start.bat` on Windows. These create a local virtual environment, install dependencies, and launch Streamlit.
-
-Or run manually:
+Python 3.11 or later is required.
 
 ```bash
 pip install -r requirements.txt
 streamlit run app.py
 ```
 
-The processed database and trained research model are included. No GPU or paid dataset is required. This public repository contains no API key. On Streamlit Community Cloud, set `DEEPSEEK_API_KEY` in Advanced settings → Secrets. For local use, copy `.streamlit/secrets.toml.example` to `.streamlit/secrets.toml` and insert your own key. The real secret file is ignored by Git and is never sent as prompt text.
+Or use `start.bat` / `bash start.sh`. The processed match data is included; raw uploads are not needed to launch the app.
 
-Live DeepSeek host access is blocked by the build environment's outbound policy, so authentication and live answer quality were not verified. On your local computer, open Settings → Test provider connection. A successful response verifies connectivity/authentication, not analytical quality.
+For live DeepSeek, configure a **server secret**, never source code:
+
+```toml
+# .streamlit/secrets.toml locally, or Streamlit Cloud > App settings > Secrets
+DEEPSEEK_API_KEY = "your-private-provider-key"
+```
+
+A `DEEPSEEK_API_KEY` environment variable or a private session override also works. No credential is included in this public repository. Local evidence mode works without an API key. Existing Streamlit hosting secrets survive a normal source update.
+
+## What changed in the corrective release
+
+- Fixed shared missing-ID collisions; canonical names preserve raw archive aliases and registry IDs.
+- Applied exclusive date cutoffs, known sourced roster events, and a clear block on unsupported historical squad reconstruction.
+- Read recorded powerplay boundaries for reduced innings; death remains an explicitly defined analytical window. Phase wickets and dismissals now reconcile with totals.
+- Added one-year recency decay and dismissal/wicket components to transparent shrinkage scores. ALL competitions stay in separate groups.
+- Added joint XI and bowling allocation: 11 players, overseas/keeper/role constraints, supported spin/pace options, 36/60/24 phase balls and at most 24 balls per player. Unsupported evidence requires a written scenario assumption.
+- Preserved exclusions, locks, prices and constraints in the AI's XI tool. Comparisons, dossier statistics and uncertainty share filters.
+- Replaced unrestricted generated numerical claims with tool-backed fact rendering. Excess tool calls get valid deferred responses. Failed requests clear old answers.
+- Isolated journals, reviews and caches by random session and franchise. Legacy shared journals are never read. Anonymous sessions are not authenticated team accounts.
+- Added a stronger training-derived chase baseline. The research model failed its acceptance gate; the UI serves the baseline and retains model results for scrutiny.
+- Added bundled franchise crests and vector IPL text mark, team accents, Light/Dark control, readable research tables and responsive typography.
 
 ## Workspaces
 
-1. Decision desk: DeepSeek chooses approved scouting, dossier, XI and prediction tools, then produces a cited brief with an inspectable trace. Saved demonstration mode never calls the provider.
-2. Scouting & comparison: competition, batting/bowling, phase, match-date window, minimum samples, literal search, CSV export and up to three candidate comparisons.
-3. Squad & auction scenarios: exact solver, exclusions, locked players, role constraints, optional editable scenario costs and an XI budget. Prices default to explicitly labeled placeholders; they are not model valuations.
-4. Player dossier: dated match records, season tables, trend chart, match-bootstrap observed-rate intervals and historical auction lookup.
-5. Match research: pre/post-toss probabilities using the evaluated feature/model pipeline, holdouts, calibration, baselines, season results and uncertainty.
-6. Decision journal: save and export briefs and scenarios with their evidence/settings.
-7. Evaluation & SWOT: real automated results, qualitative review form, source manifest and project strategy.
-8. Settings: private key status, session override, provider connection check and operational limits.
+| Workspace | Purpose |
+| --- | --- |
+| Decision desk | Local evidence or DeepSeek selection of verified tool facts, with source records and active scenario |
+| Scouting & comparison | Separate league and phase evidence, raw samples, recency-weighted descriptive scores and observed-rate intervals |
+| Squad & auction scenarios | Dated membership, availability, locks, supported workloads and editable XI cost assumptions |
+| Player dossier | Resolve names/aliases, inspect filtered match evidence and manually search historical auction records |
+| Match research | Training-derived chase baseline, failed-model gate, dated holdouts and calibration |
+| Decision journal | Session-and-team-scoped briefs, scenarios and exports |
+| Evaluation & sources | Actual release checks, source manifests, dated roster events and unassessed reviewer form |
+| Settings | Private session credential override and provider allowance status |
 
-## Verify
+## Evidence and methods
+
+6,392 eligible men's matches; 141,377 named player-match records. Sources cover IPL, BBL, SMAT, Hundred and T20I. Source hashes, exclusions and dates are in `data/audit.json`. Auction history covers 2013–2022; it is not a current pricing source.
+
+Use [the methods and boundaries](docs/DATA_SOURCES.md), [the user guide](docs/USER_GUIDE.md) and [release notes](docs/RELEASE_NOTES.md). Dated trade events have source links in `data/squad_events.json`; they do not establish a fully verified current squad. Reference bowling styles are curated planning tags, open to justified overrides.
+
+Scores use recency-weighted rates and a 120-ball prior. The batting heuristic includes dismissal rate; bowling includes conceded runs and wicket rate. Coefficients are research assumptions, not learned future values. Match-bootstrap intervals use 500 seeded samples and describe observed rates in the selected scope.
+
+The retrospective research model is trained before 2023, validated on 2023, and tested on 2024 onward with same-day outcome isolation. It must beat the training-derived chase-rate Brier score on both validation and test to be served. It currently fails. This release uses 50% before toss and the historical training chase rate after a chasing side is specified. No predictive advantage is claimed.
+
+## Validation
 
 ```bash
 python tests/test_core.py
 python tests/test_ui.py
 ```
 
-Build results: 37 offline behavioral checks and 12 Streamlit workflow checks passed; desktop/mobile browser rendering was inspected. These do not prove live DeepSeek factuality or expert tactical usefulness. No expert ratings have been invented.
+The release artifacts in `data/release_checks.json`, `test_results.json`, `ui_results.json` and `browser_results.json` contain actual outcomes and scope. Provider fixtures do not spend API credit. The original-snapshot comparison is skipped when that external audit snapshot is absent; the other checks run from this repository.
 
-## Data and reproducibility
-
-Five uploaded Cricsheet archives yield 6,392 eligible men's matches and 141,377 named player-match records. Women’s fixtures, the voided IPL fixture 1473495 and duplicate match IDs are excluded. The source manifest records raw ZIP hashes and dates. IDs come from match registries; squad display names override aliases. Squad snapshots and old auction data need independent verification.
-
-Raw ZIPs are not bundled. To rebuild from your uploaded archives:
+To rebuild from the original uploads:
 
 ```bash
-python match_data.py --source /path/to/attachments --output data
+python match_data.py --source /path/to/archives --output data
 python prediction.py
-python tests/test_core.py
-python tests/test_ui.py
 ```
 
-`--source` searches recursively. Dataset fields are never executed as instructions. The integrated release uses match-level records throughout.
+Documentation artifacts can be regenerated using `pip install -r requirements-docs.txt` and `python tools/build_docs.py`.
 
-## Analytical methods
+## Deployment and boundaries
 
-Scouting: sample-weighted 120-ball shrinkage toward the selected pool's rate. Batting score is shrunk runs above the pool per 100 balls; bowling is runs saved per six balls. Mixed competitions are not strength-adjusted. Phase boundaries use full-format rules, not rain-adjusted conditions. Hundred powerplay is the first 25 balls; death is the final 20 balls; economy is normalized to six balls.
+Streamlit Community Cloud: repository `br-abishek-07/boundary-cricket-capstone`, branch `main`, entrypoint `app.py`, Python 3.11+. Store the DeepSeek key only in hosting secrets.
 
-XI: maximize a role-weighted descriptive utility with 11 selections, at most four overseas, at least one keeper and configurable batting/bowling options. Batting utility = score/10 for batting roles; bowling utility = bowling score for bowling roles; all-rounders count in both. Missing evidence receives -1 utility. This is a planning solver, not complete official eligibility or Impact Player certification. Budget constraints use user scenario costs only.
+This is a research capstone, not a confidential franchise system. Account authentication, durable shared team storage, a verified current injury/availability feed, full Impact Player or competition eligibility certification, market valuation and proven predictive edge are not implemented. Local SQLite storage and daily allowances are installation-local and can reset on redeploy. Export work before closing a session. The six-calls/session and thirty-calls/installation limits do not replace provider billing controls or authenticated access.
 
-Uncertainty: 400 seeded match-level bootstrap resamples of observed rates; this is not an interval for future performance. Windows in scouting use actual match dates; dossier intervals explicitly use all dates before cutoff.
-
-Predictions: regularized zero-intercept logistic models trained on IPL before 2023, validation in 2023, untouched test from 2024. Past Elo, form and venue chase history update only after each match date. Fixed settings were not tuned on test results. One feature function serves evaluation and live scenarios. Current forecasts use the latest rating snapshot; older as-of live scenarios are disabled.
-
-Test results: post-toss accuracy 54.88% on 215 matches, Wilson 95% interval 48.20–61.39%, Brier 0.248129; constant-50% forecast Brier 0.25. This modest result does not establish a reliable predictive advantage. No lineup, weather, injury or pitch inputs are modeled. Classifying a 50% forecast breaks ties toward Team A; that baseline's observed accuracy is not the expected accuracy of a random coin flip.
-
-## DeepSeek, storage and cost
-
-The analyst allows at most three provider requests per brief, four tools per tool-enabled turn and 1,100 output tokens per request. A local SQLite ledger permits thirty provider requests per UTC day across sessions. Repeated identical briefs are cached against source/squad fingerprints and model weights. One deployment replica has its own ledger. Input tokens are billed too; this is an operational allowance, not a guaranteed rupee cap. Use provider billing controls and authentication before unrestricted public access. ₹300–₹1,000 is a suggested experimentation allowance, not a vendor quote.
-
-`.runtime/` stores local decisions, reviews, cache and usage. It is excluded from delivery. Storage on free hosting can be ephemeral; export important work. This capstone is intended for a trusted single-user demo. Multiuser access control, global cross-replica accounting and a remote durable database are not implemented.
-
-## Deliverables
-
-- `docs/Capstone_Report.pdf` and `.docx`
-- `docs/Capstone_Presentation.pptx`
-- `docs/USER_GUIDE.md`, `docs/PLAN.md`, `docs/previews/`
-- Actual test, UI, prediction and source reports under `data/`
-
-Source data may have redistribution requirements: inclusion in this upload is not a grant of data rights. Review source terms before making the complete repository public.
+IPL and franchise marks identify the subjects of this independent educational project. Attribution is in `assets/sources.json`; no endorsement is implied. Source-data rights remain those of their owners; check applicable terms before wider redistribution.

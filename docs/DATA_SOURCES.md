@@ -1,11 +1,21 @@
-# Supplied source references
+# Evidence, methods and boundaries
 
-- ipl_json.zip — uploaded IPL match JSON archive
-- bbl_json.zip — uploaded BBL match JSON archive
-- sma_json.zip — uploaded SMAT match JSON archive
-- hnd_json.zip — uploaded Hundred archive; men’s matches selected
-- t20s_json.zip — uploaded T20 international archive; men’s matches selected
-- IPLPlayerAuctionData.csv — supplied historical auction file; provenance and units need verification
-- IPL360_GitHub_Streamlit_Cloud_Repo.zip — supplied squad snapshot
+The supplied archives produce 6,392 eligible men's matches and 141,377 named player-match records. `data/audit.json` records archive SHA-256 hashes and per-competition coverage. Women's matches, duplicate IDs, super-over player statistics and voided IPL match 1473495 are excluded. The supplied auction CSV has 970 rows and covers 2013–2022 (one missing year); price units and transaction types remain unverified.
 
-See data/audit.json for raw archive hashes and included/excluded counts. Reuse and redistribution permissions must be confirmed from the original data providers.
+Registry IDs join match evidence. Shared UNREGISTERED_DOMESTIC_SQUAD placeholders are converted to unique franchise/name planning IDs and cannot join real historical evidence. Canonical display corrections preserve raw aliases. Names alone do not prove an identity match. Known dated roster changes are sourced in `data/squad_events.json`; the remaining supplied 2026 snapshot has not been fully reverified. Pre-2026 roster reconstruction is blocked.
+
+Batting balls include no-balls but exclude wides. Legal bowling balls exclude wides and no-balls. Bowler-conceded runs include batter runs, wides and no-balls; byes, leg-byes and penalty extras are excluded. Run outs count as dismissals, not bowler wickets. Phase wickets and dismissals reconcile with total counts.
+
+Powerplay uses recorded innings boundaries, including fractional-over delivery ordinals in reduced innings. Where metadata is missing, a proportional fallback is used: up to six overs or roughly 30% of scheduled T20 overs; Hundred uses its five groups. Death is an analytical final fifth of scheduled innings after the powerplay, with a minimum six-ball window. It is not an official field-restriction label. Rates normalize to six legal balls, including Hundred.
+
+All evidence dates are strictly before the selected cutoff and on or after the selected start. Scores apply a one-year half-life and a 120-ball pool-rate prior. Batting score: 100 times shrunk runs-per-ball residual minus 1,800 times shrunk dismissal-rate residual. Bowling score: six times conceded-rate improvement plus 72 times wicket-rate improvement. These coefficients are transparent heuristics, not empirically validated player values. Raw displayed totals are not weighted. ALL keeps league-specific baselines and groups rather than assuming equivalent competition strength.
+
+Observed-rate intervals use 500 seeded match bootstrap samples, require five relevant match samples and assume independent matches. They share the active competition, phase and date scope. They do not quantify future player performance, cross-league translation or selection bias.
+
+XI planning combines batting score/10 plus bowling score. Default bowling support requires 120 observed IPL legal balls over the rolling three-year window; phase support requires 36 PP / 36 middle / 24 death balls. The exact mixed-integer program jointly selects eleven and allocates 36/60/24 balls, with at most four overseas, at least one keeper, five supported bowling options and five observed batting options. Curated pace/spin tags are reference assumptions. These checks are not full official eligibility or Impact Player certification. Unobserved players require explicit justified utility/capability assumptions. Costs are analyst-entered XI assumptions.
+
+Prediction uses prior result form, Elo and canonical venue chase history. All matches on a date are forecast before that date updates state. Training: before 2023. Validation: 2023. Test: 2024 onward. Gate: research post-toss Brier must beat a training-derived chase-rate baseline in BOTH validation and test. The current model fails; baseline estimates are served, and research results remain available. No forecast edge, injury responsiveness or lineup-based forecast is established.
+
+The DeepSeek assistant can select existing tool facts and approved actions. It cannot publish arbitrary generated prose, prices or new numerical claims. Up to three provider requests and four unique tools per enabled turn; duplicates reuse results and excess calls receive deferred responses. Failed/empty tool results do not create facts. This limits unsupported factual text but does not prove relevance, completeness or tactical quality. Controlled fixtures test orchestration; live provider quality and independent expert usefulness remain unvalidated.
+
+SQLite caches and journals require random session-and-team scope and do not read the legacy shared database. They do not authenticate accounts. Local installation allowance is not cross-replica accounting. Secrets never belong in source, exports or examples. See `assets/sources.json` for marks and `data/release_checks.json` for actual validation scope.

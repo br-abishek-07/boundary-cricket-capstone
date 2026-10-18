@@ -1,0 +1,49 @@
+{
+  "checks": [
+    {
+      "view": "Dark desktop desk",
+      "loaded_images": [
+        {
+          "alt": "Indian Premier League text mark",
+          "complete": true,
+          "width": 270
+        },
+        {
+          "alt": "RCB logo",
+          "complete": true,
+          "width": 145
+        }
+      ]
+    },
+    {
+      "view": "Light desktop desk",
+      "loaded_images": [
+        {
+          "alt": "Indian Premier League text mark",
+          "complete": true,
+          "width": 270
+        },
+        {
+          "alt": "RCB logo",
+          "complete": true,
+          "width": 145
+        }
+      ]
+    },
+    {
+      "view": "light desktop workload table"
+    },
+    {
+      "view": "dark desktop workload table"
+    },
+    {
+      "view": "mobile desk 390px",
+      "width": {
+        "w": 390,
+        "scroll": 390
+      }
+    }
+  ],
+  "checks_passed": 5,
+  "scope": "Local Chromium render with bundled assets; deployed host not reachable from the build network."
+}

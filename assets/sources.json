@@ -1,0 +1,57 @@
+[
+  {
+    "team": "CSK",
+    "bytes": 26848,
+    "source": "https://raw.githubusercontent.com/cu-sanjay/Cricket-Streaming/main/static/logos/CSK.svg"
+  },
+  {
+    "team": "DC",
+    "bytes": 26220,
+    "source": "https://raw.githubusercontent.com/cu-sanjay/Cricket-Streaming/main/static/logos/DC.svg"
+  },
+  {
+    "team": "GT",
+    "bytes": 29988,
+    "source": "https://raw.githubusercontent.com/cu-sanjay/Cricket-Streaming/main/static/logos/GT.svg"
+  },
+  {
+    "team": "KKR",
+    "bytes": 28364,
+    "source": "https://raw.githubusercontent.com/cu-sanjay/Cricket-Streaming/main/static/logos/KKR.svg"
+  },
+  {
+    "team": "LSG",
+    "bytes": 24060,
+    "source": "https://raw.githubusercontent.com/cu-sanjay/Cricket-Streaming/main/static/logos/LSG.svg"
+  },
+  {
+    "team": "MI",
+    "bytes": 28924,
+    "source": "https://raw.githubusercontent.com/cu-sanjay/Cricket-Streaming/main/static/logos/MI.svg"
+  },
+  {
+    "team": "PBKS",
+    "bytes": 31116,
+    "source": "https://raw.githubusercontent.com/cu-sanjay/Cricket-Streaming/main/static/logos/PBKS.svg"
+  },
+  {
+    "team": "RCB",
+    "bytes": 22988,
+    "source": "https://raw.githubusercontent.com/cu-sanjay/Cricket-Streaming/main/static/logos/RCB.svg"
+  },
+  {
+    "team": "RR",
+    "bytes": 292928,
+    "source": "https://raw.githubusercontent.com/cu-sanjay/Cricket-Streaming/main/static/logos/RR.svg"
+  },
+  {
+    "team": "SRH",
+    "bytes": 28184,
+    "source": "https://raw.githubusercontent.com/cu-sanjay/Cricket-Streaming/main/static/logos/SRH.svg"
+  },
+  {
+    "name": "IPL",
+    "source": "https://commons.wikimedia.org/wiki/File:Ipl.svg",
+    "description": "Vector IPL text mark; Dpkpm007 / Andrew Pertsev, public-domain text-logo reference. Franchise marks remain their owners\u2019 trademarks."
+  }
+]

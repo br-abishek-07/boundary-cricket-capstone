@@ -1,13 +1,36 @@
 from pathlib import Path
-import base64,html
-ROOT=Path(__file__).resolve().parents[1]
-TEAMS={
-'CSK':('Chennai Super Kings','#936100','#F6CB47'), 'DC':('Delhi Capitals','#1756AD','#72AAFF'), 'GT':('Gujarat Titans','#705B2A','#D7BC75'), 'KKR':('Kolkata Knight Riders','#7043A0','#C0A0F0'), 'LSG':('Lucknow Super Giants','#006B87','#65D2E6'), 'MI':('Mumbai Indians','#0065AA','#75BBFF'), 'PBKS':('Punjab Kings','#B02736','#FF8995'), 'RCB':('Royal Challengers Bengaluru','#AB2436','#FF8798'), 'RR':('Rajasthan Royals','#A61C69','#FF88C4'), 'SRH':('Sunrisers Hyderabad','#A94C09','#FFA25D')}
+import base64, html
+
+ROOT = Path(__file__).resolve().parents[1]
+TEAMS = {
+    "CSK": ("Chennai Super Kings", "#936100", "#F6CB47"),
+    "DC": ("Delhi Capitals", "#1756AD", "#72AAFF"),
+    "GT": ("Gujarat Titans", "#705B2A", "#D7BC75"),
+    "KKR": ("Kolkata Knight Riders", "#7043A0", "#C0A0F0"),
+    "LSG": ("Lucknow Super Giants", "#006B87", "#65D2E6"),
+    "MI": ("Mumbai Indians", "#0065AA", "#75BBFF"),
+    "PBKS": ("Punjab Kings", "#B02736", "#FF8995"),
+    "RCB": ("Royal Challengers Bengaluru", "#AB2436", "#FF8798"),
+    "RR": ("Rajasthan Royals", "#A61C69", "#FF88C4"),
+    "SRH": ("Sunrisers Hyderabad", "#A94C09", "#FFA25D"),
+}
+
+
 def logo(team):
- p=ROOT/'assets'/f'{team}.svg';return 'data:image/svg+xml;base64,'+base64.b64encode(p.read_bytes()).decode()
-def css(team,theme):
- dark=theme=='Dark';accent=TEAMS[team][2 if dark else 1];bg='#101820' if dark else '#F6F5F0';panel='#19242E' if dark else '#FFFFFF';side='#131E27' if dark else '#EDEFE8';text='#E8EDF1' if dark else '#192D34';muted='#A8B8C5' if dark else '#596B72';border='#334553' if dark else '#D3DCD7'
- return f'''<style>
+    p = ROOT / "assets" / f"{team}.svg"
+    return "data:image/svg+xml;base64," + base64.b64encode(p.read_bytes()).decode()
+
+
+def css(team, theme):
+    dark = theme == "Dark"
+    accent = TEAMS[team][2 if dark else 1]
+    bg = "#101820" if dark else "#F6F5F0"
+    panel = "#19242E" if dark else "#FFFFFF"
+    side = "#131E27" if dark else "#EDEFE8"
+    text = "#E8EDF1" if dark else "#192D34"
+    muted = "#A8B8C5" if dark else "#596B72"
+    border = "#334553" if dark else "#D3DCD7"
+    return f"""<style>
  :root{{--ink:{text};--muted:{muted};--paper:{bg};--panel:{panel};--line:{border};--accent:{accent}}}
  .stApp,[data-testid="stAppViewContainer"],header[data-testid="stHeader"]{{background:{bg};color:{text}}}
  .block-container{{padding:3rem 3rem 4rem;max-width:1480px}}[data-testid="stSidebar"]{{background:{side};border-right:1px solid {border}}}
@@ -38,6 +61,26 @@ def css(team,theme):
  .stApp details,.stApp [data-testid="stForm"]{{border-color:{border}!important}}.stApp [data-testid="stExpander"] details{{background:{panel}}}
  .stApp [data-testid="stSidebarCollapsedControl"] svg{{fill:{text}!important;color:{text}!important}}
  .stApp a{{color:{accent}}}.stApp hr{{border-color:{border}}}.stApp pre{{background:{panel};color:{text}}}
- @media(max-width:700px){{.block-container{{padding:4.2rem 1rem 2rem}}.stApp h1{{font-size:2.4rem!important}}.desk{{padding:12px}}.desk-name{{font-size:22px}}.crest{{width:62px;height:62px}}}}
- </style>''',{'bg':bg,'panel':panel,'text':text,'accent':accent,'border':border}
-def desk(team,until):return f'<div class="desk"><img class="crest" src="{logo(team)}" alt="{team} logo"><div><div class="desk-sub">FRANCHISE RESEARCH / {team}</div><div class="desk-name">{TEAMS[team][0]}</div><div class="desk-sub" style="margin-top:8px">Evidence before {until} · dated roster events · human-reviewed decisions</div></div></div>'
+ .stApp [data-testid="stCaptionContainer"]{{opacity:1!important;color:{muted}!important}}
+ .stApp [data-testid="stDateInputField"],.stApp [data-testid="stDateInput"] [role="group"]{{background:{panel}!important;color:{text}!important;border-color:{border}!important}}
+ .stApp [data-testid="stDateInput"] [role="spinbutton"],.stApp [data-testid="stDateInput"] [data-type="literal"]{{color:{text}!important}}
+ .stApp [data-testid="stDateInput"] button{{background:{panel}!important;color:{text}!important}}
+ .home-brand{{display:flex;align-items:center;gap:16px;color:var(--muted);font-size:13px;margin:0 0 30px}}.home-brand .crest{{width:64px;height:64px}}
+ .workflow{{display:grid;grid-template-columns:repeat(6,1fr);gap:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:36px 0 38px}}
+ .workflow-step{{padding:22px 16px;border-right:1px solid var(--line)}}.workflow-step:last-child{{border:0}}.workflow-step span{{display:block;font-size:11px;color:var(--accent);margin-bottom:18px;letter-spacing:2px}}.workflow-step strong{{display:block;font-size:16px;color:var(--ink)}}.workflow-step p{{font-size:13px;line-height:1.6;margin:8px 0 0;color:var(--muted)}}
+ .page-intro{{animation:arrive .32s ease-out}}.stApp button{{transition:background-color .15s ease,border-color .15s ease,box-shadow .15s ease}}.stApp button:hover{{border-color:var(--accent);box-shadow:0 2px 8px #00000012}}.stApp button:focus-visible{{outline:2px solid var(--accent);outline-offset:3px}}
+ @keyframes arrive{{from{{opacity:.45;transform:translateY(6px)}}to{{opacity:1;transform:translateY(0)}}}}
+ @media(prefers-reduced-motion:reduce){{*,*::before,*::after{{animation:none!important;transition:none!important;scroll-behavior:auto!important}}}}
+ @media(max-width:1100px){{.workflow{{grid-template-columns:repeat(3,1fr)}}.workflow-step:nth-child(3){{border-right:0}}}}
+ @media(max-width:700px){{.block-container{{padding:4.2rem 1rem 2rem}}.workflow{{grid-template-columns:repeat(2,1fr)}}.workflow-step{{padding:18px 12px}}.workflow-step:nth-child(3){{border-right:1px solid var(--line)}}.workflow-step:nth-child(even){{border-right:0}}.stApp h1{{font-size:2.4rem!important}}.desk{{padding:12px}}.desk-name{{font-size:22px}}.crest{{width:62px;height:62px}}}}
+ </style>""", {
+        "bg": bg,
+        "panel": panel,
+        "text": text,
+        "accent": accent,
+        "border": border,
+    }
+
+
+def desk(team, until):
+    return f'<div class="desk"><img class="crest" src="{logo(team)}" alt="{team} logo"><div><div class="desk-sub">FRANCHISE RESEARCH / {team}</div><div class="desk-name">{TEAMS[team][0]}</div><div class="desk-sub" style="margin-top:8px">Evidence before {until} · dated roster events · human-reviewed decisions</div></div></div>'

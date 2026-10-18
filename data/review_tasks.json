@@ -1,0 +1,412 @@
+[
+  {
+    "id": "CSK-SCOUT",
+    "team": "CSK",
+    "task": "Compare death-bowling options for Chennai Super Kings using IPL, three-year evidence and at least 120 phase balls.",
+    "controls": {
+      "competition": "IPL",
+      "phase": "Death",
+      "discipline": "Bowling",
+      "min_balls": 120
+    },
+    "review_steps": [
+      "Check every named identity, sample and last relevant match.",
+      "Compare raw economy and wickets beside the descriptive score.",
+      "Record what is missing about current eligibility, availability, venue and acquisition."
+    ],
+    "rubric": [
+      "Evidence support (1\u20135)",
+      "Role relevance (1\u20135)",
+      "Clarity (1\u20135)",
+      "Usefulness (1\u20135)"
+    ],
+    "reviewer_rating": null
+  },
+  {
+    "id": "CSK-XI",
+    "team": "CSK",
+    "task": "Build the default supported XI. Exclude its leading scheduled bowler, repeat and compare the change.",
+    "review_steps": [
+      "Check 11 distinct players, keeper, overseas and role requirements.",
+      "Check 20 overs, no consecutive overs, maximum four, phase eligibility and excluded player absent.",
+      "Explain changes and uncertainty without calling the scenario score a win probability.",
+      "Export a decision pack and reproduce the active assumptions."
+    ],
+    "rubric": [
+      "Evidence support (1\u20135)",
+      "Role relevance (1\u20135)",
+      "Clarity (1\u20135)",
+      "Usefulness (1\u20135)"
+    ],
+    "reviewer_rating": null
+  },
+  {
+    "id": "DC-SCOUT",
+    "team": "DC",
+    "task": "Compare death-bowling options for Delhi Capitals using IPL, three-year evidence and at least 120 phase balls.",
+    "controls": {
+      "competition": "IPL",
+      "phase": "Death",
+      "discipline": "Bowling",
+      "min_balls": 120
+    },
+    "review_steps": [
+      "Check every named identity, sample and last relevant match.",
+      "Compare raw economy and wickets beside the descriptive score.",
+      "Record what is missing about current eligibility, availability, venue and acquisition."
+    ],
+    "rubric": [
+      "Evidence support (1\u20135)",
+      "Role relevance (1\u20135)",
+      "Clarity (1\u20135)",
+      "Usefulness (1\u20135)"
+    ],
+    "reviewer_rating": null
+  },
+  {
+    "id": "DC-XI",
+    "team": "DC",
+    "task": "Build the default supported XI. Exclude its leading scheduled bowler, repeat and compare the change.",
+    "review_steps": [
+      "Check 11 distinct players, keeper, overseas and role requirements.",
+      "Check 20 overs, no consecutive overs, maximum four, phase eligibility and excluded player absent.",
+      "Explain changes and uncertainty without calling the scenario score a win probability.",
+      "Export a decision pack and reproduce the active assumptions."
+    ],
+    "rubric": [
+      "Evidence support (1\u20135)",
+      "Role relevance (1\u20135)",
+      "Clarity (1\u20135)",
+      "Usefulness (1\u20135)"
+    ],
+    "reviewer_rating": null
+  },
+  {
+    "id": "GT-SCOUT",
+    "team": "GT",
+    "task": "Compare death-bowling options for Gujarat Titans using IPL, three-year evidence and at least 120 phase balls.",
+    "controls": {
+      "competition": "IPL",
+      "phase": "Death",
+      "discipline": "Bowling",
+      "min_balls": 120
+    },
+    "review_steps": [
+      "Check every named identity, sample and last relevant match.",
+      "Compare raw economy and wickets beside the descriptive score.",
+      "Record what is missing about current eligibility, availability, venue and acquisition."
+    ],
+    "rubric": [
+      "Evidence support (1\u20135)",
+      "Role relevance (1\u20135)",
+      "Clarity (1\u20135)",
+      "Usefulness (1\u20135)"
+    ],
+    "reviewer_rating": null
+  },
+  {
+    "id": "GT-XI",
+    "team": "GT",
+    "task": "Build the default supported XI. Exclude its leading scheduled bowler, repeat and compare the change.",
+    "review_steps": [
+      "Check 11 distinct players, keeper, overseas and role requirements.",
+      "Check 20 overs, no consecutive overs, maximum four, phase eligibility and excluded player absent.",
+      "Explain changes and uncertainty without calling the scenario score a win probability.",
+      "Export a decision pack and reproduce the active assumptions."
+    ],
+    "rubric": [
+      "Evidence support (1\u20135)",
+      "Role relevance (1\u20135)",
+      "Clarity (1\u20135)",
+      "Usefulness (1\u20135)"
+    ],
+    "reviewer_rating": null
+  },
+  {
+    "id": "KKR-SCOUT",
+    "team": "KKR",
+    "task": "Compare death-bowling options for Kolkata Knight Riders using IPL, three-year evidence and at least 120 phase balls.",
+    "controls": {
+      "competition": "IPL",
+      "phase": "Death",
+      "discipline": "Bowling",
+      "min_balls": 120
+    },
+    "review_steps": [
+      "Check every named identity, sample and last relevant match.",
+      "Compare raw economy and wickets beside the descriptive score.",
+      "Record what is missing about current eligibility, availability, venue and acquisition."
+    ],
+    "rubric": [
+      "Evidence support (1\u20135)",
+      "Role relevance (1\u20135)",
+      "Clarity (1\u20135)",
+      "Usefulness (1\u20135)"
+    ],
+    "reviewer_rating": null
+  },
+  {
+    "id": "KKR-XI",
+    "team": "KKR",
+    "task": "Build the default supported XI. Exclude its leading scheduled bowler, repeat and compare the change.",
+    "review_steps": [
+      "Check 11 distinct players, keeper, overseas and role requirements.",
+      "Check 20 overs, no consecutive overs, maximum four, phase eligibility and excluded player absent.",
+      "Explain changes and uncertainty without calling the scenario score a win probability.",
+      "Export a decision pack and reproduce the active assumptions."
+    ],
+    "rubric": [
+      "Evidence support (1\u20135)",
+      "Role relevance (1\u20135)",
+      "Clarity (1\u20135)",
+      "Usefulness (1\u20135)"
+    ],
+    "reviewer_rating": null
+  },
+  {
+    "id": "LSG-SCOUT",
+    "team": "LSG",
+    "task": "Compare death-bowling options for Lucknow Super Giants using IPL, three-year evidence and at least 120 phase balls.",
+    "controls": {
+      "competition": "IPL",
+      "phase": "Death",
+      "discipline": "Bowling",
+      "min_balls": 120
+    },
+    "review_steps": [
+      "Check every named identity, sample and last relevant match.",
+      "Compare raw economy and wickets beside the descriptive score.",
+      "Record what is missing about current eligibility, availability, venue and acquisition."
+    ],
+    "rubric": [
+      "Evidence support (1\u20135)",
+      "Role relevance (1\u20135)",
+      "Clarity (1\u20135)",
+      "Usefulness (1\u20135)"
+    ],
+    "reviewer_rating": null
+  },
+  {
+    "id": "LSG-XI",
+    "team": "LSG",
+    "task": "Build the default supported XI. Exclude its leading scheduled bowler, repeat and compare the change.",
+    "review_steps": [
+      "Check 11 distinct players, keeper, overseas and role requirements.",
+      "Check 20 overs, no consecutive overs, maximum four, phase eligibility and excluded player absent.",
+      "Explain changes and uncertainty without calling the scenario score a win probability.",
+      "Export a decision pack and reproduce the active assumptions."
+    ],
+    "rubric": [
+      "Evidence support (1\u20135)",
+      "Role relevance (1\u20135)",
+      "Clarity (1\u20135)",
+      "Usefulness (1\u20135)"
+    ],
+    "reviewer_rating": null
+  },
+  {
+    "id": "MI-SCOUT",
+    "team": "MI",
+    "task": "Compare death-bowling options for Mumbai Indians using IPL, three-year evidence and at least 120 phase balls.",
+    "controls": {
+      "competition": "IPL",
+      "phase": "Death",
+      "discipline": "Bowling",
+      "min_balls": 120
+    },
+    "review_steps": [
+      "Check every named identity, sample and last relevant match.",
+      "Compare raw economy and wickets beside the descriptive score.",
+      "Record what is missing about current eligibility, availability, venue and acquisition."
+    ],
+    "rubric": [
+      "Evidence support (1\u20135)",
+      "Role relevance (1\u20135)",
+      "Clarity (1\u20135)",
+      "Usefulness (1\u20135)"
+    ],
+    "reviewer_rating": null
+  },
+  {
+    "id": "MI-XI",
+    "team": "MI",
+    "task": "Build the default supported XI. Exclude its leading scheduled bowler, repeat and compare the change.",
+    "review_steps": [
+      "Check 11 distinct players, keeper, overseas and role requirements.",
+      "Check 20 overs, no consecutive overs, maximum four, phase eligibility and excluded player absent.",
+      "Explain changes and uncertainty without calling the scenario score a win probability.",
+      "Export a decision pack and reproduce the active assumptions."
+    ],
+    "rubric": [
+      "Evidence support (1\u20135)",
+      "Role relevance (1\u20135)",
+      "Clarity (1\u20135)",
+      "Usefulness (1\u20135)"
+    ],
+    "reviewer_rating": null
+  },
+  {
+    "id": "PBKS-SCOUT",
+    "team": "PBKS",
+    "task": "Compare death-bowling options for Punjab Kings using IPL, three-year evidence and at least 120 phase balls.",
+    "controls": {
+      "competition": "IPL",
+      "phase": "Death",
+      "discipline": "Bowling",
+      "min_balls": 120
+    },
+    "review_steps": [
+      "Check every named identity, sample and last relevant match.",
+      "Compare raw economy and wickets beside the descriptive score.",
+      "Record what is missing about current eligibility, availability, venue and acquisition."
+    ],
+    "rubric": [
+      "Evidence support (1\u20135)",
+      "Role relevance (1\u20135)",
+      "Clarity (1\u20135)",
+      "Usefulness (1\u20135)"
+    ],
+    "reviewer_rating": null
+  },
+  {
+    "id": "PBKS-XI",
+    "team": "PBKS",
+    "task": "Build the default supported XI. Exclude its leading scheduled bowler, repeat and compare the change.",
+    "review_steps": [
+      "Check 11 distinct players, keeper, overseas and role requirements.",
+      "Check 20 overs, no consecutive overs, maximum four, phase eligibility and excluded player absent.",
+      "Explain changes and uncertainty without calling the scenario score a win probability.",
+      "Export a decision pack and reproduce the active assumptions."
+    ],
+    "rubric": [
+      "Evidence support (1\u20135)",
+      "Role relevance (1\u20135)",
+      "Clarity (1\u20135)",
+      "Usefulness (1\u20135)"
+    ],
+    "reviewer_rating": null
+  },
+  {
+    "id": "RCB-SCOUT",
+    "team": "RCB",
+    "task": "Compare death-bowling options for Royal Challengers Bengaluru using IPL, three-year evidence and at least 120 phase balls.",
+    "controls": {
+      "competition": "IPL",
+      "phase": "Death",
+      "discipline": "Bowling",
+      "min_balls": 120
+    },
+    "review_steps": [
+      "Check every named identity, sample and last relevant match.",
+      "Compare raw economy and wickets beside the descriptive score.",
+      "Record what is missing about current eligibility, availability, venue and acquisition."
+    ],
+    "rubric": [
+      "Evidence support (1\u20135)",
+      "Role relevance (1\u20135)",
+      "Clarity (1\u20135)",
+      "Usefulness (1\u20135)"
+    ],
+    "reviewer_rating": null
+  },
+  {
+    "id": "RCB-XI",
+    "team": "RCB",
+    "task": "Build the default supported XI. Exclude its leading scheduled bowler, repeat and compare the change.",
+    "review_steps": [
+      "Check 11 distinct players, keeper, overseas and role requirements.",
+      "Check 20 overs, no consecutive overs, maximum four, phase eligibility and excluded player absent.",
+      "Explain changes and uncertainty without calling the scenario score a win probability.",
+      "Export a decision pack and reproduce the active assumptions."
+    ],
+    "rubric": [
+      "Evidence support (1\u20135)",
+      "Role relevance (1\u20135)",
+      "Clarity (1\u20135)",
+      "Usefulness (1\u20135)"
+    ],
+    "reviewer_rating": null
+  },
+  {
+    "id": "RR-SCOUT",
+    "team": "RR",
+    "task": "Compare death-bowling options for Rajasthan Royals using IPL, three-year evidence and at least 120 phase balls.",
+    "controls": {
+      "competition": "IPL",
+      "phase": "Death",
+      "discipline": "Bowling",
+      "min_balls": 120
+    },
+    "review_steps": [
+      "Check every named identity, sample and last relevant match.",
+      "Compare raw economy and wickets beside the descriptive score.",
+      "Record what is missing about current eligibility, availability, venue and acquisition."
+    ],
+    "rubric": [
+      "Evidence support (1\u20135)",
+      "Role relevance (1\u20135)",
+      "Clarity (1\u20135)",
+      "Usefulness (1\u20135)"
+    ],
+    "reviewer_rating": null
+  },
+  {
+    "id": "RR-XI",
+    "team": "RR",
+    "task": "Build the default supported XI. Exclude its leading scheduled bowler, repeat and compare the change.",
+    "review_steps": [
+      "Check 11 distinct players, keeper, overseas and role requirements.",
+      "Check 20 overs, no consecutive overs, maximum four, phase eligibility and excluded player absent.",
+      "Explain changes and uncertainty without calling the scenario score a win probability.",
+      "Export a decision pack and reproduce the active assumptions."
+    ],
+    "rubric": [
+      "Evidence support (1\u20135)",
+      "Role relevance (1\u20135)",
+      "Clarity (1\u20135)",
+      "Usefulness (1\u20135)"
+    ],
+    "reviewer_rating": null
+  },
+  {
+    "id": "SRH-SCOUT",
+    "team": "SRH",
+    "task": "Compare death-bowling options for Sunrisers Hyderabad using IPL, three-year evidence and at least 120 phase balls.",
+    "controls": {
+      "competition": "IPL",
+      "phase": "Death",
+      "discipline": "Bowling",
+      "min_balls": 120
+    },
+    "review_steps": [
+      "Check every named identity, sample and last relevant match.",
+      "Compare raw economy and wickets beside the descriptive score.",
+      "Record what is missing about current eligibility, availability, venue and acquisition."
+    ],
+    "rubric": [
+      "Evidence support (1\u20135)",
+      "Role relevance (1\u20135)",
+      "Clarity (1\u20135)",
+      "Usefulness (1\u20135)"
+    ],
+    "reviewer_rating": null
+  },
+  {
+    "id": "SRH-XI",
+    "team": "SRH",
+    "task": "Build the default supported XI. Exclude its leading scheduled bowler, repeat and compare the change.",
+    "review_steps": [
+      "Check 11 distinct players, keeper, overseas and role requirements.",
+      "Check 20 overs, no consecutive overs, maximum four, phase eligibility and excluded player absent.",
+      "Explain changes and uncertainty without calling the scenario score a win probability.",
+      "Export a decision pack and reproduce the active assumptions."
+    ],
+    "rubric": [
+      "Evidence support (1\u20135)",
+      "Role relevance (1\u20135)",
+      "Clarity (1\u20135)",
+      "Usefulness (1\u20135)"
+    ],
+    "reviewer_rating": null
+  }
+]

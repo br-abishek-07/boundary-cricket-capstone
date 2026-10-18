@@ -1,179 +1,164 @@
 {
-  "release": "Boundary corrective release",
-  "date": "2026-10-18",
-  "status": "Passed within documented offline/local scope",
-  "core": {
-    "tests_run": 31,
+  "version": "3.0.0",
+  "checked_utc": "2026-10-18T13:32:46.613112+00:00",
+  "status": "Offline acceptance passed",
+  "automated_tests": {
+    "core": 44,
+    "startup": 3,
+    "ui": 7,
+    "total": 54,
     "failures": 0,
     "errors": 0,
-    "skipped": 0,
-    "tests": [
-      "test_01_unique_and_counts",
-      "test_02_phase_reconciliation",
-      "test_03_reduced_chase",
-      "test_04_raw_totals_unchanged",
-      "test_05_identity_aliases",
-      "test_06_dated_trades_and_historical_guard",
-      "test_07_cutoff_invariance",
-      "test_08_phase_filter_and_samples",
-      "test_09_competitions_separate",
-      "test_10_interval_same_scope",
-      "test_11_all_ten_workload_plans",
-      "test_12_availability_and_locks",
-      "test_13_budget_validation",
-      "test_14_override_validation",
-      "test_15_prediction_gate_and_symmetry",
-      "test_16_venue_aliases",
-      "test_17_forecast_future_invariance",
-      "test_18_tool_filters_and_allowlist",
-      "test_19_agent_dossier_phase_scope",
-      "test_20_agent_inherits_exact_scenario",
-      "test_21_grounded_cache",
-      "test_22_failed_tools_no_invention",
-      "test_23_unknown_fact_rejected",
-      "test_24_tool_overflow_protocol",
-      "test_25_malformed_model_fallback_safe",
-      "test_26_provider_failure_not_cached",
-      "test_27_session_team_isolation",
-      "test_28_atomic_allowance",
-      "test_29_parser_extras_and_wickets",
-      "test_30_malformed_provider_protocol",
-      "test_31_safe_serialization"
-    ],
-    "scope": "Offline regression and controlled provider fixtures. No live-provider quality or authentication claim."
+    "scope": "Final core suite (44), startup (3) and Streamlit interface tests (7). The UI matrix covers 100 team/page combinations and 20 team/theme changes."
   },
-  "ui": {
-    "checks_passed": 41,
-    "checks": [
-      "initial decision desk",
-      "Light / Decision desk",
-      "Light / Scouting & comparison",
-      "Light / Squad & auction scenarios",
-      "Light / Player dossier",
-      "Light / Match research",
-      "Light / Decision journal",
-      "Light / Evaluation & sources",
-      "Light / Settings",
-      "Dark / Decision desk",
-      "Dark / Scouting & comparison",
-      "Dark / Squad & auction scenarios",
-      "Dark / Player dossier",
-      "Dark / Match research",
-      "Dark / Decision journal",
-      "Dark / Evaluation & sources",
-      "Dark / Settings",
-      "theme cannot deselect into missing state",
-      "workload XI / CSK",
-      "workload XI / DC",
-      "workload XI / GT",
-      "workload XI / KKR",
-      "workload XI / LSG",
-      "workload XI / MI",
-      "workload XI / PBKS",
-      "workload XI / RCB",
-      "workload XI / RR",
-      "workload XI / SRH",
-      "all unavailable abstains",
-      "budget editor",
-      "insufficient budget abstains",
-      "scouting alternate league phase",
-      "filters travel to decision desk",
-      "local tool-backed brief",
-      "private journal save",
-      "team journal isolated",
-      "original team journal retained",
-      "failed request clears previous brief",
-      "canonical identity dossier",
-      "fresh session hides old journal",
-      "second visitor journal isolated"
-    ],
-    "scope": "Headless Streamlit, ten team workload plans, themes, isolation, filtered evidence and controlled outage. No live-provider test."
+  "team_scenarios": {
+    "teams": 10,
+    "scenarios": 100,
+    "rule": "Every successful plan independently checked for 11 distinct players, all 20 overs, no consecutive overs, workload/phase caps, exclusions and locks. Explicitly impossible cases rejected."
+  },
+  "raw_reconciliation": {
+    "sources": 5,
+    "matches": 6392,
+    "player_matches": 141377,
+    "field_comparisons": 3393048,
+    "delivery_records": 1455366,
+    "mismatches": 0,
+    "source_hashes_match": true,
+    "scope": "Full supplied archive reconciliation; target overs interpreted as cricket over.ball notation, not decimal overs. Fallback and analytical death labels are not proof of official field restrictions or source authenticity."
   },
   "browser": {
+    "checks_passed": 47,
     "checks": [
+      "Home workflow and coverage rendered",
+      "CSK bundled crest",
+      "CSK themed appearance",
+      "DC bundled crest",
+      "DC themed appearance",
+      "GT bundled crest",
+      "GT themed appearance",
+      "KKR bundled crest",
+      "KKR themed appearance",
+      "LSG bundled crest",
+      "LSG themed appearance",
+      "MI bundled crest",
+      "MI themed appearance",
+      "PBKS bundled crest",
+      "PBKS themed appearance",
+      "RCB bundled crest",
+      "RCB themed appearance",
+      "RR bundled crest",
+      "RR themed appearance",
+      "SRH bundled crest",
+      "SRH themed appearance",
+      "Project guide rendered",
+      "PDF guide contains all chapters",
+      "Word guide contains instructions and chapters",
+      "Source ZIP complete and excludes credentials/runtime",
+      "Scouting & comparison rendered",
+      "Scouting CSV retains context and version",
+      "Scouting pack includes source fingerprints",
+      "Squad & auction scenarios rendered",
+      "XI CSV has 11 players and 120 legal balls",
+      "XI pack has legal complete schedule",
+      "Decision desk rendered",
+      "Checked brief pack matches manifest fingerprint",
+      "Private brief saved",
+      "Decision journal rendered",
+      "Journal export scoped to selected team",
+      "Evaluation & sources rendered",
+      "Review form and export",
+      "Match research rendered",
+      "Forecast export has target, teams and method provenance",
+      "Settings rendered",
+      "Credentials hidden and test disabled without override",
+      "Reduce motion removes animation",
+      "Second visitor cannot read first journal",
+      "Mobile Home has no page overflow and respects reduced motion",
+      "Mobile guided scenario has no horizontal page overflow",
+      "No uncaught browser errors"
+    ],
+    "downloads": [
       {
-        "view": "Dark desktop desk",
-        "loaded_images": [
-          {
-            "alt": "Indian Premier League text mark",
-            "complete": true,
-            "width": 270
-          },
-          {
-            "alt": "RCB logo",
-            "complete": true,
-            "width": 145
-          }
-        ]
+        "label": "Download PDF guide",
+        "bytes": 24046
       },
       {
-        "view": "Light desktop desk",
-        "loaded_images": [
-          {
-            "alt": "Indian Premier League text mark",
-            "complete": true,
-            "width": 270
-          },
-          {
-            "alt": "RCB logo",
-            "complete": true,
-            "width": 145
-          }
-        ]
+        "label": "Download Word guide",
+        "bytes": 47707
       },
       {
-        "view": "light desktop workload table"
+        "label": "Download complete project ZIP",
+        "bytes": 3340044
       },
       {
-        "view": "dark desktop workload table"
+        "label": "Download CSV",
+        "bytes": 6267
       },
       {
-        "view": "mobile desk 390px",
-        "width": {
-          "w": 390,
-          "scroll": 390
-        }
+        "label": "Download decision pack",
+        "bytes": 3548
+      },
+      {
+        "label": "Download CSV",
+        "bytes": 5353
+      },
+      {
+        "label": "Download decision pack",
+        "bytes": 3858
+      },
+      {
+        "label": "Download brief pack",
+        "bytes": 6220
+      },
+      {
+        "label": "Export private journal",
+        "bytes": 14908
+      },
+      {
+        "label": "Export private reviews",
+        "bytes": 426
+      },
+      {
+        "label": "Download CSV",
+        "bytes": 112049
       }
     ],
-    "checks_passed": 5,
-    "scope": "Local Chromium render with bundled assets; deployed host not reachable from the build network."
+    "cold_browser_seconds": 3.135,
+    "scope": "Real local Chromium, isolated synthetic session data, desktop and 390px mobile. No hosted rebuild or live provider quality claim."
   },
-  "limitations": [
-    "Live deployed host could not be reached from the restricted build network.",
-    "Provider orchestration uses controlled fixtures; live DeepSeek response quality was not measured.",
-    "Full current squad and availability verification remains incomplete.",
-    "Session/team scoping does not provide authenticated accounts.",
-    "No independently measured expert usefulness or proven predictive edge."
+  "temporal_scouting_study": {
+    "settings": 24,
+    "methods": 2,
+    "rows": 48,
+    "scope": "Rolling-origin descriptive study, not evidence of scouting superiority. See scouting_benchmark_report.json."
+  },
+  "human_review": {
+    "task_count": 20,
+    "authenticated_expert_reviews": 0
+  },
+  "source_sha256": {
+    "data/match_players.csv.gz": "2c536bb0e5df04cf32b9ad869fdc7f7938db1dbe64d40cc4ba7b4ee705bc33f3",
+    "data/matches.csv.gz": "6441d39c9e48febdc25cbec5b58d36b80bf21bce54298cc8b6d630f68eb563b1",
+    "data/squads.csv": "fac16a8fbab01f903bb162ea59842321560de2149d93b5b4c77752804794155e",
+    "data/squad_events.json": "d5b1872c17171e36a123b6be39377497c5e90efc615940f8c64ae8e8b31a5c5f",
+    "data/player_registry.json": "49d447faa7db702fb68a8d968b29d08f0dce5975409bf0d59316962f8a3d3ce0",
+    "data/attack_types.json": "ebeb8c01a79bdd9ee716d5e9082172248a2b064c194b286348aacc2a270c929a",
+    "data/prediction_model.json": "8e5dabeb918ec3174cd4d66ce2f40eba3d77a8caa7223eb9182b7c92b01160ab",
+    "boundary_core/analytics.py": "bbc5da1075b31a4724d432fe9b9b883a29370d960ce5e4afcec4f07106970e37",
+    "boundary_core/agent.py": "6f196e45535e3ba093d882cb9681560d2a44c215be71a12ef088daa1df96c0ce",
+    "boundary_core/prediction.py": "dc7cea4d11638f2e681ce46317d384b1d1e3d8309a194d59cc26413ffc2b48a2",
+    "boundary_core/evidence.py": "59af1dde45df34dca495cd117188ce8365b77b88579362eadad21707ee64a5fe",
+    "match_data.py": "bdf6e7272186e4383debe9e843ea1939cbc5d7fb50e7fca477c97c5635df26b5"
+  },
+  "limits": [
+    "Hosted Streamlit rebuild and live DeepSeek connectivity/quality have not been verified from this environment.",
+    "Squad verification is partial. Current eligibility, availability, acquisition status and market prices require review.",
+    "No demonstrated forecast advantage. The app serves a training-derived baseline.",
+    "Public browser-session scoping is not authenticated durable team access.",
+    "Full Impact Player and competition regulation certification are outside this twenty-over model."
   ],
-  "startup": {
-    "tests_run": 3,
-    "failures": 0,
-    "errors": 0,
-    "tests": [
-      "test_cached_generic_modules_do_not_break_startup",
-      "test_packaged_resources_resolve_to_repository",
-      "test_startup_from_another_working_directory"
-    ],
-    "scope": "Fresh environment, simulated cached generic modules, rerun, foreign cwd and packaged resource paths. Hosted logs are unavailable; the screenshot failure is reproduced locally using the previous analytics module."
-  },
-  "startup_browser": {
-    "checks_passed": 3,
-    "checks": [
-      "Light cold-start rendering and bundled marks",
-      "Dark cold-start rendering and bundled marks",
-      "Packaged local-evidence tool after rerun"
-    ],
-    "scope": "Chromium against a fresh installation of the declared dependencies; localhost, not the hosted app."
-  },
-  "startup_fix_environment": {
-    "python": "3.12.14",
-    "dependencies": {
-      "streamlit": "1.66.0",
-      "pandas": "2.3.3",
-      "numpy": "2.5.4",
-      "scipy": "1.18.1",
-      "altair": "6.3.0"
-    },
-    "installation": "Fresh virtual environment installed from requirements.txt"
-  }
+  "additional_checks": [
+    "Source ZIP retains platform launch scripts and excludes secrets/runtime records.",
+    "Unselected players with a justified utility override retain the correct assumption status."
+  ]
 }

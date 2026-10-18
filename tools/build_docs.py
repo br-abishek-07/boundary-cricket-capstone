@@ -1,35 +1,126 @@
-"""Generate synchronized capstone deliverables from the current release documentation."""
+"""Build the same plain-English guide in PDF and Word; runtime needs no docs packages."""
+
 from pathlib import Path
-import html,json,re
-from reportlab.platypus import SimpleDocTemplate,Paragraph,Spacer,PageBreak,Image
-from reportlab.lib.styles import getSampleStyleSheet,ParagraphStyle
+import html, re
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from docx import Document
-from docx.shared import Inches
-from pptx import Presentation
-from pptx.util import Inches as PInches,Pt
-from pptx.dml.color import RGBColor
-R=Path(__file__).resolve().parents[1];D=R/'docs';checks=json.loads((R/'data/release_checks.json').read_text())
-sections=[('Release results',f"{checks['core']['tests_run']} core regressions; {checks['ui']['checks_passed']} workflow checks; {checks['browser']['checks_passed']} local browser checks. Failures: {checks['core']['failures']}; errors: {checks['core']['errors']}. These checks do not establish live provider quality, deployed rebuild completion or independent expert usefulness.")]+[(name,(D/file).read_text()) for name,file in [('Corrective release','RELEASE_NOTES.md'),('Evidence and methods','DATA_SOURCES.md'),('Analyst workflow','USER_GUIDE.md'),('Planning and evaluation','PLAN.md')]]
-styles=getSampleStyleSheet();styles.add(ParagraphStyle(name='BodyBoundary',fontSize=10,leading=15,spaceAfter=10));styles['Title'].fontName='Times-Roman';styles['Heading1'].textColor=colors.HexColor('#AB2436')
-story=[Paragraph('BOUNDARY',styles['Title']),Paragraph('Franchise research studio — corrective release',styles['Heading2']),Paragraph('18 October 2026 · Independent educational capstone',styles['Normal']),Spacer(1,20)]
-doc=Document();doc.add_heading('Boundary — corrective capstone release',0);doc.add_paragraph('18 October 2026 · Franchise research studio')
-for i,(title,body) in enumerate(sections):
- if i:story.append(PageBreak())
- story.append(Paragraph(title,styles['Heading1']));doc.add_heading(title,1)
- for para in body.split('\n\n'):
-  para=para.strip()
-  if not para or para.startswith('#'):continue
-  story.append(Paragraph(html.escape(para).replace('\n','<br/>'),styles['BodyBoundary']));doc.add_paragraph(para)
- if i==0:
-  shot=D/'previews/dark-desk.png';story.append(Image(str(shot),width=455,height=332));doc.add_picture(str(shot),width=Inches(6))
-SimpleDocTemplate(str(D/'Capstone_Report.pdf'),title='Boundary corrective capstone release',leftMargin=42,rightMargin=42).build(story);doc.save(D/'Capstone_Report.docx')
-slides=[('Boundary','Evidence, decisions and an inspectable research trail'),('The analyst workflow','Scout a role → compare evidence → confirm identity\nPlan the XI and every bowling over\nInspect uncertainty → preserve the reasoning'),('Evidence and identity','6,392 eligible men’s matches; 141,377 player-match records\nStrict dates, archive hashes and phase reconciliation\nUnique unregistered planning IDs; partial roster verification disclosed'),('Supported planning','Exactly eleven; overseas, keeper and role constraints\n36 PP / 60 middle / 24 death balls; max 24 per player\nAvailability, locks, styles and explicit cost assumptions'),('The bounded assistant','Approved tools retrieve the active scenario\nOnly locally rendered tool facts reach the brief\nDeferred excess calls, scoped cache and outage clearing'),('Prediction honesty','Training before 2023; validation 2023; test 2024 onward\nResearch model failed the stronger baseline gate\nServe baseline; keep model results open to scrutiny'),('Private session records','Random session + franchise scope\nNo legacy shared journal reads\nExport work; authenticated team accounts remain future work'),('Interface and accessibility','Ten franchise accents and bundled crests\nIPL vector text mark; Light and Dark modes\nResponsive typography and themed research tables'),('Actual validation',f"{checks['core']['tests_run']} core regressions\n{checks['ui']['checks_passed']} workflow checks\n{checks['browser']['checks_passed']} local browser checks"),('Remaining evidence gaps','Verify complete current squads and availability\nAuthenticate durable shared team access\nMeasure expert usefulness and live provider quality')]
-prs=Presentation();prs.slide_width=PInches(13.333);prs.slide_height=PInches(7.5)
-for i,(title,body) in enumerate(slides):
- slide=prs.slides.add_slide(prs.slide_layouts[6]);slide.background.fill.solid();slide.background.fill.fore_color.rgb=RGBColor.from_string('101820')
- for top,height,text,size,col in [(.5,.4,f'BOUNDARY / CAPSTONE RESEARCH                         {i+1:02d}',11,'FF8798'),(1.4,1.1,title,36,'E8EDF1'),(3,4,body,24,'A8B8C5')]:
-  box=slide.shapes.add_textbox(PInches(.8),PInches(top),PInches(11.8),PInches(height));tf=box.text_frame;tf.word_wrap=True
-  for j,line in enumerate(text.split('\n')):
-   q=tf.paragraphs[0] if j==0 else tf.add_paragraph();q.text=line;q.font.size=Pt(size);q.font.color.rgb=RGBColor.from_string(col);q.space_after=Pt(24)
-prs.save(D/'Capstone_Presentation.pptx');print('Synchronized PDF, DOCX and 10-slide PPTX.')
+from docx.shared import Pt, Inches, RGBColor
+
+R = Path(__file__).resolve().parents[1]
+D = R / "docs"
+text = (D / "USER_GUIDE.md").read_text()
+styles = getSampleStyleSheet()
+styles.add(
+    ParagraphStyle(
+        name="BodyGuide",
+        fontName="Helvetica",
+        fontSize=10,
+        leading=15,
+        spaceAfter=9,
+        splitLongWords=True,
+    )
+)
+styles["Title"].fontName = "Times-Roman"
+styles["Title"].fontSize = 30
+styles["Heading1"].fontName = "Helvetica-Bold"
+styles["Heading1"].fontSize = 15
+styles["Heading1"].spaceBefore = 18
+styles["Heading1"].textColor = colors.HexColor("#AB2436")
+doc = Document()
+doc.core_properties.title = "Boundary project guide — version 3.0.0"
+doc.styles["Normal"].font.name = "Calibri"
+doc.styles["Normal"].font.size = Pt(11)
+story = []
+
+
+def clean(s):
+    return (
+        s.replace("→", " > ")
+        .replace("×", " x ")
+        .replace("—", " - ")
+        .replace("–", "-")
+        .replace("₹", "INR ")
+        .replace("’", "'")
+        .replace("“", '"')
+        .replace("”", '"')
+        .replace("−", "-")
+    )
+
+
+def pdf(s, style="BodyGuide"):
+    return Paragraph(html.escape(clean(s)).replace("`", ""), styles[style])
+
+
+blocks = text.split("\n\n")
+for block in blocks:
+    block = block.strip()
+    if not block:
+        continue
+    if block.startswith("|"):
+        rows = [
+            [x.strip() for x in line.strip("|").split("|")]
+            for line in block.splitlines()
+            if not re.fullmatch(r"[| :\-]+", line)
+        ]
+        table = Table(
+            [[pdf(cell) for cell in row] for row in rows],
+            repeatRows=1,
+            hAlign="LEFT",
+            colWidths=[130, 80, 120, 120],
+        )
+        table.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#EDEFE8")),
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                    ("LINEBELOW", (0, 0), (-1, 0), 0.5, colors.HexColor("#AB2436")),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 7),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 7),
+                ]
+            )
+        )
+        story += [table, Spacer(1, 12)]
+        t = doc.add_table(rows=1, cols=len(rows[0]))
+        t.style = "Light Shading Accent 1"
+        for i, x in enumerate(rows[0]):
+            t.rows[0].cells[i].text = x
+        for row in rows[1:]:
+            cells = t.add_row().cells
+            for i, x in enumerate(row):
+                cells[i].text = x
+    elif block.startswith("# "):
+        title = block[2:]
+        story += [pdf(title, "Title"), Spacer(1, 12)]
+        doc.add_heading(title, 0)
+    elif block.startswith("## "):
+        title = block[3:]
+        story.append(pdf(title, "Heading1"))
+        doc.add_heading(title, 1)
+    else:
+        for line in block.splitlines():
+            story.append(pdf(line))
+            doc.add_paragraph(line.replace("`", ""))
+
+
+def footer(canvas, document):
+    canvas.setFont("Helvetica", 8)
+    canvas.setFillColor(colors.HexColor("#596B72"))
+    canvas.drawString(42, 28, "BOUNDARY 3.0.0 / EDUCATIONAL PROJECT")
+    canvas.drawRightString(550, 28, str(document.page))
+
+
+SimpleDocTemplate(
+    str(D / "Boundary_Project_Guide.pdf"),
+    title="Boundary Project Guide",
+    author="Boundary capstone",
+    leftMargin=42,
+    rightMargin=42,
+    topMargin=40,
+    bottomMargin=45,
+).build(story, onFirstPage=footer, onLaterPages=footer)
+section = doc.sections[0]
+section.footer.paragraphs[0].text = "Boundary 3.0.0 | Independent educational project"
+doc.save(D / "Boundary_Project_Guide.docx")
+print("Generated the final guide in PDF and Word.")

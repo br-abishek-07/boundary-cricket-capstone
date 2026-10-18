@@ -1,0 +1,49 @@
+{
+  "version": "Boundary 3.0.0",
+  "sources": [
+    {
+      "file": "sma_json.zip",
+      "sha256_matches": true,
+      "included": 695
+    },
+    {
+      "file": "ipl_json.zip",
+      "sha256_matches": true,
+      "included": 1242
+    },
+    {
+      "file": "hnd_json.zip",
+      "sha256_matches": true,
+      "included": 201
+    },
+    {
+      "file": "t20s_json.zip",
+      "sha256_matches": true,
+      "included": 3592
+    },
+    {
+      "file": "bbl_json.zip",
+      "sha256_matches": true,
+      "included": 662
+    }
+  ],
+  "matches": 6392,
+  "player_matches": 141377,
+  "counts": {
+    "deliveries": 1455366,
+    "field_comparisons": 3393048
+  },
+  "mismatches": 0,
+  "examples": [],
+  "all_mismatches": [],
+  "extra_player_rows": 0,
+  "match_id_sets_equal": true,
+  "date_or_competition_mismatches": [],
+  "phase_metadata_coverage": {
+    "metadata_innings": 12703,
+    "fallback_innings": 6,
+    "reduced_target_innings": 322
+  },
+  "seconds": 14.51,
+  "scope": "Full supplied archive reconciliation; target overs interpreted as cricket over.ball notation, not decimal overs. Fallback and analytical death labels are not proof of official field restrictions or source authenticity."
+}

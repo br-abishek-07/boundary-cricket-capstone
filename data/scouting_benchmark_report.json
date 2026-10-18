@@ -1,0 +1,16 @@
+{
+  "design": "24 fixed rolling-origin settings: 2024, 2025 and available 2026 IPL follow-up; batting/bowling; all, powerplay, middle, death. Two ranking methods per setting. Three previous years of training only. Top five chosen before inspecting follow-up.",
+  "comparison": "Boundary descriptive score versus raw historical strike rate (batting) or economy (bowling). Follow-up rate is an unweighted average across selected players with sufficient future exposure. Bowling wicket-taking is also reported.",
+  "sample_rules": "At least 60 relevant training balls and 30 follow-up balls. No future exposure is used to choose the shortlist. Missing follow-up players stay counted in the exported denominator.",
+  "limitations": [
+    "Only three seasons, correlated players and overlapping training windows.",
+    "Players without follow-up evidence are not assigned zero performance; observed-only means have exposure and survivorship bias.",
+    "Role, schedule, venue, opposition, availability and tactical fit are not controlled.",
+    "Batting strike rate and bowling economy alone do not capture the full scoring objective.",
+    "2026 means the available uploaded season, not a live feed.",
+    "No parameter tuning was performed from these results. No causal, scouting superiority or future-value claim is justified."
+  ],
+  "human_review": "20 team tasks are supplied separately. No authenticated professional reviews have been collected.",
+  "rows": 48,
+  "settings": 24
+}

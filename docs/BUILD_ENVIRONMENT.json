@@ -1,28 +1,13 @@
 {
   "python": "3.12.14",
-  "core_test_dependencies": {
-    "pandas": "2.2.3",
-    "numpy": "2.3.5",
-    "scipy": "1.17.0"
+  "tested_dependencies": {
+    "streamlit": "1.66.0",
+    "pandas": "2.3.3",
+    "numpy": "2.5.4",
+    "scipy": "1.18.1",
+    "altair": "6.3.0"
   },
-  "ui_test_environment": "Streamlit 1.65.0 in isolated Python 3.12 environment",
   "browser": "Local Chromium desktop 1440px and mobile 390px",
-  "provider": "Network policy prevents a live provider-quality test",
-  "secret_status": "No credential included in public source",
-  "startup_fix_fresh_environment": {
-    "python": "3.12.14",
-    "dependencies": {
-      "streamlit": "1.66.0",
-      "pandas": "2.3.3",
-      "numpy": "2.5.4",
-      "scipy": "1.18.1",
-      "altair": "6.3.0"
-    },
-    "results": {
-      "core": 31,
-      "ui": 41,
-      "startup": 3,
-      "startup_browser": 3
-    }
-  }
+  "provider": "Offline fixtures; live connectivity and provider quality are not verified",
+  "secret_status": "Public source and source ZIP exclude actual credentials"
 }

@@ -1,15 +1,16 @@
 {
-  "version": "3.0.0",
-  "checked_utc": "2026-10-18T13:32:46.613112+00:00",
+  "version": "3.0.1",
+  "checked_utc": "2026-10-18T14:33:20.631161+00:00",
   "status": "Offline acceptance passed",
   "automated_tests": {
     "core": 44,
     "startup": 3,
     "ui": 7,
-    "total": 54,
+    "total": 60,
     "failures": 0,
     "errors": 0,
-    "scope": "Final core suite (44), startup (3) and Streamlit interface tests (7). The UI matrix covers 100 team/page combinations and 20 team/theme changes."
+    "scope": "Full current suite: 60 tests, including cached package startup, coherent source snapshots, same-path/same-timestamp changes, failed-load cleanup, concurrent loading and data-cache invalidation. UI covers all ten franchise desks and pages. The cached-package scenario also checks that a legacy brief without a context fingerprint is safely hidden until recomputed.",
+    "release_runtime": 6
   },
   "team_scenarios": {
     "teams": 10,
@@ -124,7 +125,8 @@
       }
     ],
     "cold_browser_seconds": 3.135,
-    "scope": "Real local Chromium, isolated synthetic session data, desktop and 390px mobile. No hosted rebuild or live provider quality claim."
+    "scope": "Real local Chromium, isolated synthetic session data, desktop and 390px mobile. No hosted rebuild or live provider quality claim.",
+    "tested_version": "3.0.0"
   },
   "temporal_scouting_study": {
     "settings": 24,
@@ -147,8 +149,10 @@
     "boundary_core/analytics.py": "bbc5da1075b31a4724d432fe9b9b883a29370d960ce5e4afcec4f07106970e37",
     "boundary_core/agent.py": "6f196e45535e3ba093d882cb9681560d2a44c215be71a12ef088daa1df96c0ce",
     "boundary_core/prediction.py": "dc7cea4d11638f2e681ce46317d384b1d1e3d8309a194d59cc26413ffc2b48a2",
-    "boundary_core/evidence.py": "59af1dde45df34dca495cd117188ce8365b77b88579362eadad21707ee64a5fe",
-    "match_data.py": "bdf6e7272186e4383debe9e843ea1939cbc5d7fb50e7fca477c97c5635df26b5"
+    "boundary_core/evidence.py": "3f535f19aad87365c4125a19bd2b6193b87d8f68fb89682b75180dd5975a2fb8",
+    "match_data.py": "bdf6e7272186e4383debe9e843ea1939cbc5d7fb50e7fca477c97c5635df26b5",
+    "app.py": "bc049b73882abbbdae189fb7e87328816b1f9fb44c5653fe216ff401b60f16ba",
+    "boundary_runtime.py": "1cc19ca0ee0467f593eda5032c8a0803d7970de7e6a19e12bcfd901610b1b661"
   },
   "limits": [
     "Hosted Streamlit rebuild and live DeepSeek connectivity/quality have not been verified from this environment.",
@@ -160,5 +164,20 @@
   "additional_checks": [
     "Source ZIP retains platform launch scripts and excludes secrets/runtime records.",
     "Unselected players with a justified utility override retain the correct assumption status."
-  ]
+  ],
+  "startup_browser": {
+    "version": "3.0.1",
+    "checks_passed": 8,
+    "checks": [
+      "Home opens with previous packaged agent cached",
+      "Guided local brief succeeds with previous packaged agent cached",
+      "Brief export includes current version and bootstrap fingerprint",
+      "XI and complete legal schedule work after cached-package startup",
+      "Project ZIP includes runtime loader and regressions without private files",
+      "Updated guide downloads remain available",
+      "Rerun and theme change reuse a complete release",
+      "No uncaught browser errors"
+    ],
+    "scope": "Local Chromium against a Streamlit process with the previous packaged agent already imported. Hosted Cloud process and live provider remain unverified."
+  }
 }

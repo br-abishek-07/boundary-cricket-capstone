@@ -549,6 +549,7 @@ class Release(unittest.TestCase):
         with zipfile.ZipFile(io.BytesIO(downloads.source_zip())) as z:
             names = z.namelist()
             self.assertIn("boundary/app.py", names)
+            self.assertIn("boundary/boundary_runtime.py", names)
             self.assertIn("boundary/data/player_registry.json", names)
             self.assertIn("boundary/.streamlit/secrets.example.toml", names)
             self.assertFalse(

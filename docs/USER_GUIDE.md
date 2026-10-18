@@ -1,6 +1,6 @@
 # Boundary — project guide
 
-Version 3.0.0 · 18 October 2026
+Version 3.0.1 · 18 October 2026
 
 Boundary is an independent educational cricket research application. It is designed for an IPL franchise analyst or scout. It combines match records, clear calculations, a constrained AI workflow and a record of the analyst's reasoning.
 
@@ -224,7 +224,7 @@ Existing Cloud apps normally rebuild when their configured GitHub branch changes
 
 ## 16. Architecture and file map
 
-app.py contains the Streamlit pages, controls and display flow. It imports the boundary_core package explicitly so similarly named installed packages cannot replace the project's modules.
+app.py contains the Streamlit pages, controls and display flow. boundary_runtime.py loads the complete boundary_core source snapshot under its own fingerprinted package name. Identical code is reused on reruns. Changed code and its Streamlit cache keys receive a new release fingerprint. Each loaded module resolves its data and assets relative to the project folder.
 
 boundary_core/analytics.py loads linked evidence, computes scouting summaries and solves/validates the XI schedule. agent.py checks task context and optional DeepSeek selection. prediction.py builds chronological research forecasts. evidence.py creates fingerprints and decision manifests. storage.py stores scoped journals, cache and atomic request counts in SQLite. branding.py handles franchise colors and bundled identification marks. downloads.py creates an allowlisted source ZIP.
 

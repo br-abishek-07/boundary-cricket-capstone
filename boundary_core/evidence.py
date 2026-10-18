@@ -6,7 +6,7 @@ import datetime, hashlib, io, json, math, zipfile
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "3.0.0"
+VERSION = "3.0.1"
 FILES = [
     "data/match_players.csv.gz",
     "data/matches.csv.gz",
@@ -20,6 +20,8 @@ FILES = [
     "boundary_core/prediction.py",
     "boundary_core/evidence.py",
     "match_data.py",
+    "app.py",
+    "boundary_runtime.py",
 ]
 CONTEXT_FIELDS = {
     "competition",

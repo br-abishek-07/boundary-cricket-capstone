@@ -6,6 +6,7 @@ import io, zipfile
 ROOT = Path(__file__).resolve().parents[1]
 ROOT_FILES = {
     "app.py",
+    "boundary_runtime.py",
     "match_data.py",
     "prediction.py",
     "README.md",

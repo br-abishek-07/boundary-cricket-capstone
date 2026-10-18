@@ -9,44 +9,45 @@ if str(ROOT) not in sys.path:
 import altair as alt
 import pandas as pd
 import streamlit as st
-from boundary_core.analytics import (
-    load,
-    scout,
-    roster_scores,
-    optimize,
-    player_interval,
-    resolve,
-    window,
-    select_window,
-)
-from boundary_core.prediction import predict
-from boundary_core.agent import prepare, task_context, provider
-from boundary_core.evidence import (
-    VERSION,
-    safe,
-    context_key,
-    manifest,
-    export_frame,
-    decision_pack,
-)
-from boundary_core import storage, branding, downloads
+from boundary_runtime import load_release
+
+release = load_release(ROOT)
+load = release.analytics.load
+scout = release.analytics.scout
+roster_scores = release.analytics.roster_scores
+optimize = release.analytics.optimize
+player_interval = release.analytics.player_interval
+resolve = release.analytics.resolve
+window = release.analytics.window
+select_window = release.analytics.select_window
+predict = release.prediction.predict
+prepare = release.agent.prepare
+task_context = release.agent.task_context
+provider = release.agent.provider
+VERSION = release.evidence.VERSION
+safe = release.evidence.safe
+context_key = release.evidence.context_key
+manifest = release.evidence.manifest
+export_frame = release.evidence.export_frame
+decision_pack = release.evidence.decision_pack
+storage, branding, downloads = release.storage, release.branding, release.downloads
 
 st.set_page_config(
     page_title="Boundary · Franchise research", page_icon="🏏", layout="wide"
 )
 
 
-@st.cache_resource
+@st.cache_resource(max_entries=1)
 def data(signature):
     return load()
 
 
-@st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False, max_entries=2)
 def source_download(signature):
     return downloads.source_zip()
 
 
-signature = tuple(
+signature = (release.release_fingerprint,) + tuple(
     (ROOT / "data" / f).stat().st_mtime_ns
     for f in [
         "match_players.csv.gz",
@@ -393,7 +394,7 @@ def guide_downloads():
             st.download_button(label, f.read_bytes(), name, mime, on_click="ignore")
     st.download_button(
         "Download complete project ZIP",
-        source_download(downloads.source_signature()),
+        source_download((release.release_fingerprint, downloads.source_signature())),
         "Boundary-v3-project.zip",
         "application/zip",
         on_click="ignore",
@@ -614,7 +615,7 @@ elif page == "Decision desk":
             b = ss.brief
             normalized, _ = task_context(question, p, team, until, scope)
             current = context_key(question, team, until, normalized)
-            if current != b["fingerprint"]:
+            if current != b.get("fingerprint"):
                 st.warning(
                     "Context changed. Prepare a new brief before saving or exporting. The previous result is hidden to prevent reuse with different assumptions."
                 )

@@ -1,0 +1,22 @@
+{
+  "project": "CreaseIQ",
+  "author": "B.R. Abishek",
+  "application_version": "3.1.0",
+  "frozen_application_commit": "1100cace6b820c278135189f8925d4d1e423b375",
+  "checked_date": "2026-10-18",
+  "checks_passed": 10,
+  "checks": [
+    "44 slides render to 44 PDF pages and all include detailed speaker notes",
+    "Every main/appendix text paragraph is present in its rendered slide; all shapes stay on canvas",
+    "Presentation cover has correct author, project area and preparation date",
+    "27-page report, one-page abstract and six-page demo/viva guide have no blank pages or text outside margins",
+    "Every report table-of-contents page number matches its rendered heading",
+    "Editable PowerPoint and Word packages are structurally valid",
+    "All frozen source files match the verified released Git blobs; runtime records and actual secrets are excluded",
+    "Evidence package retains completed test logs and all official-source discrepancies",
+    "Key source totals, model values, author and claim limits agree across the presentation/report",
+    "Submission manifest hashes match every individual artifact"
+  ],
+  "review": "Rendered slide overview and selected full-size slides/report pages inspected visually. Structural/text/layout checks cover all rendered slides and new document pages.",
+  "limits": "These checks validate submission materials; they do not add hosted/live provider, complete official source coverage or independent tactical-validation claims."
+}

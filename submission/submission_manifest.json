@@ -1,0 +1,101 @@
+{
+  "project": "CreaseIQ \u2014 franchise research studio",
+  "author": "B.R. Abishek",
+  "area": "AI Driven Data Science",
+  "prepared_date": "2026-10-18",
+  "application_version": "3.1.0",
+  "application_commit": "1100cace6b820c278135189f8925d4d1e423b375",
+  "application_tree": "a0df7ff7d150dec3d2fdd95381e8feeca211e33a",
+  "application_source_files": 84,
+  "presentation": {
+    "slides": 44,
+    "main_slides": 34,
+    "appendix_slides": 10,
+    "embedded_speaker_notes": true,
+    "design": "Custom CreaseIQ editorial layout; editable vector elements and real local application screenshots"
+  },
+  "report_pages": 27,
+  "abstract_pages": 1,
+  "demo_guide_pages": 6,
+  "artifacts": [
+    {
+      "file": "CreaseIQ_Capstone_Presentation.pptx",
+      "package_path": "01_Presentation/CreaseIQ_Capstone_Presentation.pptx",
+      "bytes": 1320932,
+      "sha256": "f35621ab8934ea4035055aa028a6a97a742118ab1174797379fc80ca6f1f7022"
+    },
+    {
+      "file": "CreaseIQ_Capstone_Presentation.pdf",
+      "package_path": "01_Presentation/CreaseIQ_Capstone_Presentation.pdf",
+      "bytes": 1574725,
+      "sha256": "95dc9349e69c9212fc9dd3cc630ad6280922c5500edd6e4c128ce847cf36ff99"
+    },
+    {
+      "file": "Presentation_Speaker_Notes.md",
+      "package_path": "01_Presentation/Presentation_Speaker_Notes.md",
+      "bytes": 25647,
+      "sha256": "5d06fdbf80ba74f641a9c3d79b2f1e628a6de7d15ab9b69c3bf353cb4cba7e78"
+    },
+    {
+      "file": "CreaseIQ_Project_Report.docx",
+      "package_path": "02_Project_Report/CreaseIQ_Project_Report.docx",
+      "bytes": 544093,
+      "sha256": "13ac51d5566deb686d4d5cc572be3bd76622ba85166b1caaee63ef7e48878de0"
+    },
+    {
+      "file": "CreaseIQ_Project_Report.pdf",
+      "package_path": "02_Project_Report/CreaseIQ_Project_Report.pdf",
+      "bytes": 814741,
+      "sha256": "d17fc3b73f474ef8b859333ed844e51a918b16d7e58c9d8118f0de51973b0fe7"
+    },
+    {
+      "file": "CreaseIQ_Project_Source_v3.1.0.zip",
+      "package_path": "03_Source_Code/CreaseIQ_Project_Source_v3.1.0.zip",
+      "bytes": 3933766,
+      "sha256": "3609606bfc42c64ad4e8b28e65f5039d5d4af7b7841b906192a9fb7eb440fdea"
+    },
+    {
+      "file": "CreaseIQ_Project_Guide.pdf",
+      "package_path": "04_User_Guide/CreaseIQ_Project_Guide.pdf",
+      "bytes": 27090,
+      "sha256": "404b94ea16947aea129a384090b8c5722651658c7f1133646d24081a8b17caaa"
+    },
+    {
+      "file": "CreaseIQ_Project_Guide.docx",
+      "package_path": "04_User_Guide/CreaseIQ_Project_Guide.docx",
+      "bytes": 48979,
+      "sha256": "3faf80e39776a41c952640e41e5601722573a928c363fa754e88019f163e9cf0"
+    },
+    {
+      "file": "CreaseIQ_Validation_Evidence.zip",
+      "package_path": "05_Validation/CreaseIQ_Validation_Evidence.zip",
+      "bytes": 58556,
+      "sha256": "34754c389e971b5579000082cf35b6ec0b160ec5b43c77d7762dc0413ca915d7"
+    },
+    {
+      "file": "CreaseIQ_Demo_and_Viva_Guide.docx",
+      "package_path": "06_Demo_and_Viva/CreaseIQ_Demo_and_Viva_Guide.docx",
+      "bytes": 42786,
+      "sha256": "68364e0f76835bb8fdbee9458243fd425ea865a27b1b3ebf3aee6b00a8476422"
+    },
+    {
+      "file": "CreaseIQ_Demo_and_Viva_Guide.pdf",
+      "package_path": "06_Demo_and_Viva/CreaseIQ_Demo_and_Viva_Guide.pdf",
+      "bytes": 150547,
+      "sha256": "96da81aca5a065b4facd05e0be633f024f8efa39a6a369fd8af7ae5dfdff1c50"
+    },
+    {
+      "file": "CreaseIQ_Abstract.docx",
+      "package_path": "07_Abstract/CreaseIQ_Abstract.docx",
+      "bytes": 39202,
+      "sha256": "d962473239d6c661c1f7b25c2849175491c5253d73530c4bb9ce5ab46efd4d9b"
+    },
+    {
+      "file": "CreaseIQ_Abstract.pdf",
+      "package_path": "07_Abstract/CreaseIQ_Abstract.pdf",
+      "bytes": 44349,
+      "sha256": "363e7be9cf2b15076727530a6fd9ce7d92e7823294bf339696c47699c1501fb1"
+    }
+  ],
+  "scope": "Submission files describe the frozen application. Functional/local test evidence is not hosted/live provider or complete official data certification."
+}

@@ -27,3 +27,7 @@ The engine fixes the task and filters before calculation. DeepSeek can select on
 For deployment, select repository branch `main`, entry file `app.py`, Python 3.12 and private hosting secrets. Confirm the hosted rebuild and live provider connection separately from local tests. Educational project; no IPL or franchise endorsement.
 
 Read [the accuracy audit](docs/ACCURACY_AUDIT.md) for exhaustive archive checks, all-team scenarios and sampled official-source comparisons. Player dossier defaults to a labeled archive overview; phase totals and incomplete career coverage are explicit. Selected dated 2026 unavailability notices block XI selection, while missing replacement metadata remains visible.
+
+## Capstone submission
+
+[Download the presentation, report, source and complete submission package](submission/README.md), prepared for B.R. Abishek — AI Driven Data Science. These documents describe the frozen v3.0.2 release; the application code is unchanged.

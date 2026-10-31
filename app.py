@@ -1,4 +1,4 @@
-"""Cached data ingestion, navigation and Phase 2 player profiles."""
+"""Cached ingestion, player profiles and team matchup research."""
 
 import pandas as pd
 import streamlit as st
@@ -63,6 +63,62 @@ def calculate_career_metrics(records, stat_columns):
     return metrics, issues
 
 
+def filter_team_matches(frame, team_a, team_b, team1_column, team2_column):
+    """Select a pair in either home/away order using the supplied team names."""
+    if team_a == team_b:
+        raise ValueError("Choose two different teams.")
+    missing = {team1_column, team2_column} - set(frame.columns)
+    if missing:
+        raise ValueError("Missing team columns: " + ", ".join(sorted(missing)))
+    forward = frame[team1_column].eq(team_a) & frame[team2_column].eq(team_b)
+    reverse = frame[team1_column].eq(team_b) & frame[team2_column].eq(team_a)
+    return frame.loc[forward | reverse].copy()
+
+
+def summarize_head_to_head(records, team_a, team_b, winner_column):
+    """Keep absent and unrecognized winners separate from confirmed wins."""
+    result = {
+        "matches": len(records), "a_wins": None, "b_wins": None,
+        "no_winner": None, "unrecognized": None,
+    }
+    if winner_column not in records.columns:
+        return result
+    winners = records[winner_column].astype("string").str.strip()
+    absent = winners.isna() | winners.eq("").fillna(False)
+    a_wins = winners.eq(team_a).fillna(False)
+    b_wins = winners.eq(team_b).fillna(False)
+    result.update(
+        a_wins=int(a_wins.sum()), b_wins=int(b_wins.sum()),
+        no_winner=int(absent.sum()),
+        unrecognized=int((~absent & ~a_wins & ~b_wins).sum()),
+    )
+    return result
+
+
+def recent_team_encounters(records, date_column, venue_column,
+                           winner_column, margin_column):
+    """Return five dated encounters with explicit placeholders for missing fields."""
+    display_columns = ["Date", "Venue", "Winner", "Margin"]
+    if date_column not in records.columns:
+        return pd.DataFrame(columns=display_columns), len(records)
+    recent = records.copy()
+    dates = pd.to_datetime(recent[date_column], errors="coerce")
+    invalid_dates = int(dates.isna().sum())
+    recent[date_column] = dates
+    recent = recent.loc[dates.notna()].sort_values(date_column, ascending=False, kind="stable").head(5)
+    display = pd.DataFrame(index=recent.index)
+    display["Date"] = recent[date_column].dt.strftime("%Y-%m-%d")
+    for label, column in [("Venue", venue_column), ("Winner", winner_column), ("Margin", margin_column)]:
+        if column not in recent.columns:
+            display[label] = "Not available in source"
+        else:
+            values = recent[column].astype("string")
+            empty = values.isna() | values.str.strip().eq("").fillna(False)
+            placeholder = "No recorded winner" if label == "Winner" else "Not recorded"
+            display[label] = values.mask(empty, placeholder)
+    return display.reset_index(drop=True), invalid_dates
+
+
 st.set_page_config(
     page_title="IPL Intelligence 360°",
     page_icon="🏏",
@@ -85,7 +141,7 @@ with st.sidebar:
         ],
     )
     st.divider()
-    st.caption("Phase 2 · Player profiles")
+    st.caption("Phase 2 · Profiles and matchups")
 
 
 # Initialize datasets. Cached loaders reuse their results on UI reruns.
@@ -275,15 +331,146 @@ elif selected_module == "Player Profile":
 
 
 elif selected_module == "Team Matchups":
+    # EDIT THESE MAPPINGS to match a different match export.
+    TEAM1_COLUMN = "team1"
+    TEAM2_COLUMN = "team2"
+    WINNER_COLUMN = "winner"
+    DATE_COLUMN = "date"
+    VENUE_COLUMN = "venue"
+    MARGIN_COLUMN = "margin"  # Absent in the current export: shown as unavailable.
+    COMPETITION_COLUMN = "competition"
+
     st.title("Team Matchups")
-    st.write(
-        "Compare teams using the supplied historical match records."
+    st.caption(
+        "Head-to-head evidence from the full supplied match archive. "
+        "Historical team names are kept as supplied; coverage may be incomplete."
     )
-    st.info(
-        "Phase 2: team selection, head-to-head summaries "
-        "and matchup analysis."
-    )
-    st.caption(f"Available: {len(matches):,} match records.")
+    with st.expander("Inspect match headers and field availability"):
+        st.write(matches.columns.tolist())
+        st.caption("Column mappings are defined at the top of the Team Matchups block.")
+
+    matchup_pool = matches
+    if COMPETITION_COLUMN in matches.columns:
+        competitions = sorted(matches[COMPETITION_COLUMN].dropna().astype(str).unique())
+        scope_options = ["All supplied competitions", *competitions]
+        scope = st.selectbox(
+            "Matchup competition", scope_options,
+            index=scope_options.index("IPL") if "IPL" in competitions else 0,
+            key="matchup_competition",
+        )
+        if scope != "All supplied competitions":
+            matchup_pool = matches.loc[matches[COMPETITION_COLUMN].astype(str).eq(scope)]
+    else:
+        scope = "All supplied records (competition column unavailable)"
+
+    required_team_columns = {TEAM1_COLUMN, TEAM2_COLUMN}
+    if not required_team_columns.issubset(matchup_pool.columns):
+        st.warning("Map both team columns above to enable head-to-head research.")
+    else:
+        team_names = pd.concat(
+            [matchup_pool[TEAM1_COLUMN], matchup_pool[TEAM2_COLUMN]], ignore_index=True
+        ).dropna().astype(str)
+        teams = sorted(team_names.loc[team_names.str.strip().ne("")].unique(), key=str.casefold)
+        if len(teams) < 2:
+            st.info("At least two named teams are needed for a matchup.")
+        else:
+            left, right = st.columns(2)
+            team_a = left.selectbox(
+                "Team A", teams, index=teams.index("RCB") if "RCB" in teams else 0,
+                key="matchup_team_a",
+            )
+            team_b_options = [name for name in teams if name != team_a]
+            team_b = right.selectbox(
+                "Team B", team_b_options,
+                index=team_b_options.index("CSK") if "CSK" in team_b_options else 0,
+                key=f"matchup_team_b_{team_a}",
+            )
+            encounters = filter_team_matches(
+                matchup_pool, team_a, team_b, TEAM1_COLUMN, TEAM2_COLUMN
+            )
+            summary = summarize_head_to_head(encounters, team_a, team_b, WINNER_COLUMN)
+            st.subheader("Head-to-head summary")
+            st.caption(f"{scope} · {team_a} vs {team_b} · both team orders included.")
+            boxes = st.columns(4)
+            for box, label, key in zip(
+                boxes,
+                ["Total Matches", f"{team_a} Wins", f"{team_b} Wins", "No recorded winner"],
+                ["matches", "a_wins", "b_wins", "no_winner"],
+            ):
+                value = summary[key]
+                box.metric(label, "N/A" if value is None else f"{value:,}")
+            st.caption(
+                "The current export omits outcome type. Matches with no recorded winner "
+                "cannot be confirmed or separated into no-results and ties from this file."
+            )
+            if WINNER_COLUMN not in encounters.columns:
+                st.warning("Winner column unavailable. Map it above to calculate wins and venue rates.")
+            if summary["unrecognized"]:
+                st.warning(
+                    f"{summary['unrecognized']} records name a winner outside the selected pair. "
+                    "They are included in total matches but excluded from win and no-winner counts."
+                )
+            if encounters.empty:
+                st.info("No encounters between these teams were found in the selected archive scope.")
+
+            st.subheader("Recent encounters")
+            recent, invalid_dates = recent_team_encounters(
+                encounters, DATE_COLUMN, VENUE_COLUMN, WINNER_COLUMN, MARGIN_COLUMN
+            )
+            if invalid_dates:
+                st.warning(f"{invalid_dates} encounters lack valid dates and are omitted from the recent table.")
+            if recent.empty:
+                st.info("No dated encounters are available for the recent-match table.")
+            else:
+                st.dataframe(recent, hide_index=True, width="stretch")
+                st.caption("Up to five latest dated matches. Same-date matches retain source order.")
+            if MARGIN_COLUMN not in encounters.columns:
+                st.caption("Margins are not included in this export; no margins have been inferred.")
+
+            st.subheader("Venue impact · head-to-head win rates")
+            if VENUE_COLUMN not in matchup_pool.columns:
+                st.info("Map the venue column above to enable venue analysis.")
+            else:
+                venue_names = matchup_pool[VENUE_COLUMN].dropna().astype(str)
+                venues = sorted(venue_names.loc[venue_names.str.strip().ne("")].unique())
+                if not venues:
+                    st.info("No named venues are available in the selected archive scope.")
+                else:
+                    observed_venues = encounters[VENUE_COLUMN].dropna().astype(str)
+                    observed_venues = observed_venues.loc[observed_venues.isin(venues)].value_counts()
+                    default_venue = observed_venues.index[0] if not observed_venues.empty else venues[0]
+                    venue = st.selectbox(
+                        "Venue", venues, index=venues.index(default_venue), key="matchup_venue"
+                    )
+                    venue_encounters = encounters.loc[encounters[VENUE_COLUMN].astype(str).eq(venue)]
+                    venue_summary = summarize_head_to_head(venue_encounters, team_a, team_b, WINNER_COLUMN)
+                    sample = venue_summary["matches"]
+                    rates_available = sample > 0 and venue_summary["a_wins"] is not None
+                    venue_boxes = st.columns(3)
+                    venue_boxes[0].metric("Encounters at venue", f"{sample:,}")
+                    for box, name, key in zip(venue_boxes[1:], [team_a, team_b], ["a_wins", "b_wins"]):
+                        value = 100 * venue_summary[key] / sample if rates_available else None
+                        box.metric(f"{name} Win %", "N/A" if value is None else f"{value:.1f}%")
+                    st.caption(
+                        "Win percentage = team wins ÷ all head-to-head encounters at this venue × 100. "
+                        "Matches with no recorded winner remain in the denominator. "
+                        "Venue names use exact source labels; spelling variants are not merged. "
+                        "These are descriptive archive rates; small samples do not establish a venue advantage."
+                    )
+                    if not sample:
+                        st.info("No encounters between these teams at this venue; win rates are unavailable.")
+                    elif rates_available:
+                        if venue_summary["unrecognized"]:
+                            st.warning("Unrecognized winners at this venue are excluded from wins but included in the denominator.")
+                        st.bar_chart(
+                            pd.DataFrame(
+                                {"Win percentage": [
+                                    100 * venue_summary["a_wins"] / sample,
+                                    100 * venue_summary["b_wins"] / sample,
+                                ]}, index=[team_a, team_b]
+                            ), y_label="Win percentage (0–100)",
+                        )
+
 
 elif selected_module == "Auction Trends":
     st.title("Auction Trends")

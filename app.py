@@ -8,6 +8,7 @@ import streamlit as st
 
 from agents import (
     ScoutReportError, generate_player_scout_report, scout_context_fingerprint,
+    generate_matchup_report, matchup_context_fingerprint,
 )
 
 from data_loader import (
@@ -269,6 +270,92 @@ def build_player_scout_evidence(records, player_id, player_name, competition,
     }
 
 
+def build_matchup_evidence(encounters, team_a, team_b, competition, selected_venue,
+                           winner_column, date_column, venue_column, margin_column):
+    """Compute matchup evidence from the same complete records used by the UI."""
+    overall = summarize_head_to_head(encounters, team_a, team_b, winner_column)
+    recent, invalid_dates = recent_team_encounters(
+        encounters, date_column, venue_column, winner_column, margin_column
+    )
+    limitations = [
+        "The supplied archive may not provide complete historical coverage.",
+        "Historical patterns do not establish current superiority or future win probabilities.",
+        "Current lineups, fitness, pitch, weather and tactical player matchups are not supplied.",
+        "Team and venue names use exact source labels; naming variants are not merged.",
+        "Recent encounters and venue samples may be too small for tactical conclusions.",
+    ]
+    if winner_column not in encounters:
+        limitations.append("Winner data is unavailable in this export.")
+    limitations.append("Outcome type is unavailable; absent winners cannot be confirmed as ties or no-results.")
+    if margin_column not in encounters:
+        limitations.append("Match margins are unavailable and have not been inferred.")
+    if overall["unrecognized"]:
+        limitations.append("Some winner labels fall outside the selected pair and are excluded from win counts.")
+    if invalid_dates:
+        limitations.append("Some encounters lack valid dates and are omitted from the recent sample.")
+
+    facts = []
+    def add(fid, label, value, unit):
+        if value is not None:
+            facts.append({"id": fid, "metric": label, "value": value, "unit": unit})
+    for fid, label, key in [
+        ("F1", "Overall head-to-head encounters", "matches"),
+        ("F2", f"Overall wins by {team_a}", "a_wins"),
+        ("F3", f"Overall wins by {team_b}", "b_wins"),
+        ("F4", "Overall encounters with no recorded winner", "no_winner"),
+        ("F5", "Overall encounters with unrecognized winners", "unrecognized"),
+    ]:
+        add(fid, label, overall[key], "matches in the selected archive scope")
+
+    venue_summary = None
+    a_rate = b_rate = None
+    if selected_venue is not None and venue_column in encounters:
+        venue_records = encounters.loc[encounters[venue_column].astype(str).eq(selected_venue)]
+        venue_summary = summarize_head_to_head(venue_records, team_a, team_b, winner_column)
+        for fid, label, key in [
+            ("F6", "Encounters at selected venue", "matches"),
+            ("F7", f"Wins by {team_a} at selected venue", "a_wins"),
+            ("F8", f"Wins by {team_b} at selected venue", "b_wins"),
+            ("F9", "Selected-venue encounters with no recorded winner", "no_winner"),
+        ]:
+            add(fid, label, venue_summary[key], "head-to-head matches at the exact selected venue label")
+        if venue_summary["matches"] and venue_summary["a_wins"] is not None:
+            a_rate = 100 * venue_summary["a_wins"] / venue_summary["matches"]
+            b_rate = 100 * venue_summary["b_wins"] / venue_summary["matches"]
+            add("F10", f"Historical venue win percentage for {team_a}", a_rate, "percent of all head-to-head encounters at selected venue")
+            add("F11", f"Historical venue win percentage for {team_b}", b_rate, "percent of all head-to-head encounters at selected venue")
+        else:
+            limitations.append("Venue win percentages are unavailable because encounters or winner data are absent.")
+    else:
+        limitations.append("No venue-specific evidence is selected or available.")
+    recent_rows = json.loads(recent.to_json(orient="records"))
+    for offset, row in enumerate(recent_rows):
+        fid = f"F{12 + offset}"
+        row["fact_id"] = fid
+        add(fid, f"Recorded winner for recent encounter on {row['Date']}",
+            row["Winner"], "source result label; absence does not confirm a tie")
+    dates = pd.to_datetime(encounters[date_column], errors="coerce").dropna() if date_column in encounters else pd.Series(dtype="datetime64[ns]")
+    source_hash = hashlib.sha256(
+        pd.util.hash_pandas_object(encounters, index=True).values.tobytes()
+        + json.dumps(list(encounters.columns)).encode("utf-8")
+    ).hexdigest()
+    return {
+        "task": "matchup_analysis", "teams": {"team_a": team_a, "team_b": team_b},
+        "scope": {
+            "competition": competition, "venue": selected_venue,
+            "since": dates.min().date().isoformat() if len(dates) else None,
+            "through_inclusive": dates.max().date().isoformat() if len(dates) else None,
+            "coverage": "Full selected supplied head-to-head archive, including both team orders",
+            "source": "matches.csv.gz (loaded selected records)",
+        },
+        "head_to_head": overall, "recent_matches": recent_rows,
+        "venue": {"name": selected_venue, "head_to_head": venue_summary,
+                  "team_a_win_percentage": a_rate, "team_b_win_percentage": b_rate,
+                  "denominator": "All head-to-head encounters at the exact selected venue label, including absent winners"},
+        "facts": facts, "limitations": limitations, "source_fingerprint": source_hash,
+    }
+
+
 st.set_page_config(
     page_title="IPL Intelligence 360°",
     page_icon="🏏",
@@ -291,7 +378,7 @@ with st.sidebar:
         ],
     )
     st.divider()
-    st.caption("Phase 3 · Player Scout integration")
+    st.caption("Phase 3 · Scout and Matchup Analyst")
 
 
 # Initialize datasets. Cached loaders reuse their results on UI reruns.
@@ -562,6 +649,7 @@ elif selected_module == "Team Matchups":
     VENUE_COLUMN = "venue"
     MARGIN_COLUMN = "margin"  # Absent in the current export: shown as unavailable.
     COMPETITION_COLUMN = "competition"
+    selected_venue = None
 
     st.title("Team Matchups")
     st.caption(
@@ -665,6 +753,7 @@ elif selected_module == "Team Matchups":
                     venue = st.selectbox(
                         "Venue", venues, index=venues.index(default_venue), key="matchup_venue"
                     )
+                    selected_venue = venue
                     venue_encounters = encounters.loc[encounters[VENUE_COLUMN].astype(str).eq(venue)]
                     venue_summary = summarize_head_to_head(venue_encounters, team_a, team_b, WINNER_COLUMN)
                     sample = venue_summary["matches"]
@@ -693,6 +782,76 @@ elif selected_module == "Team Matchups":
                                 ]}, index=[team_a, team_b]
                             ), y_label="Win percentage (0–100)",
                         )
+
+
+            st.divider()
+            st.subheader("Matchup Analyst · DeepSeek")
+            st.caption(
+                "Generate an interpretation of the selected head-to-head and venue evidence. "
+                "Only clicking the button sends this packet to DeepSeek."
+            )
+            matchup_packet = build_matchup_evidence(
+                encounters, team_a, team_b, scope, selected_venue,
+                WINNER_COLUMN, DATE_COLUMN, VENUE_COLUMN, MARGIN_COLUMN,
+            )
+            with st.expander("Inspect evidence sent to the Matchup Analyst"):
+                st.json(matchup_packet)
+            try:
+                matchup_fingerprint = matchup_context_fingerprint(matchup_packet)
+            except ScoutReportError as exc:
+                st.warning(str(exc))
+            else:
+                saved_matchup = st.session_state.get("matchup_analyst_report")
+                if st.button("Generate Matchup Report", disabled=encounters.empty):
+                    if saved_matchup and saved_matchup["fingerprint"] == matchup_fingerprint:
+                        st.info("Using the saved matchup report for this exact evidence and model.")
+                    else:
+                        st.session_state.pop("matchup_analyst_report", None)
+                        saved_matchup = None
+                        try:
+                            with st.spinner("Analysing matchup..."):
+                                matchup_report = generate_matchup_report(matchup_packet)
+                            if matchup_report["_provenance"]["context_fingerprint"] != matchup_fingerprint:
+                                raise ScoutReportError("The matchup context changed. Generate a new report.")
+                            saved_matchup = {"fingerprint": matchup_fingerprint, "report": matchup_report}
+                            st.session_state["matchup_analyst_report"] = saved_matchup
+                        except ScoutReportError as exc:
+                            st.error(str(exc))
+                        except Exception:
+                            st.error("The matchup report could not be completed. Your match statistics remain available.")
+                if saved_matchup and saved_matchup["fingerprint"] != matchup_fingerprint:
+                    st.info("The saved matchup report belongs to different teams, venue, evidence or settings. Generate a matching report.")
+                elif saved_matchup:
+                    matchup_report = saved_matchup["report"]
+                    fact_lookup = {fact["id"]: fact for fact in matchup_packet["facts"]}
+                    for section, label in [
+                        ("observations", "Historical observations"),
+                        ("interpretations", "Tentative tactical interpretations"),
+                    ]:
+                        st.markdown(f"**{label}**")
+                        if not matchup_report[section]:
+                            st.caption("No supported interpretation was returned.")
+                        for finding in matchup_report[section]:
+                            st.write(finding["text"])
+                            citations = []
+                            for fid in finding["fact_ids"]:
+                                fact = fact_lookup[fid]
+                                value = fact["value"]
+                                display_value = f"{value:,.2f}" if isinstance(value, (int, float)) else str(value)
+                                citations.append(f"[{fid}] {fact['metric']}: {display_value} {fact['unit']}")
+                            st.caption(" · ".join(citations))
+                    st.markdown("**Limitations**")
+                    for limitation in dict.fromkeys(matchup_packet["limitations"] + matchup_report["limitations"]):
+                        st.warning(limitation)
+                    if matchup_report["next_steps"]:
+                        st.markdown("**Suggested review actions**")
+                        for action in matchup_report["next_steps"]:
+                            st.write(action)
+                    st.caption(
+                        "AI-generated historical interpretation. Structure and citations are checked; "
+                        "tactical correctness and future performance are not certified. "
+                        "This report is saved only in this browser session."
+                    )
 
 
 elif selected_module == "Auction Trends":

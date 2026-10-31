@@ -1,4 +1,4 @@
-"""Cached ingestion, player profiles and team matchup research."""
+"""Cached ingestion, player profiles, matchups and auction trends."""
 
 import pandas as pd
 import streamlit as st
@@ -119,6 +119,59 @@ def recent_team_encounters(records, date_column, venue_column,
     return display.reset_index(drop=True), invalid_dates
 
 
+def prepare_auction_records(frame, year_column, amount_column):
+    """Preserve source rows and derive validated calendar years and amounts.
+
+    Numeric strings may contain thousands separators. Currency symbols and
+    crore/lakh suffixes are not guessed or silently converted.
+    """
+    missing = {year_column, amount_column} - set(frame.columns)
+    if missing:
+        raise ValueError("Missing auction columns: " + ", ".join(sorted(missing)))
+    records = frame.copy()
+    years = pd.to_numeric(records[year_column], errors="coerce")
+    valid_year = years.notna() & years.ge(1) & years.le(9999) & years.mod(1).eq(0)
+    records["_auction_year"] = years.where(valid_year).astype("Int64")
+    amounts = pd.to_numeric(
+        records[amount_column].astype("string").str.strip().str.replace(",", "", regex=False),
+        errors="coerce",
+    )
+    valid_amount = amounts.notna() & amounts.ge(0) & amounts.lt(float("inf"))
+    records["_auction_amount"] = amounts.where(valid_amount)
+    return records
+
+
+def aggregate_auction_spending(records, group_column):
+    """Sum usable recorded amounts, retaining unnamed groups for reconciliation."""
+    if group_column not in records.columns:
+        raise ValueError(f"Auction grouping column not found: {group_column}")
+    usable = records.loc[records["_auction_amount"].notna()].copy()
+    groups = usable[group_column].astype("string").str.strip()
+    groups = groups.mask(groups.isna() | groups.eq("").fillna(False), "Not recorded")
+    result = usable.groupby(groups, dropna=False)["_auction_amount"].sum()
+    result = result.sort_values(ascending=False, kind="stable").to_frame("Recorded amount")
+    total = result["Recorded amount"].sum()
+    result["Share (%)"] = 100 * result["Recorded amount"] / total if total > 0 else float("nan")
+    return result
+
+
+def top_auction_buys(records, player_column, team_column, category_columns, limit=10):
+    """Rank individual source records, keeping repeat players and auction years."""
+    usable = records.loc[records["_auction_amount"].notna()]
+    top = usable.sort_values("_auction_amount", ascending=False, kind="stable").head(limit)
+    display = pd.DataFrame(index=top.index)
+    for label, column in [("Player", player_column), ("Team", team_column)]:
+        values = top[column].astype("string").str.strip()
+        display[label] = values.mask(values.isna() | values.eq("").fillna(False), "Not recorded")
+    display["Year"] = top["_auction_year"].astype("string").fillna("Not recorded")
+    display["Recorded amount"] = top["_auction_amount"]
+    for column in dict.fromkeys(category_columns):
+        if column in top.columns and column not in display.columns:
+            values = top[column].astype("string").str.strip()
+            display[column] = values.mask(values.isna() | values.eq("").fillna(False), "Not recorded")
+    return display.reset_index(drop=True)
+
+
 st.set_page_config(
     page_title="IPL Intelligence 360°",
     page_icon="🏏",
@@ -141,7 +194,7 @@ with st.sidebar:
         ],
     )
     st.divider()
-    st.caption("Phase 2 · Profiles and matchups")
+    st.caption("Phase 2 · Profiles, matchups and auctions")
 
 
 # Initialize datasets. Cached loaders reuse their results on UI reruns.
@@ -181,8 +234,8 @@ if selected_module == "Home/Overview":
     with st.expander("Preview the supplied match data"):
         st.dataframe(matches.head(10), width="stretch")
     st.info(
-        "Use the sidebar to switch workspaces. "
-        "Analytical tools will be added in Phase 2."
+        "Use the sidebar to explore player profiles, "
+        "team matchups and historical auction trends."
     )
 
 elif selected_module == "Player Profile":
@@ -473,10 +526,117 @@ elif selected_module == "Team Matchups":
 
 
 elif selected_module == "Auction Trends":
+    # EDIT THESE MAPPINGS for a different auction CSV.
+    YEAR_COLUMN = "Year"
+    PLAYER_COLUMN = "Player"
+    AMOUNT_COLUMN = "Amount"
+    TEAM_COLUMN = "Team"
+    ROLE_COLUMN = "Role"
+    ORIGIN_COLUMN = "Player Origin"
+    CATEGORY_COLUMNS = [ROLE_COLUMN, ORIGIN_COLUMN]
+    AMOUNT_UNIT_LABEL = "recorded source units (currency unverified)"
+
     st.title("Auction Trends")
-    st.write("Inspect the supplied historical auction records.")
-    st.info(
-        "Phase 2: auction exploration and trends, "
-        "after reviewing the dataset's fields and units."
+    st.caption(
+        "Explore historical amounts in the supplied CSV. Currency, units and transaction "
+        "types are not documented in this file; these are not verified auction-purse totals "
+        "or current market prices."
     )
-    st.caption(f"Available: {len(auction):,} auction records.")
+    with st.expander("Inspect auction headers and column mappings"):
+        st.write(auction.columns.tolist())
+        st.caption("Edit the mapping variables at the top of the Auction Trends block.")
+
+    required_columns = {YEAR_COLUMN, PLAYER_COLUMN, AMOUNT_COLUMN, TEAM_COLUMN}
+    missing_columns = required_columns - set(auction.columns)
+    if missing_columns:
+        st.warning("Map the required auction columns above: " + ", ".join(sorted(missing_columns)))
+    elif auction.empty:
+        st.info("The auction dataset contains no records.")
+    else:
+        auction_records = prepare_auction_records(auction, YEAR_COLUMN, AMOUNT_COLUMN)
+        years = sorted(auction_records["_auction_year"].dropna().astype(int).unique(), reverse=True)
+        selected_year = st.selectbox(
+            "Auction year", ["All Time", *[str(year) for year in years]], key="auction_year"
+        )
+        if selected_year == "All Time":
+            scoped_auction = auction_records
+        else:
+            scoped_auction = auction_records.loc[
+                auction_records["_auction_year"].eq(int(selected_year)).fillna(False)
+            ].copy()
+        undated_count = int(auction_records["_auction_year"].isna().sum())
+        if undated_count:
+            st.caption(
+                f"{undated_count:,} records have no valid calendar year. "
+                "They are included in All Time and excluded from individual-year selections."
+            )
+        usable_auction = scoped_auction.loc[scoped_auction["_auction_amount"].notna()]
+        invalid_amount_count = len(scoped_auction) - len(usable_auction)
+        if invalid_amount_count:
+            st.warning(
+                f"{invalid_amount_count:,} records have missing, negative or non-numeric amounts "
+                "and are excluded from rankings and totals. Amounts must be finite numbers; "
+                "currency symbols and unit suffixes need an explicit conversion."
+            )
+        total_amount = usable_auction["_auction_amount"].sum()
+        boxes = st.columns(3)
+        boxes[0].metric("Records in scope", f"{len(scoped_auction):,}")
+        boxes[1].metric("Usable amount records", f"{len(usable_auction):,}")
+        boxes[2].metric("Total recorded amount", f"{total_amount:,.0f}" if len(usable_auction) else "N/A")
+        st.caption(f"Scope: {selected_year} · Amounts: {AMOUNT_UNIT_LABEL}. No inflation adjustment is applied.")
+
+        if usable_auction.empty:
+            st.info("No usable amounts are available for this selection.")
+        else:
+            st.subheader("Top 10 buys · recorded amounts")
+            top_buys = top_auction_buys(
+                scoped_auction, PLAYER_COLUMN, TEAM_COLUMN, CATEGORY_COLUMNS
+            )
+            st.dataframe(
+                top_buys, hide_index=True, width="stretch",
+                column_config={"Recorded amount": st.column_config.NumberColumn(format="localized")},
+            )
+            st.caption(
+                "Each row is one source record. A player can appear more than once across years; "
+                "All Time ranks individual records, not a player's cumulative earnings. "
+                "Amounts are displayed without an assumed currency conversion."
+            )
+
+            st.subheader("Franchise spending · recorded amounts")
+            team_totals = aggregate_auction_spending(scoped_auction, TEAM_COLUMN)
+            st.bar_chart(
+                team_totals[["Recorded amount"]],
+                x_label="Team (source name)", y_label=AMOUNT_UNIT_LABEL,
+                sort=False,
+            )
+            st.dataframe(team_totals, width="stretch")
+            st.caption(
+                "Totals sum usable records in the selected scope. Historical franchise names "
+                "remain separate. Missing team names are included under Not recorded. "
+                "These figures do not establish complete or official auction spending."
+            )
+
+            st.subheader("Category breakdown")
+            available_categories = [
+                column for column in dict.fromkeys(CATEGORY_COLUMNS) if column in scoped_auction.columns
+            ]
+            if not available_categories:
+                st.info("No mapped role or origin categories are available in this CSV.")
+            for category in available_categories:
+                breakdown = aggregate_auction_spending(scoped_auction, category)
+                st.markdown(f"**{category}**")
+                st.bar_chart(
+                    breakdown[["Recorded amount"]], x_label=category,
+                    y_label=AMOUNT_UNIT_LABEL, sort=False,
+                )
+                st.dataframe(
+                    breakdown, width="stretch",
+                    column_config={"Share (%)": st.column_config.NumberColumn(format="%.2f%%")},
+                )
+            if available_categories:
+                st.caption(
+                    "Each category breakdown covers the same usable amount records. "
+                    "Missing categories appear as Not recorded; role and origin breakdowns "
+                    "are separate views of the same total. Percentage shares are unavailable "
+                    "when the total amount is zero."
+                )

@@ -4,7 +4,7 @@ from pathlib import Path
 import os
 import sys
 import tempfile
-from types import ModuleType
+from types import ModuleType, SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -23,7 +23,7 @@ class AgentRuntimeTests(unittest.TestCase):
         unrelated = ModuleType("agents")
         with patch.dict(sys.modules, {"agents": unrelated}):
             app = AppTest.from_file(str(ROOT / "app.py"), default_timeout=30).run()
-            for route in ["Player Profile", "Team Matchups", "Auction Trends", "Home/Overview"]:
+            for route in ["Player Profile", "Team Matchups", "Squad Analysis", "Auction Trends", "Home/Overview"]:
                 app.sidebar.radio[0].set_value(route).run()
                 self.assertFalse(app.exception, route)
                 self.assertFalse(app.error, route)
@@ -61,11 +61,23 @@ class AgentRuntimeTests(unittest.TestCase):
     def test_optional_agent_failure_preserves_statistical_dashboard(self):
         with patch.object(agent_runtime, "load_agents", side_effect=AgentRuntimeError("fixture")):
             app = AppTest.from_file(str(ROOT / "app.py"), default_timeout=30).run()
-            for route in ["Player Profile", "Team Matchups", "Auction Trends", "Home/Overview"]:
+            for route in ["Player Profile", "Team Matchups", "Squad Analysis", "Auction Trends", "Home/Overview"]:
                 app.sidebar.radio[0].set_value(route).run()
                 self.assertFalse(app.exception, route)
                 self.assertFalse(app.error, route)
                 self.assertTrue(app.metric, route)
+
+    def test_older_runtime_contract_does_not_break_new_squad_workspace(self):
+        legacy = SimpleNamespace(ScoutReportError=RuntimeError)
+        for name in agent_runtime._FUNCTIONS:
+            if "squad" not in name:
+                setattr(legacy, name, lambda *args: None)
+        with patch.object(agent_runtime, "load_agents", return_value=legacy):
+            app = AppTest.from_file(str(ROOT / "app.py"), default_timeout=30).run()
+            app.sidebar.radio[0].set_value("Squad Analysis").run()
+            self.assertFalse(app.exception)
+            self.assertTrue(app.metric)
+            self.assertTrue(any("updating or unavailable" in m.value for m in app.warning))
 
 
 if __name__ == "__main__":

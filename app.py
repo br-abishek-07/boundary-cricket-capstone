@@ -12,6 +12,15 @@ from agent_runtime import AgentRuntimeError, load_agents
 # Use one coherent local agent version, independent of cached 'agents' packages.
 try:
     agent_api = load_agents(Path(__file__).resolve().parent)
+    # Check this UI's complete contract even if an older runtime is still cached.
+    required_agent_functions = (
+        "generate_player_scout_report", "scout_context_fingerprint",
+        "generate_matchup_report", "matchup_context_fingerprint",
+        "generate_auction_report", "auction_context_fingerprint",
+        "generate_squad_report", "squad_context_fingerprint",
+    )
+    if any(not callable(getattr(agent_api, name, None)) for name in required_agent_functions):
+        raise AgentRuntimeError("The current UI requires a newer agent release.")
 except AgentRuntimeError:
     class ScoutReportError(Exception):
         """Optional agents are unavailable while statistical tools remain usable."""
@@ -25,6 +34,7 @@ except AgentRuntimeError:
     generate_player_scout_report = scout_context_fingerprint = _agent_unavailable
     generate_matchup_report = matchup_context_fingerprint = _agent_unavailable
     generate_auction_report = auction_context_fingerprint = _agent_unavailable
+    generate_squad_report = squad_context_fingerprint = _agent_unavailable
 else:
     ScoutReportError = agent_api.ScoutReportError
     generate_player_scout_report = agent_api.generate_player_scout_report
@@ -33,6 +43,8 @@ else:
     matchup_context_fingerprint = agent_api.matchup_context_fingerprint
     generate_auction_report = agent_api.generate_auction_report
     auction_context_fingerprint = agent_api.auction_context_fingerprint
+    generate_squad_report = agent_api.generate_squad_report
+    squad_context_fingerprint = agent_api.squad_context_fingerprint
 
 from data_loader import (
     load_auction,
@@ -471,6 +483,100 @@ def build_auction_evidence(records, selected_year, player_column, team_column,
     }
 
 
+def prepare_squad_snapshot(records, columns, expected_roles):
+    """Count source rows and explicit flags without merging placeholder IDs."""
+    def text_field(key):
+        column = columns[key]
+        values = records[column] if column in records else pd.Series(pd.NA, index=records.index, dtype="string")
+        values = values.astype("string").str.strip()
+        return values.mask(values.isna() | values.eq("").fillna(False), "Not recorded")
+
+    def flag_field(key, yes, no):
+        column = columns[key]
+        values = pd.to_numeric(records[column], errors="coerce") if column in records else pd.Series(float("nan"), index=records.index)
+        labels = pd.Series("Unknown", index=records.index, dtype="string")
+        labels.loc[values.eq(1).fillna(False)] = yes
+        labels.loc[values.eq(0).fillna(False)] = no
+        return labels
+
+    names = text_field("player")
+    roles = text_field("role")
+    origins = flag_field("overseas", "Overseas", "Domestic")
+    keepers = flag_field("keeper", "Yes", "No")
+    role_labels = list(dict.fromkeys([*expected_roles, *sorted(roles.unique())]))
+    role_counts = {label: int(roles.eq(label).sum()) for label in role_labels}
+    origin_counts = {label: int(origins.eq(label).sum()) for label in ["Domestic", "Overseas", "Unknown"]}
+    keeper_counts = {label: int(keepers.eq(label).sum()) for label in ["Yes", "No", "Unknown"]}
+    known_names = names.loc[names.ne("Not recorded")]
+    registry_ids = text_field("registry")
+    summary = {
+        "listed_players": len(records), "distinct_listed_names": int(known_names.nunique()),
+        "missing_player_names": int(names.eq("Not recorded").sum()),
+        "duplicate_name_entries": int(known_names.duplicated().sum()),
+        "unclassified_role_entries": int((~roles.isin(expected_roles)).sum()),
+        "nonstandard_or_missing_registry_entries": int((~registry_ids.str.fullmatch(r"[0-9a-f]{8}", case=False).fillna(False)).sum()),
+    }
+    display = pd.DataFrame({
+        "Player": names, "Primary role": roles, "Origin (flag)": origins,
+        "Nationality": text_field("nationality"), "Wicketkeeper flag": keepers,
+        "Designation": text_field("designation"), "Registry ID": registry_ids,
+    })
+    return display.reset_index(drop=True), summary, role_counts, origin_counts, keeper_counts
+
+
+def build_squad_evidence(records, franchise_id, franchise_name, columns, expected_roles):
+    """Build an auditable squad composition packet from the selected supplied pool."""
+    display, summary, role_counts, origins, keepers = prepare_squad_snapshot(records, columns, expected_roles)
+    facts = []
+    def add(label, value, unit):
+        fid = f"F{len(facts) + 1}"
+        facts.append({"id": fid, "metric": label, "value": int(value), "unit": unit})
+        return fid
+    add("Listed squad entries", summary["listed_players"], "source rows, not certified registered players")
+    add("Distinct listed player names", summary["distinct_listed_names"], "source names, not verified unique identities")
+    add("Entries with missing player names", summary["missing_player_names"], "source rows")
+    add("Additional entries with repeated player names", summary["duplicate_name_entries"], "source rows requiring identity review")
+    role_rows = [{"role": role, "count": count, "fact_id": add(
+        f"Entries with primary role label {role}", count, "source rows; zero does not prove absent capability"
+    )} for role, count in role_counts.items()]
+    origin_rows = [{"origin": label, "count": count, "fact_id": add(
+        f"Entries classified {label} by overseas flag", count, "source rows; nationality is not used to infer origin"
+    )} for label, count in origins.items()]
+    keeper_rows = [{"flag": label, "count": count, "fact_id": add(
+        f"Entries with wicketkeeper flag {label}", count, "source rows; overlaps primary roles"
+    )} for label, count in keepers.items()]
+    limitations = [
+        "This supplied pool is not a verified current registered squad; the CSV provides no snapshot date.",
+        "The pool may contain outgoing players and replacements; current registration, eligibility and availability need verification.",
+        "Primary role labels describe metadata, not verified capability, quality, batting position or bowling workload.",
+        "Zero entries with a primary role label do not prove that no listed player can perform that role.",
+        "Domestic and overseas counts use only explicit source flags; unknown flags are not inferred from nationality or names.",
+        "Wicketkeeper flags are an overlapping view and must not be added to primary role totals.",
+        "Pace/spin specialisms, current form, fitness, budgets and match-day conditions are not supplied.",
+        "These counts do not certify competition quotas, a legal playing XI or future performance.",
+        "Names and registry IDs may be incomplete or placeholders; source entries are preserved rather than merged automatically.",
+    ]
+    if summary["missing_player_names"] or summary["duplicate_name_entries"]:
+        limitations.append("Missing or repeated player names require identity review before interpreting a unique player count.")
+    if summary["unclassified_role_entries"]:
+        limitations.append("Some primary role labels are missing or outside the configured expected set; role coverage needs metadata review.")
+    if origins["Unknown"] or keepers["Unknown"]:
+        limitations.append("Some origin or wicketkeeper flags are unknown; metadata coverage is incomplete.")
+    source_hash = hashlib.sha256(
+        pd.util.hash_pandas_object(records, index=True).values.tobytes()
+        + json.dumps(list(records.columns)).encode("utf-8")
+    ).hexdigest()
+    return {
+        "task": "squad_analysis", "franchise": {"id": str(franchise_id), "name": str(franchise_name)},
+        "scope": {"source": "squads.csv (loaded selected franchise rows)",
+                  "roster_status": "Supplied snapshot; current registered squad not certified", "snapshot_date": None},
+        "summary": summary, "role_counts": role_rows, "origin_counts": origin_rows,
+        "wicketkeeper_flags": keeper_rows,
+        "roster": json.loads(display.drop(columns="Registry ID").to_json(orient="records")),
+        "facts": facts, "limitations": limitations, "source_fingerprint": source_hash,
+    }
+
+
 st.set_page_config(
     page_title="IPL Intelligence 360°",
     page_icon="🏏",
@@ -489,11 +595,12 @@ with st.sidebar:
             "Home/Overview",
             "Player Profile",
             "Team Matchups",
+            "Squad Analysis",
             "Auction Trends",
         ],
     )
     st.divider()
-    st.caption("Phase 3 · Scout, Matchup and Auction")
+    st.caption("Phase 3 · Scout, Matchup, Auction and Squad")
 
 
 # Initialize datasets. Cached loaders reuse their results on UI reruns.
@@ -534,7 +641,7 @@ if selected_module == "Home/Overview":
         st.dataframe(matches.head(10), width="stretch")
     st.info(
         "Use the sidebar to explore player profiles, "
-        "team matchups and historical auction trends."
+        "team matchups, squad snapshots and historical auction trends."
     )
 
 elif selected_module == "Player Profile":
@@ -965,6 +1072,145 @@ elif selected_module == "Team Matchups":
                     st.caption(
                         "AI-generated historical interpretation. Structure and citations are checked; "
                         "tactical correctness and future performance are not certified. "
+                        "This report is saved only in this browser session."
+                    )
+
+
+elif selected_module == "Squad Analysis":
+    # EDIT THESE MAPPINGS when using a different squad source.
+    FRANCHISE_COLUMN = "franchise_id"
+    FRANCHISE_NAME_COLUMN = "team_name"
+    PLAYER_COLUMN = "player_name"
+    ROLE_COLUMN = "role"
+    OVERSEAS_COLUMN = "is_overseas"
+    KEEPER_COLUMN = "is_wicketkeeper"
+    NATIONALITY_COLUMN = "nationality"
+    DESIGNATION_COLUMN = "designation"
+    REGISTRY_COLUMN = "cricsheet_id"
+    EXPECTED_ROLE_LABELS = ["Batter", "Bowler", "All Rounder", "Wicket Keeper"]
+
+    st.title("Squad Analysis")
+    st.caption(
+        "Review the supplied franchise squad snapshot. Current registration, availability "
+        "and roster completeness are not certified; the CSV has no snapshot date."
+    )
+    with st.expander("Inspect squad headers and column mappings"):
+        st.write(squads.columns.tolist())
+        st.caption("Mappings and expected primary role labels are defined at the top of this workspace.")
+    required_columns = {FRANCHISE_COLUMN, PLAYER_COLUMN}
+    if not required_columns.issubset(squads.columns):
+        st.warning("Map the franchise and player-name columns above to enable squad analysis.")
+    else:
+        franchise_values = squads[FRANCHISE_COLUMN].dropna().astype(str)
+        franchises = sorted(franchise_values.loc[franchise_values.str.strip().ne("")].unique())
+        if not franchises:
+            st.info("No franchises are available in the supplied squad dataset.")
+        else:
+            franchise_names = {}
+            for franchise in franchises:
+                rows = squads.loc[squads[FRANCHISE_COLUMN].astype(str).eq(franchise)]
+                names = rows[FRANCHISE_NAME_COLUMN].dropna().astype(str).unique() if FRANCHISE_NAME_COLUMN in rows else []
+                franchise_names[franchise] = names[0] if len(names) == 1 else franchise
+            selected_franchise = st.selectbox(
+                "Franchise", franchises,
+                index=franchises.index("RCB") if "RCB" in franchises else 0,
+                format_func=lambda code: f"{code} · {franchise_names[code]}", key="squad_franchise",
+            )
+            squad_records = squads.loc[squads[FRANCHISE_COLUMN].astype(str).eq(selected_franchise)].copy()
+            squad_columns = {
+                "player": PLAYER_COLUMN, "role": ROLE_COLUMN, "overseas": OVERSEAS_COLUMN,
+                "keeper": KEEPER_COLUMN, "nationality": NATIONALITY_COLUMN,
+                "designation": DESIGNATION_COLUMN, "registry": REGISTRY_COLUMN,
+            }
+            roster, summary, role_counts, origin_counts, keeper_counts = prepare_squad_snapshot(
+                squad_records, squad_columns, EXPECTED_ROLE_LABELS
+            )
+            st.subheader("Supplied squad snapshot")
+            boxes = st.columns(4)
+            boxes[0].metric("Listed players (rows)", f"{summary['listed_players']:,}")
+            boxes[1].metric("Domestic (flag)", f"{origin_counts['Domestic']:,}")
+            boxes[2].metric("Overseas (flag)", f"{origin_counts['Overseas']:,}")
+            boxes[3].metric("Unknown origin", f"{origin_counts['Unknown']:,}")
+            st.dataframe(roster, hide_index=True, width="stretch")
+            st.caption(
+                "Source rows are preserved. Repeated placeholder registry IDs are not merged. "
+                "These are listed entries, not a certified count of currently registered players."
+            )
+            if summary["duplicate_name_entries"] or summary["missing_player_names"]:
+                st.warning("Some names are missing or repeated; verify identities before counting distinct players.")
+            if summary["unclassified_role_entries"] or origin_counts["Unknown"] or keeper_counts["Unknown"]:
+                st.warning("Some role or flag metadata is unknown or unclassified. Review the source before drawing balance conclusions.")
+            left, right = st.columns(2)
+            with left:
+                st.markdown("**Primary role counts**")
+                st.dataframe(pd.DataFrame({"Primary role": list(role_counts), "Entries": list(role_counts.values())}), hide_index=True, width="stretch")
+            with right:
+                st.markdown("**Origin counts from source flags**")
+                st.dataframe(pd.DataFrame({"Origin": list(origin_counts), "Entries": list(origin_counts.values())}), hide_index=True, width="stretch")
+            st.caption(
+                "Origin uses is_overseas: zero means Domestic, one means Overseas, other values mean Unknown. "
+                "Role counts use primary labels; zero does not establish absent capability. "
+                "Wicketkeeper flags overlap primary roles."
+            )
+
+            st.divider()
+            st.subheader("Squad Analyst · DeepSeek")
+            st.caption("Generate a cited review of the selected snapshot. Only clicking the button sends its evidence to DeepSeek.")
+            squad_packet = build_squad_evidence(
+                squad_records, selected_franchise, franchise_names[selected_franchise],
+                squad_columns, EXPECTED_ROLE_LABELS,
+            )
+            with st.expander("Inspect evidence sent to the Squad Analyst"):
+                st.json(squad_packet)
+            try:
+                squad_fingerprint = squad_context_fingerprint(squad_packet)
+            except ScoutReportError as exc:
+                st.warning(str(exc))
+            else:
+                saved_squad = st.session_state.get("squad_analyst_report")
+                if st.button("Generate Squad Report", disabled=squad_records.empty):
+                    if saved_squad and saved_squad["fingerprint"] == squad_fingerprint:
+                        st.info("Using the saved squad report for this exact evidence and model.")
+                    else:
+                        st.session_state.pop("squad_analyst_report", None)
+                        saved_squad = None
+                        try:
+                            with st.spinner("Analysing squad..."):
+                                squad_report = generate_squad_report(squad_packet)
+                            if squad_report["_provenance"]["context_fingerprint"] != squad_fingerprint:
+                                raise ScoutReportError("The squad context changed. Generate a new report.")
+                            saved_squad = {"fingerprint": squad_fingerprint, "report": squad_report}
+                            st.session_state["squad_analyst_report"] = saved_squad
+                        except ScoutReportError as exc:
+                            st.error(str(exc))
+                        except Exception:
+                            st.error("The squad report could not be completed. Your squad table remains available.")
+                if saved_squad and saved_squad["fingerprint"] != squad_fingerprint:
+                    st.info("The saved squad report belongs to a different franchise, evidence or settings. Generate a matching report.")
+                elif saved_squad:
+                    squad_report = saved_squad["report"]
+                    facts = {fact["id"]: fact for fact in squad_packet["facts"]}
+                    for section, label in [("observations", "Squad composition observations"),
+                                           ("interpretations", "Tentative tactical interpretations")]:
+                        st.markdown(f"**{label}**")
+                        if not squad_report[section]:
+                            st.caption("No supported interpretation was returned.")
+                        for finding in squad_report[section]:
+                            st.write(finding["text"])
+                            st.caption(" · ".join(
+                                f"[{fid}] {facts[fid]['metric']}: {facts[fid]['value']:,} {facts[fid]['unit']}"
+                                for fid in finding["fact_ids"]
+                            ))
+                    st.markdown("**Limitations**")
+                    for limitation in dict.fromkeys(squad_packet["limitations"] + squad_report["limitations"]):
+                        st.warning(limitation)
+                    if squad_report["next_steps"]:
+                        st.markdown("**Next Steps**")
+                        for action in squad_report["next_steps"]:
+                            st.write(action)
+                    st.caption(
+                        "AI-generated snapshot interpretation. Structure and citations are checked; "
+                        "current eligibility, tactical balance and future performance are not certified. "
                         "This report is saved only in this browser session."
                     )
 

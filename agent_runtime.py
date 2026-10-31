@@ -11,6 +11,7 @@ _FUNCTIONS = (
     "generate_player_scout_report", "scout_context_fingerprint",
     "generate_matchup_report", "matchup_context_fingerprint",
     "generate_auction_report", "auction_context_fingerprint",
+    "generate_squad_report", "squad_context_fingerprint",
 )
 
 

@@ -84,6 +84,17 @@ class MatchupAgentTests(unittest.TestCase):
                 agents.generate_matchup_report(copy.deepcopy(PACKET))
             self.assertIn(raw, debug.call_args.args[0])
 
+    def test_seven_limitations_are_accepted_and_prompt_requests_five(self):
+        report = copy.deepcopy(REPORT)
+        report["limitations"] = ["Archive coverage may be incomplete."] * 7
+        self.client.chat.completions.create.return_value.choices[0].message.content = json.dumps(report)
+        with patch.object(agents.st, "error") as debug:
+            result = agents.generate_matchup_report(copy.deepcopy(PACKET))
+            self.assertEqual(len(result["limitations"]), 7)
+            debug.assert_not_called()
+        prompt = self.client.chat.completions.create.call_args.kwargs["messages"][0]["content"]
+        self.assertIn("maximum of five limitations", prompt)
+
     def test_packet_uses_correct_denominator_and_unresolved_results(self):
         namespace = {"pd": pd, "json": json, "hashlib": __import__("hashlib")}
         tree = ast.parse((ROOT / "app.py").read_text())

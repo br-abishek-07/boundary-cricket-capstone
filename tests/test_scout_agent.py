@@ -83,7 +83,7 @@ class ScoutAgentTests(unittest.TestCase):
         wrong_type = copy.deepcopy(REPORT)
         wrong_type["limitations"] = "A string instead of a JSON array"
         too_many = copy.deepcopy(REPORT)
-        too_many["next_steps"] = ["Review evidence."] * 7
+        too_many["next_steps"] = ["Review evidence."] * 16
         cases = ["```json\nnot valid json\n```", json.dumps(wrong_type), json.dumps(too_many)]
         for text in cases:
             with self.subTest(text=text), patch.object(agents.st, "error") as debug:
@@ -104,6 +104,19 @@ class ScoutAgentTests(unittest.TestCase):
             with self.assertRaises(agents.ScoutReportError):
                 agents.generate_player_scout_report(copy.deepcopy(PACKET))
             debug.assert_not_called()
+
+    def test_section_limits_accept_fifteen_and_reject_sixteen(self):
+        for section in ["observations", "interpretations", "limitations", "next_steps"]:
+            with self.subTest(section=section):
+                item = {"text": "The archive contains recorded evidence.", "fact_ids": ["F1"]} if section in ["observations", "interpretations"] else "Review the source limitations."
+                valid = copy.deepcopy(REPORT)
+                valid[section] = [copy.deepcopy(item) for _ in range(15)]
+                result = agents.validate_scout_report(valid, {"F1"})
+                self.assertEqual(len(result[section]), 15)
+                invalid = copy.deepcopy(valid)
+                invalid[section].append(copy.deepcopy(item))
+                with self.assertRaisesRegex(agents.ScoutReportError, "15-entry limit"):
+                    agents.validate_scout_report(invalid, {"F1"})
 
     def test_invalid_reports_are_rejected(self):
         bad_reference = copy.deepcopy(REPORT)

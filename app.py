@@ -2,15 +2,37 @@
 
 import hashlib
 import json
+from pathlib import Path
 
 import pandas as pd
 import streamlit as st
 
-from agents import (
-    ScoutReportError, generate_player_scout_report, scout_context_fingerprint,
-    generate_matchup_report, matchup_context_fingerprint,
-    generate_auction_report, auction_context_fingerprint,
-)
+from agent_runtime import AgentRuntimeError, load_agents
+
+# Use one coherent local agent version, independent of cached 'agents' packages.
+try:
+    agent_api = load_agents(Path(__file__).resolve().parent)
+except AgentRuntimeError:
+    class ScoutReportError(Exception):
+        """Optional agents are unavailable while statistical tools remain usable."""
+
+    def _agent_unavailable(*args, **kwargs):
+        raise ScoutReportError(
+            "AI components are updating or unavailable. Statistical tools remain available. "
+            "Wait for deployment to finish, then reboot the dev app if this message persists."
+        )
+
+    generate_player_scout_report = scout_context_fingerprint = _agent_unavailable
+    generate_matchup_report = matchup_context_fingerprint = _agent_unavailable
+    generate_auction_report = auction_context_fingerprint = _agent_unavailable
+else:
+    ScoutReportError = agent_api.ScoutReportError
+    generate_player_scout_report = agent_api.generate_player_scout_report
+    scout_context_fingerprint = agent_api.scout_context_fingerprint
+    generate_matchup_report = agent_api.generate_matchup_report
+    matchup_context_fingerprint = agent_api.matchup_context_fingerprint
+    generate_auction_report = agent_api.generate_auction_report
+    auction_context_fingerprint = agent_api.auction_context_fingerprint
 
 from data_loader import (
     load_auction,

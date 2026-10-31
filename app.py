@@ -1,7 +1,14 @@
-"""Cached ingestion, player profiles, matchups and auction trends."""
+"""Cricket analytics with evidence-bound DeepSeek player scouting."""
+
+import hashlib
+import json
 
 import pandas as pd
 import streamlit as st
+
+from agents import (
+    ScoutReportError, generate_player_scout_report, scout_context_fingerprint,
+)
 
 from data_loader import (
     load_auction,
@@ -172,6 +179,96 @@ def top_auction_buys(records, player_column, team_column, category_columns, limi
     return display.reset_index(drop=True)
 
 
+def build_player_scout_evidence(records, player_id, player_name, competition,
+                               metrics, metric_issues, stat_columns,
+                               date_column, match_id_column):
+    """Build a small JSON packet from the complete selected loaded sample."""
+    facts = []
+    definitions = [
+        ("F1", "Total runs", metrics["runs"], "runs"),
+        ("F3", "Batting strike rate", metrics["strike_rate"], "runs per hundred balls faced"),
+        ("F4", "Bowler-credited wickets", metrics["wickets"], "wickets"),
+        ("F7", "Bowling economy", metrics["economy"], "runs per six legal balls"),
+        ("F8", "Named player-match records", len(records), "records, including possible no-batting appearances"),
+    ]
+    raw_totals = {}
+    for key, fid, label, unit in [
+        ("balls", "F2", "Balls faced", "balls"),
+        ("conceded", "F5", "Bowling runs conceded", "runs"),
+        ("legal_balls", "F6", "Legal balls bowled", "balls"),
+    ]:
+        column = stat_columns[key]
+        if column in records:
+            values = pd.to_numeric(records[column], errors="coerce")
+            if (values.notna() & values.ge(0) & values.lt(float("inf"))).all():
+                raw_totals[key] = float(values.sum())
+                definitions.append((fid, label, raw_totals[key], unit))
+    for fid, label, value, unit in sorted(definitions):
+        if value is not None:
+            facts.append({"id": fid, "metric": label, "value": float(value), "unit": unit})
+
+    limitations = [
+        "Figures describe the supplied archive, whose completeness is not certified.",
+        "Technique, fitness, current availability, market value and future performance are not supplied.",
+        "Named player-match records can include appearances without batting or bowling.",
+        "No peer benchmark or phase-specific scouting comparison is included in this packet.",
+    ]
+    limitations.extend(metric_issues)
+    if not raw_totals.get("balls"):
+        limitations.append("Usable batting exposure is unavailable or zero.")
+    if not raw_totals.get("legal_balls"):
+        limitations.append("Usable bowling exposure is unavailable or zero.")
+
+    dates = pd.to_datetime(records[date_column], errors="coerce") if date_column in records else pd.Series(pd.NaT, index=records.index)
+    valid_dates = dates.dropna()
+    if dates.isna().any():
+        limitations.append("Some records lack valid dates and are omitted from the recent-match sample.")
+    selected_columns = list(dict.fromkeys(
+        column for column in [match_id_column, date_column, *stat_columns.values()]
+        if column in records.columns
+    ))
+    recent = records.loc[dates.notna(), selected_columns].copy()
+    if date_column in recent:
+        recent[date_column] = dates.loc[recent.index]
+        order = [date_column]
+        if match_id_column in recent:
+            recent[match_id_column] = recent[match_id_column].astype(str)
+            order.append(match_id_column)
+        recent = recent.sort_values(order, kind="stable").tail(10)
+    # Hash the full loaded selected records, not just the recent ten rows.
+    source_hash = hashlib.sha256(
+        pd.util.hash_pandas_object(records, index=True).values.tobytes()
+        + json.dumps(list(records.columns)).encode("utf-8")
+    ).hexdigest()
+    recent_rows = json.loads(recent.to_json(orient="records", date_format="iso"))
+    # Give recent batting evidence its own references for supported form comments.
+    for offset, row in enumerate(recent_rows):
+        runs = pd.to_numeric(row.get(stat_columns["runs"]), errors="coerce")
+        if pd.notna(runs) and runs >= 0 and runs < float("inf"):
+            fid = f"F{9 + offset}"
+            row["fact_id"] = fid
+            facts.append({
+                "id": fid,
+                "metric": f"Runs in recorded match {row.get(match_id_column, 'unidentified')} on {row.get(date_column, 'undated')}",
+                "value": float(runs), "unit": "runs; the appearance may include no batting",
+            })
+    return {
+        "task": "player_scouting",
+        "player": {"id": str(player_id), "name": str(player_name)},
+        "scope": {
+            "competition": competition, "phase": "All",
+            "since": valid_dates.min().date().isoformat() if len(valid_dates) else None,
+            "through_inclusive": valid_dates.max().date().isoformat() if len(valid_dates) else None,
+            "coverage": "Full selected supplied archive sample; not a certified complete career",
+            "source": "match_players.csv.gz (loaded selected records)",
+        },
+        "facts": facts,
+        "recent_matches": recent_rows,
+        "limitations": list(dict.fromkeys(limitations)),
+        "source_fingerprint": source_hash,
+    }
+
+
 st.set_page_config(
     page_title="IPL Intelligence 360°",
     page_icon="🏏",
@@ -194,7 +291,7 @@ with st.sidebar:
         ],
     )
     st.divider()
-    st.caption("Phase 2 · Profiles, matchups and auctions")
+    st.caption("Phase 3 · Player Scout integration")
 
 
 # Initialize datasets. Cached loaders reuse their results on UI reruns.
@@ -380,6 +477,79 @@ elif selected_module == "Player Profile":
                             st.caption(
                                 f"Chart window: {recent[DATE_COLUMN].min():%Y-%m-%d} "
                                 f"to {recent[DATE_COLUMN].max():%Y-%m-%d}."
+                            )
+
+
+                    st.divider()
+                    st.subheader("Player Scout · DeepSeek")
+                    st.caption(
+                        "Generate an interpretation of the selected archive evidence. "
+                        "This sends the evidence packet to DeepSeek only when you click the button. "
+                        "Numerical values remain calculated and displayed by Python."
+                    )
+                    scout_packet = build_player_scout_evidence(
+                        player_records, selected_player_id, name_by_id[selected_player_id],
+                        scope, metrics, issues,
+                        {"runs": RUNS_COLUMN, "balls": BALLS_FACED_COLUMN,
+                         "wickets": WICKETS_COLUMN, "conceded": RUNS_CONCEDED_COLUMN,
+                         "legal_balls": LEGAL_BALLS_COLUMN},
+                        DATE_COLUMN, MATCH_ID_COLUMN,
+                    )
+                    with st.expander("Inspect evidence sent to the scout"):
+                        st.json(scout_packet)
+                    try:
+                        scout_fingerprint = scout_context_fingerprint(scout_packet)
+                    except ScoutReportError as exc:
+                        st.warning(str(exc))
+                    else:
+                        saved_scout = st.session_state.get("player_scout_report")
+                        if st.button("Generate Scouting Report", disabled=len(scout_packet["facts"]) < 2):
+                            if saved_scout and saved_scout["fingerprint"] == scout_fingerprint:
+                                st.info("Using the saved report for this exact evidence and model.")
+                            else:
+                                st.session_state.pop("player_scout_report", None)
+                                saved_scout = None
+                                try:
+                                    with st.spinner("Scouting player..."):
+                                        scout_report = generate_player_scout_report(scout_packet)
+                                    if scout_report["_provenance"]["context_fingerprint"] != scout_fingerprint:
+                                        raise ScoutReportError("The report context changed. Generate a new report.")
+                                    saved_scout = {"fingerprint": scout_fingerprint, "report": scout_report}
+                                    st.session_state["player_scout_report"] = saved_scout
+                                except ScoutReportError as exc:
+                                    st.error(str(exc))
+                                except Exception:
+                                    st.error("The scouting request could not be completed. Your statistics remain available.")
+                        if saved_scout and saved_scout["fingerprint"] != scout_fingerprint:
+                            st.info("The saved report belongs to different evidence or settings. Generate a matching report.")
+                        elif saved_scout:
+                            scout_report = saved_scout["report"]
+                            fact_lookup = {fact["id"]: fact for fact in scout_packet["facts"]}
+                            for section, label in [
+                                ("observations", "Evidence-backed observations"),
+                                ("interpretations", "Tentative interpretations"),
+                            ]:
+                                st.markdown(f"**{label}**")
+                                if not scout_report[section]:
+                                    st.caption("No supported interpretation was returned.")
+                                for finding in scout_report[section]:
+                                    st.write(finding["text"])
+                                    st.caption(" · ".join(
+                                        f"[{fid}] {fact_lookup[fid]['metric']}: "
+                                        f"{fact_lookup[fid]['value']:,.2f} {fact_lookup[fid]['unit']}"
+                                        for fid in finding["fact_ids"]
+                                    ))
+                            st.markdown("**Limitations**")
+                            for limitation in dict.fromkeys(scout_packet["limitations"] + scout_report["limitations"]):
+                                st.warning(limitation)
+                            if scout_report["next_steps"]:
+                                st.markdown("**Suggested review actions**")
+                                for action in scout_report["next_steps"]:
+                                    st.write(action)
+                            st.caption(
+                                "AI-generated interpretation; citations and structure are checked. "
+                                "These checks do not certify tactical correctness or future performance. "
+                                "This report is saved only in this browser session."
                             )
 
 

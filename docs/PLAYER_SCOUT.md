@@ -42,3 +42,7 @@ DeepSeek references:
 - https://api-docs.deepseek.com/
 - https://api-docs.deepseek.com/guides/json_mode/
 - https://api-docs.deepseek.com/guides/thinking_mode/
+
+## If the hosted app reports a missing OpenAI module
+
+The `openai` package is listed in the root `requirements.txt`. Changes to that file trigger Streamlit's dependency installation process. Check the dev deployment's build logs for installation errors, then reboot the dev app if it still shows an old error. The app imports the optional SDK only after a scouting request, so statistics and navigation remain available while that dependency is unavailable. A missing key is a separate configuration issue handled through Streamlit Secrets.

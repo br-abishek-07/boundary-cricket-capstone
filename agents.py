@@ -6,10 +6,6 @@ import math
 import re
 
 import streamlit as st
-from openai import (
-    OpenAI, APIConnectionError, APITimeoutError, AuthenticationError,
-    RateLimitError, APIStatusError,
-)
 
 DEFAULT_MODEL = "deepseek-flash"
 PROMPT_VERSION = "player-scout-1"
@@ -36,6 +32,23 @@ may be empty when unsupported. Each text entry must be at most eight hundred cha
 
 class ScoutReportError(Exception):
     """Safe user-facing error; never exposes provider bodies or credentials."""
+
+
+def _load_openai():
+    """Import the optional SDK only for an explicit scouting request."""
+    try:
+        import openai
+    except ImportError:
+        raise ScoutReportError(
+            "The DeepSeek client dependency is unavailable. Install the updated "
+            "requirements.txt, or reboot the dev app after its dependency rebuild. "
+            "The statistical modules remain available."
+        ) from None
+    required = ["OpenAI", "AuthenticationError", "RateLimitError", "APITimeoutError",
+                "APIConnectionError", "APIStatusError"]
+    if any(not hasattr(openai, name) for name in required):
+        raise ScoutReportError("Update the openai package using the project's requirements.txt.")
+    return openai
 
 
 def configured_scout_model():
@@ -155,8 +168,9 @@ def generate_player_scout_report(evidence_packet):
     if not isinstance(api_key, str) or not api_key.strip():
         raise ScoutReportError("Add a non-empty DEEPSEEK_API_KEY in Streamlit Secrets.")
 
+    sdk = _load_openai()
     try:
-        with OpenAI(
+        with sdk.OpenAI(
             api_key=api_key.strip(), base_url="https://api.deepseek.com",
             timeout=45.0, max_retries=0,
         ) as client:
@@ -170,15 +184,15 @@ def generate_player_scout_report(evidence_packet):
                 max_tokens=1400, temperature=0,
                 extra_body={"thinking": {"type": "disabled"}},
             )
-    except AuthenticationError:
+    except sdk.AuthenticationError:
         raise ScoutReportError("DeepSeek authentication failed. Check your key in Streamlit Secrets.") from None
-    except RateLimitError:
+    except sdk.RateLimitError:
         raise ScoutReportError("DeepSeek is rate-limiting requests. Please wait before trying again.") from None
-    except APITimeoutError:
+    except sdk.APITimeoutError:
         raise ScoutReportError("The scouting request timed out. Your statistics remain available.") from None
-    except APIConnectionError:
+    except sdk.APIConnectionError:
         raise ScoutReportError("Unable to reach DeepSeek. Please try again later.") from None
-    except APIStatusError:
+    except sdk.APIStatusError:
         raise ScoutReportError("DeepSeek could not complete the request. Check service status and account balance.") from None
     except Exception:
         raise ScoutReportError("The scouting service could not complete this request.") from None

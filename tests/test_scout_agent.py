@@ -4,6 +4,8 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 import copy
+import builtins
+import importlib.util
 import json
 import sys
 import unittest
@@ -48,7 +50,7 @@ class ScoutAgentTests(unittest.TestCase):
         self.client = MagicMock()
         self.client.__enter__.return_value = self.client
         self.client.chat.completions.create.return_value = response()
-        self.factory_patch = patch.object(agents, "OpenAI", return_value=self.client)
+        self.factory_patch = patch("openai.OpenAI", return_value=self.client)
         self.factory = self.factory_patch.start()
         self.addCleanup(self.factory_patch.stop)
 
@@ -116,6 +118,39 @@ class ScoutAgentTests(unittest.TestCase):
         self.assertNotEqual(original, agents.scout_context_fingerprint(changed))
         with patch.object(agents.st, "secrets", {"DEEPSEEK_MODEL": "another-model"}):
             self.assertNotEqual(original, agents.scout_context_fingerprint(PACKET))
+
+    def test_module_import_does_not_require_openai(self):
+        real_import = builtins.__import__
+        def blocked_import(name, *args, **kwargs):
+            if name == "openai" or name.startswith("openai."):
+                raise ModuleNotFoundError("Fixture: openai is unavailable")
+            return real_import(name, *args, **kwargs)
+        with patch("builtins.__import__", side_effect=blocked_import):
+            spec = importlib.util.spec_from_file_location("scout_without_sdk", ROOT / "agents.py")
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            with self.assertRaises(module.ScoutReportError):
+                module._load_openai()
+
+    def test_missing_sdk_preserves_all_workspaces(self):
+        real_import = builtins.__import__
+        def blocked_import(name, *args, **kwargs):
+            if name == "openai" or name.startswith("openai."):
+                raise ModuleNotFoundError("Fixture: openai is unavailable")
+            return real_import(name, *args, **kwargs)
+        with patch("builtins.__import__", side_effect=blocked_import):
+            app = AppTest.from_file(str(ROOT / "app.py"), default_timeout=30)
+            app.secrets["DEEPSEEK_API_KEY"] = "fixture-only"
+            app.run()
+            for route in ["Player Profile", "Team Matchups", "Auction Trends", "Home/Overview"]:
+                app.sidebar.radio[0].set_value(route).run()
+                self.assertFalse(app.exception, route)
+            app.sidebar.radio[0].set_value("Player Profile").run()
+            next(b for b in app.button if b.label == "Generate Scouting Report").click().run()
+            self.assertFalse(app.exception)
+            self.assertTrue(app.error)
+            self.assertTrue(app.metric)
+            self.factory.assert_not_called()
 
     def test_ui_generation_cache_stale_context_and_existing_routes(self):
         app = AppTest.from_file(str(ROOT / "app.py"), default_timeout=30)

@@ -67,6 +67,44 @@ class ScoutAgentTests(unittest.TestCase):
         self.assertNotIn("tools", request)
         self.assertNotIn("fixture-only", json.dumps(request))
 
+    def test_fenced_json_is_accepted_without_rewriting_content(self):
+        report = copy.deepcopy(REPORT)
+        report["observations"][0]["text"] = "The literal marker ``` is retained in the evidence discussion."
+        encoded = json.dumps(report)
+        for text in [f"```json\n{encoded}\n```", f"```JSON\r\n{encoded}\r\n```",
+                     f"```\n{encoded}\n```", "\ufeff " + encoded]:
+            with self.subTest(text=text), patch.object(agents.st, "error") as debug:
+                self.client.chat.completions.create.return_value = response(text)
+                result = agents.generate_player_scout_report(copy.deepcopy(PACKET))
+                self.assertEqual(result["observations"], report["observations"])
+                debug.assert_not_called()
+
+    def test_invalid_json_and_schema_show_raw_completion(self):
+        wrong_type = copy.deepcopy(REPORT)
+        wrong_type["limitations"] = "A string instead of a JSON array"
+        too_many = copy.deepcopy(REPORT)
+        too_many["next_steps"] = ["Review evidence."] * 7
+        cases = ["```json\nnot valid json\n```", json.dumps(wrong_type), json.dumps(too_many)]
+        for text in cases:
+            with self.subTest(text=text), patch.object(agents.st, "error") as debug:
+                self.client.chat.completions.create.return_value = response(text)
+                with self.assertRaises(agents.ScoutReportError):
+                    agents.generate_player_scout_report(copy.deepcopy(PACKET))
+                self.assertIn(text, debug.call_args.args[0])
+
+    def test_debug_redacts_key_and_api_failures_do_not_dump_bodies(self):
+        with patch.object(agents.st, "error") as debug:
+            self.client.chat.completions.create.return_value = response("invalid fixture-only output")
+            with self.assertRaises(agents.ScoutReportError):
+                agents.generate_player_scout_report(copy.deepcopy(PACKET))
+            self.assertNotIn("fixture-only", debug.call_args.args[0])
+            self.assertIn("[REDACTED API KEY]", debug.call_args.args[0])
+        with patch.object(agents.st, "error") as debug:
+            self.client.chat.completions.create.side_effect = RuntimeError("PRIVATE PROVIDER BODY")
+            with self.assertRaises(agents.ScoutReportError):
+                agents.generate_player_scout_report(copy.deepcopy(PACKET))
+            debug.assert_not_called()
+
     def test_invalid_reports_are_rejected(self):
         bad_reference = copy.deepcopy(REPORT)
         bad_reference["observations"][0]["fact_ids"] = ["F999"]
@@ -194,6 +232,7 @@ class ScoutAgentTests(unittest.TestCase):
         next(b for b in app.button if b.label == "Generate Scouting Report").click().run()
         self.assertFalse(app.exception)
         self.assertTrue(app.error)
+        self.assertTrue(any("bad json" in error.value for error in app.error))
         self.assertEqual(app.metric[0].value, "9,336")
 
 

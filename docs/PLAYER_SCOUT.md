@@ -46,3 +46,9 @@ DeepSeek references:
 ## If the hosted app reports a missing OpenAI module
 
 The `openai` package is listed in the root `requirements.txt`. Changes to that file trigger Streamlit's dependency installation process. Check the dev deployment's build logs for installation errors, then reboot the dev app if it still shows an old error. The app imports the optional SDK only after a scouting request, so statistics and navigation remain available while that dependency is unavailable. A missing key is a separate configuration issue handled through Streamlit Secrets.
+
+## Debugging report formatting
+
+The parser accepts a single enclosing Markdown code fence, optionally labelled `json`, as well as plain JSON. It preserves backticks inside JSON string values. Extra prose and invalid report structures remain rejected.
+
+When JSON parsing or schema validation fails, the dev UI shows the original completion text in an error panel. A configured API key is redacted if it appears in that text. Provider transport error bodies are not printed. The normal validation error identifies an incorrectly typed section or an exceeded list limit. Debug output is not saved as a successful scouting report.

@@ -123,9 +123,11 @@ def validate_scout_report(report, fact_ids):
     keys = {"observations", "interpretations", "limitations", "next_steps"}
     if not isinstance(report, dict) or set(report) != keys:
         raise ScoutReportError("The scout returned an unexpected JSON structure. Try again.")
-    for key in keys:
-        if not isinstance(report[key], list) or len(report[key]) > 6:
-            raise ScoutReportError("The scout returned an invalid report section. Try again.")
+    for key in ["observations", "interpretations", "limitations", "next_steps"]:
+        if not isinstance(report[key], list):
+            raise ScoutReportError(f"The scout section '{key}' must be a JSON array. Try again.")
+        if len(report[key]) > 6:
+            raise ScoutReportError(f"The scout section '{key}' exceeds the six-entry limit. Try again.")
     if not report["observations"]:
         raise ScoutReportError("The scout returned no evidence-backed observations. Try again.")
     for key in ["observations", "interpretations"]:
@@ -152,6 +154,19 @@ def _json_object(pairs):
             raise ValueError("Duplicate JSON key")
         result[key] = value
     return result
+
+
+def _strip_json_fence(content):
+    """Unwrap one enclosing Markdown fence; preserve backticks inside JSON strings."""
+    text = content.strip().lstrip("\ufeff").strip()
+    fenced = re.fullmatch(r"```(?:json)?\s*([\s\S]*?)\s*```", text, flags=re.IGNORECASE)
+    return fenced.group(1).strip() if fenced else text
+
+
+def _show_raw_report_error(content, api_key):
+    """Show completion text only, never SDK error bodies or the configured key."""
+    debug_text = content.replace(api_key.strip(), "[REDACTED API KEY]")
+    st.error("Raw DeepSeek response (rejected; debug output):\n\n" + debug_text)
 
 
 def generate_player_scout_report(evidence_packet):
@@ -207,10 +222,15 @@ def generate_player_scout_report(evidence_packet):
     if not isinstance(content, str) or not content.strip():
         raise ScoutReportError("DeepSeek returned an empty scouting response. Try again.")
     try:
-        report = json.loads(content, object_pairs_hook=_json_object)
+        report = json.loads(_strip_json_fence(content), object_pairs_hook=_json_object)
     except (ValueError, TypeError):
+        _show_raw_report_error(content, api_key)
         raise ScoutReportError("DeepSeek returned invalid JSON. Try again.") from None
-    report = validate_scout_report(report, fact_ids)
+    try:
+        report = validate_scout_report(report, fact_ids)
+    except ScoutReportError:
+        _show_raw_report_error(content, api_key)
+        raise
     report["_provenance"] = {
         "context_fingerprint": fingerprint, "model": model,
         "prompt_version": PROMPT_VERSION,

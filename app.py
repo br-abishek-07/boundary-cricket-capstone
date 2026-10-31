@@ -3,6 +3,7 @@
 import hashlib
 import json
 from pathlib import Path
+from importlib.util import find_spec
 
 import pandas as pd
 import streamlit as st
@@ -10,6 +11,7 @@ import streamlit as st
 from agent_runtime import AgentRuntimeError, load_agents
 
 # Use one coherent local agent version, independent of cached 'agents' packages.
+agent_layer_ready = False
 try:
     agent_api = load_agents(Path(__file__).resolve().parent)
     # Check this UI's complete contract even if an older runtime is still cached.
@@ -45,6 +47,7 @@ else:
     auction_context_fingerprint = agent_api.auction_context_fingerprint
     generate_squad_report = agent_api.generate_squad_report
     squad_context_fingerprint = agent_api.squad_context_fingerprint
+    agent_layer_ready = True
 
 from data_loader import (
     load_auction,
@@ -577,11 +580,48 @@ def build_squad_evidence(records, franchise_id, franchise_name, columns, expecte
     }
 
 
+def describe_system_status(datasets, agent_layer_ready):
+    """Inspect local readiness without a provider request or returning secrets."""
+    rows = []
+    for name, frame in datasets.items():
+        loaded = isinstance(frame, pd.DataFrame)
+        rows.append({"Dataset": name, "Rows": len(frame) if loaded else 0,
+                     "Status": "Loaded" if loaded and not frame.empty else "Empty" if loaded else "Unavailable"})
+    datasets_ready = bool(rows) and all(row["Status"] == "Loaded" for row in rows)
+    try:
+        sdk_discoverable = find_spec("openai") is not None
+    except (ImportError, ValueError):
+        sdk_discoverable = False
+    credentials_present = False
+    model_valid = True
+    settings_readable = True
+    try:
+        key = st.secrets.get("DEEPSEEK_API_KEY", "")
+        credentials_present = isinstance(key, str) and bool(key.strip())
+        model = st.secrets.get("DEEPSEEK_MODEL", "deepseek-flash")
+        model_valid = isinstance(model, str) and bool(model.strip()) and len(model) <= 100
+    except FileNotFoundError:
+        pass  # Missing secrets are normal for local statistical use.
+    except Exception:
+        settings_readable = False
+        model_valid = False
+    return {
+        "datasets_ready": datasets_ready,
+        "loaded_datasets": sum(row["Status"] == "Loaded" for row in rows),
+        "dataset_count": len(rows), "dataset_rows": rows,
+        "agent_layer_ready": bool(agent_layer_ready), "sdk_discoverable": sdk_discoverable,
+        "credentials_present": credentials_present, "model_configuration_valid": model_valid,
+        "settings_readable": settings_readable,
+        "ai_configuration_ready": bool(agent_layer_ready and sdk_discoverable
+                                       and credentials_present and model_valid and settings_readable),
+    }
+
+
 st.set_page_config(
     page_title="IPL Intelligence 360°",
     page_icon="🏏",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="auto",
 )
 
 
@@ -623,26 +663,146 @@ except (OSError, ValueError) as exc:
 
 # Route to the selected workspace.
 if selected_module == "Home/Overview":
+    home_status = describe_system_status(
+        {"Match archive": matches, "Player-match records": match_players,
+         "Squad pool": squads, "Auction records": auction, "Player registry": player_registry},
+        agent_layer_ready,
+    )
+    row_counts = {row["Dataset"]: row["Rows"] for row in home_status["dataset_rows"]}
+
     st.title("IPL Intelligence 360°")
-    st.write(
-        "A workspace for franchise scouting, player research, "
-        "team comparisons and historical auction analysis."
+    st.caption("FRANCHISE RESEARCH · SCOUTING EVIDENCE · DECISION SUPPORT")
+    st.markdown(
+        "An **empirical, hybrid multi-agent AI scouting platform** combining deterministic "
+        "analytics with specialist reasoning. Explore player evidence, team matchups, "
+        "historical auction records and supplied squad composition, then inspect the "
+        "facts, interpretations and limitations behind each report."
     )
-    st.success("All five datasets loaded successfully.")
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Match records", f"{len(matches):,}")
-    col2.metric("Player-match records", f"{len(match_players):,}")
-    col3.metric("Registry entries", f"{len(player_registry):,}")
+    columns = st.columns(3)
+    columns[0].metric("Archive matches", f"{row_counts['Match archive']:,}")
+    columns[1].metric("Player-match records", f"{row_counts['Player-match records']:,}")
+    columns[2].metric("Registry identities", f"{row_counts['Player registry']:,}")
     st.caption(
-        f"Squad records: {len(squads):,} · "
-        f"Auction records: {len(auction):,}"
+        f"Also loaded: {row_counts['Auction records']:,} historical auction records and "
+        f"{row_counts['Squad pool']:,} supplied squad entries. "
+        "Source coverage varies; current registration and monetary units require verification."
     )
-    with st.expander("Preview the supplied match data"):
-        st.dataframe(matches.head(10), width="stretch")
-    st.info(
-        "Use the sidebar to explore player profiles, "
-        "team matchups, squad snapshots and historical auction trends."
+
+    st.divider()
+    st.subheader("Hybrid 6-Agent Architecture")
+    st.write(
+        "Six logical roles support one evidence-led workflow: four DeepSeek specialists "
+        "and two deterministic Python control roles."
     )
+    specialists, controls = st.columns([1.15, 1])
+    with specialists:
+        with st.container(border=True):
+            st.markdown("**LLM specialists · interpretation**")
+            for title, description in [
+                ("Player Scout", "Interprets selected player statistics and recent evidence, with explicit identity and scope."),
+                ("Matchup Analyst", "Explains historical head-to-head and venue patterns, with encounter counts and caveats."),
+                ("Auction Analyst", "Reviews recorded buys, franchise totals and category distributions without asserting current value."),
+                ("Squad Analyst", "Reviews listed role and origin coverage while keeping roster and capability uncertainty visible."),
+            ]:
+                st.markdown(f"**{title}**")
+                st.caption(description)
+    with controls:
+        with st.container(border=True):
+            st.markdown("**Python control roles · coordination and checks**")
+            st.markdown("**Research Coordinator**")
+            st.caption(
+                "Workspace and selection-driven context routing: chooses the requested specialist "
+                "and assembles the relevant filtered evidence."
+            )
+            st.markdown("**Evidence Reviewer**")
+            st.caption(
+                "Validates response structure, known fact IDs and output bounds. "
+                "Python supplies the cited numerical values and preserves source limitations."
+            )
+            st.info(
+                "The coordinator and reviewer are Python logic. A report requests its selected "
+                "specialist; all six roles do not trigger separate LLM calls."
+            )
+
+    st.subheader("Empirical Evidence First")
+    left, right = st.columns(2)
+    with left:
+        st.markdown("**Calculate before interpreting**")
+        st.write(
+            "Pandas filters the source records and computes totals, rates and distributions. "
+            "DeepSeek receives a bounded JSON evidence packet."
+        )
+        st.markdown("**Keep the decision context attached**")
+        st.write(
+            "Reports retain the selected identity, teams, year or venue, source fingerprints "
+            "and fact references. Changing the context makes the saved report stale."
+        )
+    with right:
+        st.markdown("**Guard against unsupported claims**")
+        st.write(
+            "Prompts restrict reasoning to supplied evidence. JSON and citation checks reject "
+            "malformed reports and unknown fact references. Observations stay separate from tentative interpretations."
+        )
+        st.markdown("**Expose limits before decisions**")
+        st.write(
+            "Coverage gaps, unknown metadata, unverified currency and sample limitations remain "
+            "visible. Statistical tools remain usable when the optional AI layer is unavailable."
+        )
+    st.caption(
+        "Validation reduces some unsupported outputs; it does not guarantee hallucination-free "
+        "prose, prove that every interpretation follows from its citations, or establish predictive "
+        "or tactical advantage. Human review remains part of the workflow."
+    )
+
+    st.subheader("Technology & Methodology")
+    for box, title, detail in zip(
+        st.columns(4), ["Python", "Streamlit", "Pandas", "DeepSeek API"],
+        ["Routing, validation and reproducible evidence.",
+         "Interactive workspaces and session-bound reports.",
+         "Cached ingestion and deterministic calculations.",
+         "Structured specialist interpretation through an OpenAI-compatible client."],
+    ):
+        box.markdown(f"**{title}**")
+        box.caption(detail)
+    with st.expander("How to use the platform"):
+        st.markdown(
+            "1. Choose a workspace from the sidebar and confirm the selection.\n"
+            "2. Inspect the calculated statistics, source rows and evidence packet.\n"
+            "3. Generate a report, review its citations and limitations, then decide what needs further investigation."
+        )
+        st.caption("Selecting filters does not make a provider request. Report generation is an explicit action.")
+
+    st.divider()
+    st.subheader("System Status")
+    if home_status["datasets_ready"]:
+        st.success("System Online: all five empirical datasets are loaded through cached data loaders.")
+    else:
+        st.warning(
+            f"Data readiness: {home_status['loaded_datasets']} of {home_status['dataset_count']} "
+            "datasets contain records. Review dataset availability below."
+        )
+    if home_status["ai_configuration_ready"]:
+        st.success("AI configuration ready: specialist functions, SDK package and credentials are present.")
+    else:
+        missing = []
+        if not home_status["agent_layer_ready"]:
+            missing.append("agent components are unavailable or updating")
+        if not home_status["sdk_discoverable"]:
+            missing.append("the optional OpenAI-compatible SDK package is not discoverable")
+        if not home_status["settings_readable"]:
+            missing.append("Streamlit Secrets could not be read")
+        elif not home_status["credentials_present"]:
+            missing.append("the DeepSeek API key is not configured")
+        if not home_status["model_configuration_valid"]:
+            missing.append("the DeepSeek model setting needs review")
+        st.info("AI configuration needs attention: " + "; ".join(missing) + ". Statistical tools remain available.")
+    st.caption(
+        "Status checks inspect local configuration only. API authentication, endpoint availability "
+        "and report quality are not verified here. Home makes no paid provider requests."
+    )
+    with st.expander("Dataset availability"):
+        st.dataframe(pd.DataFrame(home_status["dataset_rows"]), hide_index=True, width="stretch")
+
 
 elif selected_module == "Player Profile":
     # EDIT THESE MAPPINGS if the dataset headers change.

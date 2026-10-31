@@ -1,4 +1,4 @@
-"""Cricket analytics with evidence-bound DeepSeek player scouting."""
+"""Cricket analytics with evidence-bound DeepSeek specialist reports."""
 
 import hashlib
 import json
@@ -9,6 +9,7 @@ import streamlit as st
 from agents import (
     ScoutReportError, generate_player_scout_report, scout_context_fingerprint,
     generate_matchup_report, matchup_context_fingerprint,
+    generate_auction_report, auction_context_fingerprint,
 )
 
 from data_loader import (
@@ -356,6 +357,98 @@ def build_matchup_evidence(encounters, team_a, team_b, competition, selected_ven
     }
 
 
+def build_auction_evidence(records, selected_year, player_column, team_column,
+                           category_columns, amount_unit_label):
+    """Build cited auction evidence from the selected, validated source rows."""
+    usable = records.loc[records["_auction_amount"].notna()]
+    total = float(usable["_auction_amount"].sum()) if len(usable) else None
+    invalid_count = len(records) - len(usable)
+    unknown_year_count = int(records["_auction_year"].isna().sum())
+    limitations = [
+        "Currency, amount units and transaction definitions are unverified in the supplied CSV.",
+        "No inflation adjustment or currency conversion is applied.",
+        "These historical records do not establish current market prices, fair value or recommended bids.",
+        "Source rows are not verified winning bids; auction, retention and transfer classifications are not supplied.",
+        "Rows are source records, not necessarily unique players; top buys rank individual records, not cumulative earnings.",
+        "Historical franchise names remain separate and source coverage may be incomplete.",
+        "Role and origin distributions are separate views of the same total and must not be added together.",
+    ]
+    if unknown_year_count:
+        limitations.append("Some records have unknown years; All Time includes them while individual-year views exclude them.")
+    if invalid_count:
+        limitations.append("Records with unusable amounts are excluded from monetary rankings and totals.")
+    if total == 0:
+        limitations.append("Recorded total amount is zero; percentage shares are unavailable.")
+    if not len(usable):
+        limitations.append("No usable amounts are available for this selection.")
+
+    facts = []
+    def add(label, value, unit):
+        if value is None:
+            return None
+        fid = f"F{len(facts) + 1}"
+        facts.append({"id": fid, "metric": label, "value": value, "unit": unit})
+        return fid
+    add("Total recorded amount in selection", total, amount_unit_label)
+    add("Source records in selection", len(records), "source rows, not necessarily unique players")
+    add("Records with usable amounts", len(usable), "source rows")
+    add("Records excluded from monetary totals", invalid_count, "source rows")
+    add("Records with unknown year in selection", unknown_year_count, "source rows")
+    top = top_auction_buys(records, player_column, team_column, category_columns)
+    top_rows = json.loads(top.to_json(orient="records"))
+    for rank, row in enumerate(top_rows, 1):
+        row["rank_in_selected_records"] = rank
+        row["fact_ids"] = {"amount": add(
+            f"Recorded amount for {row['Player']} · {row['Team']} · {row['Year']}",
+            float(row["Recorded amount"]), amount_unit_label,
+        )}
+
+    def grouped_rows(column, label_key):
+        table = aggregate_auction_spending(records, column)
+        result = []
+        for name, row in table.iterrows():
+            amount = float(row["Recorded amount"])
+            share = float(row["Share (%)"]) if pd.notna(row["Share (%)"]) else None
+            refs = {"amount": add(f"Total recorded amount for {column}: {name}", amount, amount_unit_label)}
+            if share is not None:
+                refs["share_percent"] = add(
+                    f"Share of selected recorded amount for {column}: {name}", share,
+                    "percent of the same selected usable-amount total",
+                )
+            result.append({label_key: str(name), "recorded_amount": amount,
+                           "share_percent": share, "fact_ids": refs})
+        return result
+
+    franchise_totals = grouped_rows(team_column, "team")
+    categories = {}
+    for category in dict.fromkeys(category_columns):
+        if category in records:
+            categories[category] = grouped_rows(category, "category")
+    if not categories:
+        limitations.append("No mapped role or origin categories are available.")
+    limitations.append("Missing franchise or category labels are retained under Not recorded, not inferred.")
+    source_hash = hashlib.sha256(
+        pd.util.hash_pandas_object(records, index=True).values.tobytes()
+        + json.dumps(list(records.columns)).encode("utf-8")
+    ).hexdigest()
+    return {
+        "task": "auction_analysis",
+        "scope": {
+            "selected_year": str(selected_year), "amount_unit_label": amount_unit_label,
+            "known_years_in_selection": sorted(records["_auction_year"].dropna().astype(int).unique().tolist()),
+            "coverage": "Selected supplied source records; completeness and transaction types unverified",
+            "source": "auction.csv (loaded selected records and validated derived amounts)",
+            "inflation_adjusted": False, "currency_verified": False,
+        },
+        "summary": {"source_records": len(records), "usable_amount_records": len(usable),
+                    "excluded_amount_records": invalid_count, "unknown_year_records": unknown_year_count,
+                    "total_recorded_amount": total},
+        "top_buys": top_rows, "franchise_spending": franchise_totals,
+        "category_breakdowns": categories, "facts": facts,
+        "limitations": limitations, "source_fingerprint": source_hash,
+    }
+
+
 st.set_page_config(
     page_title="IPL Intelligence 360°",
     page_icon="🏏",
@@ -378,7 +471,7 @@ with st.sidebar:
         ],
     )
     st.divider()
-    st.caption("Phase 3 · Scout and Matchup Analyst")
+    st.caption("Phase 3 · Scout, Matchup and Auction")
 
 
 # Initialize datasets. Cached loaders reuse their results on UI reruns.
@@ -968,4 +1061,71 @@ elif selected_module == "Auction Trends":
                     "Missing categories appear as Not recorded; role and origin breakdowns "
                     "are separate views of the same total. Percentage shares are unavailable "
                     "when the total amount is zero."
+                )
+
+        st.divider()
+        st.subheader("Auction Analyst · DeepSeek")
+        st.caption(
+            "Generate a historical interpretation of this year's selection or All Time. "
+            "Only clicking the button sends this evidence packet to DeepSeek."
+        )
+        auction_packet = build_auction_evidence(
+            scoped_auction, selected_year, PLAYER_COLUMN, TEAM_COLUMN,
+            CATEGORY_COLUMNS, AMOUNT_UNIT_LABEL,
+        )
+        with st.expander("Inspect evidence sent to the Auction Analyst"):
+            st.json(auction_packet)
+        try:
+            auction_fingerprint = auction_context_fingerprint(auction_packet)
+        except ScoutReportError as exc:
+            st.warning(str(exc))
+        else:
+            saved_auction = st.session_state.get("auction_analyst_report")
+            if st.button("Generate Auction Report", disabled=usable_auction.empty):
+                if saved_auction and saved_auction["fingerprint"] == auction_fingerprint:
+                    st.info("Using the saved auction report for this exact evidence and model.")
+                else:
+                    st.session_state.pop("auction_analyst_report", None)
+                    saved_auction = None
+                    try:
+                        with st.spinner("Analysing auction..."):
+                            auction_report = generate_auction_report(auction_packet)
+                        if auction_report["_provenance"]["context_fingerprint"] != auction_fingerprint:
+                            raise ScoutReportError("The auction context changed. Generate a new report.")
+                        saved_auction = {"fingerprint": auction_fingerprint, "report": auction_report}
+                        st.session_state["auction_analyst_report"] = saved_auction
+                    except ScoutReportError as exc:
+                        st.error(str(exc))
+                    except Exception:
+                        st.error("The auction report could not be completed. Your statistics remain available.")
+            if saved_auction and saved_auction["fingerprint"] != auction_fingerprint:
+                st.info("The saved auction report belongs to a different year, evidence or settings. Generate a matching report.")
+            elif saved_auction:
+                auction_report = saved_auction["report"]
+                fact_lookup = {fact["id"]: fact for fact in auction_packet["facts"]}
+                for section, label in [
+                    ("observations", "Historical observations"),
+                    ("interpretations", "Tentative market interpretations"),
+                ]:
+                    st.markdown(f"**{label}**")
+                    if not auction_report[section]:
+                        st.caption("No supported interpretation was returned.")
+                    for finding in auction_report[section]:
+                        st.write(finding["text"])
+                        st.caption(" · ".join(
+                            f"[{fid}] {fact_lookup[fid]['metric']}: "
+                            f"{fact_lookup[fid]['value']:,.2f} {fact_lookup[fid]['unit']}"
+                            for fid in finding["fact_ids"]
+                        ))
+                st.markdown("**Limitations**")
+                for limitation in dict.fromkeys(auction_packet["limitations"] + auction_report["limitations"]):
+                    st.warning(limitation)
+                if auction_report["next_steps"]:
+                    st.markdown("**Suggested review actions**")
+                    for action in auction_report["next_steps"]:
+                        st.write(action)
+                st.caption(
+                    "AI-generated historical interpretation. Structure and citations are checked; "
+                    "market value and future outcomes are not certified. "
+                    "This report is saved only in this browser session."
                 )

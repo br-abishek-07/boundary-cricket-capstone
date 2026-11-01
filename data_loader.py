@@ -158,7 +158,10 @@ def load_ipl_rosters() -> pd.DataFrame:
 @st.cache_data(show_spinner=False, max_entries=2)
 def _cached_season_impact(source_versions: tuple) -> pd.DataFrame:
     """Cache groupby work by file versions; avoid hashing large frames on reruns."""
-    from moneyball import aggregate_season_impact
+    if __package__:
+        from .moneyball import aggregate_season_impact
+    else:
+        from moneyball import aggregate_season_impact
     return aggregate_season_impact(load_deliveries(), load_ipl_wickets(), load_ipl_rosters())
 
 

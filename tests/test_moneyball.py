@@ -232,14 +232,16 @@ class MoneyballTests(unittest.TestCase):
             self.assertTrue(any("different year" in item.value for item in app.info))
 
     def test_optional_source_failure_preserves_workspaces(self):
-        with patch.object(dl, "load_deliveries", side_effect=FileNotFoundError("Fixture missing deliveries")), patch("openai.OpenAI") as client:
+        from data_runtime import load_data_layer
+        ui_loader = load_data_layer(ROOT).data_loader
+        with patch.object(ui_loader, "load_deliveries", side_effect=FileNotFoundError("Fixture missing deliveries")), patch("openai.OpenAI") as client:
             app = AppTest.from_file(str(ROOT / "app.py"), default_timeout=30).run()
             app.sidebar.radio[0].set_value("Player Profile").run()
             self.assertFalse(app.exception)
             self.assertTrue(app.metric)
             self.assertFalse(json.loads(app.json[-1].value)["phase_batting"]["available"])
             client.assert_not_called()
-        with patch.object(dl, "load_clean_auction", side_effect=FileNotFoundError("Fixture missing auction")):
+        with patch.object(ui_loader, "load_clean_auction", side_effect=FileNotFoundError("Fixture missing auction")):
             app.sidebar.radio[0].set_value("Auction Trends").run()
             self.assertFalse(app.exception)
             self.assertFalse(json.loads(app.json[-1].value)["moneyball"]["available"])

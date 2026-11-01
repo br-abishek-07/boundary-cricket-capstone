@@ -49,17 +49,41 @@ else:
     squad_context_fingerprint = agent_api.squad_context_fingerprint
     agent_layer_ready = True
 
-from data_loader import (
-    load_auction,
-    load_deliveries, load_clean_auction, load_auction_player_links, load_season_impact,
-    load_match_players,
-    load_matches,
-    load_player_registry,
-    load_squads,
-)
+from data_runtime import DataRuntimeError, load_data_layer
 
-from moneyball import (phase_batting_metrics, latest_auction_impact,
-                       append_phase_evidence, append_impact_evidence)
+# Hosted reruns may retain older generic module imports. Load both repository
+# data modules as one source-versioned package, just as the agents are loaded.
+try:
+    data_api = load_data_layer(Path(__file__).resolve().parent)
+    required_loaders = (
+        "load_auction", "load_match_players", "load_matches", "load_player_registry",
+        "load_squads", "load_deliveries", "load_clean_auction",
+        "load_auction_player_links", "load_season_impact",
+    )
+    required_metrics = (
+        "phase_batting_metrics", "latest_auction_impact",
+        "append_phase_evidence", "append_impact_evidence",
+    )
+    if (any(not callable(getattr(data_api.data_loader, name, None)) for name in required_loaders)
+            or any(not callable(getattr(data_api.moneyball, name, None)) for name in required_metrics)):
+        raise DataRuntimeError("The current UI requires a complete data release.")
+except (DataRuntimeError, AttributeError):
+    st.error("The data components are updating or unavailable. Wait for deployment to finish, then reboot the dev app if this message persists.")
+    st.stop()
+else:
+    load_auction = data_api.data_loader.load_auction
+    load_match_players = data_api.data_loader.load_match_players
+    load_matches = data_api.data_loader.load_matches
+    load_player_registry = data_api.data_loader.load_player_registry
+    load_squads = data_api.data_loader.load_squads
+    load_deliveries = data_api.data_loader.load_deliveries
+    load_clean_auction = data_api.data_loader.load_clean_auction
+    load_auction_player_links = data_api.data_loader.load_auction_player_links
+    load_season_impact = data_api.data_loader.load_season_impact
+    phase_batting_metrics = data_api.moneyball.phase_batting_metrics
+    latest_auction_impact = data_api.moneyball.latest_auction_impact
+    append_phase_evidence = data_api.moneyball.append_phase_evidence
+    append_impact_evidence = data_api.moneyball.append_impact_evidence
 
 
 def filter_player_records(frame, player_id, player_id_column):

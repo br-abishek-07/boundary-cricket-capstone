@@ -144,11 +144,13 @@ class AuctionAgentTests(unittest.TestCase):
         raw = data_loader.load_auction()
         invalid = raw.copy()
         invalid["Amount"] = "unusable"
-        with patch.object(data_loader, "load_auction", return_value=invalid):
+        from data_runtime import load_data_layer
+        ui_loader = load_data_layer(ROOT).data_loader
+        with patch.object(ui_loader, "load_auction", return_value=invalid):
             app = self.app()
             self.assertTrue(next(b for b in app.button if b.label == "Generate Auction Report").disabled)
             self.assertIsNone(json.loads(app.json[-1].value)["summary"]["total_recorded_amount"])
-        with patch.object(data_loader, "load_auction", return_value=raw.drop(columns=["Role", "Player Origin"])):
+        with patch.object(ui_loader, "load_auction", return_value=raw.drop(columns=["Role", "Player Origin"])):
             app = self.app()
             packet = json.loads(app.json[-1].value)
             self.assertEqual(packet["category_breakdowns"], {})

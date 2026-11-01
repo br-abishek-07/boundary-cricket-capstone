@@ -132,6 +132,7 @@ Run the focused tests from the repository root:
 python -m unittest discover -s tests -p 'test_moneyball.py' -v
 python -m unittest discover -s tests -p 'test_*agent*.py' -v
 python -m unittest discover -s tests -p 'test_home_overview.py' -v
+python -m unittest discover -s tests -p 'test_data_runtime.py' -v
 ```
 
 The new tests cover every supplied batter's phase totals, all sale-season scopes,
@@ -147,6 +148,16 @@ deliberately preserves both size and timestamp, clear Streamlit's data cache or 
 The loader reads only needed delivery columns into memory. `moneyball.py` contains
 pure Pandas calculations; `app.py` handles selection, presentation and packet assembly.
 `agents.py` retains the shared JSON parser, citation checks and response limits.
+
+`data_runtime.py` loads the repository's `data_loader.py` and `moneyball.py` as one
+private package identified by their source bytes. Both module files must be present
+in the deployed branch. Package-relative imports keep season aggregation on the
+same Moneyball source version. Streamlit reruns reuse a complete matching package;
+a source change selects a new one without replacing modules already used by other
+sessions. Missing or incomplete code produces a readable deployment message.
+After a hosted update finishes, use Manage app → Reboot if your session still
+shows a previous deployment. Source versions and cached dataset contents are
+separate: the file-version cache rules above still apply.
 
 Data acknowledgement: **Cricsheet** — https://cricsheet.org/ . The source licence is
 included in `data/CRICSHEET_SOURCE_LICENSE.txt` (Open Data Commons Attribution).

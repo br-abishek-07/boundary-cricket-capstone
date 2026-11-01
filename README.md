@@ -1,3 +1,20 @@
+# Development branch — IPL Intelligence 360°
+
+This `dev-phase1-ui` branch runs the Streamlit dashboard with Player Profile,
+Team Matchups, Auction Trends and Squad Analysis. Four DeepSeek specialists use
+Python-built evidence, while routing and citation checks form the other two
+logical agent roles. For dev setup, run `streamlit run app.py` on this branch.
+
+The Research Coordinator now includes IPL batting phases and latest-auction
+cost per same-season run/wicket. See [Moneyball setup and methods](docs/MONEYBALL_METRICS.md)
+and [the hybrid architecture](docs/ARCHITECTURE.md). The required new data
+are included; large CSVs use lossless gzip. Real API keys belong in hosting secrets.
+This update does not change `main` or refresh the production capstone submission ZIP.
+
+The earlier production project description and submission links follow below.
+
+---
+
 # CreaseIQ — franchise research studio
 
 **The name:** Crease refers to the markings on a cricket pitch. IQ stands for intelligence. CreaseIQ turns cricket evidence into informed decisions, with the analyst in control.
@@ -38,3 +55,4 @@ Read [the accuracy audit](docs/ACCURACY_AUDIT.md) for exhaustive archive checks,
 - [Browse the presentation, report and supporting files](https://github.com/br-abishek-07/creaseiq-cricket-capstone/tree/main/submission)
 
 The submission is prepared for B.R. Abishek, AI Driven Data Science. It includes editable presentation/report files, PDF copies, runnable source, the user guide, evidence, abstract and demo/viva notes. Open `submission/START_HERE.md` for the file map. Private keys and runtime records are excluded.
+

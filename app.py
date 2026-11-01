@@ -51,11 +51,15 @@ else:
 
 from data_loader import (
     load_auction,
+    load_deliveries, load_clean_auction, load_auction_player_links, load_season_impact,
     load_match_players,
     load_matches,
     load_player_registry,
     load_squads,
 )
+
+from moneyball import (phase_batting_metrics, latest_auction_impact,
+                       append_phase_evidence, append_impact_evidence)
 
 
 def filter_player_records(frame, player_id, player_id_column):
@@ -250,7 +254,7 @@ def build_player_scout_evidence(records, player_id, player_name, competition,
         "Figures describe the supplied archive, whose completeness is not certified.",
         "Technique, fitness, current availability, market value and future performance are not supplied.",
         "Named player-match records can include appearances without batting or bowling.",
-        "No peer benchmark or phase-specific scouting comparison is included in this packet.",
+        "No peer benchmark is included in this packet.",
     ]
     limitations.extend(metric_issues)
     if not raw_totals.get("balls"):
@@ -640,7 +644,7 @@ with st.sidebar:
         ],
     )
     st.divider()
-    st.caption("Phase 3 · Scout, Matchup, Auction and Squad")
+    st.caption("Phase 3 · Evidence-first specialists + Moneyball routing")
 
 
 # Initialize datasets. Cached loaders reuse their results on UI reruns.
@@ -964,6 +968,37 @@ elif selected_module == "Player Profile":
                          "legal_balls": LEGAL_BALLS_COLUMN},
                         DATE_COLUMN, MATCH_ID_COLUMN,
                     )
+                    st.subheader("IPL batting phases · delivery evidence")
+                    phase_result = None
+                    phase_issue = None
+                    if scope not in ["IPL", "All supplied competitions"]:
+                        phase_issue = "IPL phase metrics do not apply to the selected non-IPL competition."
+                    else:
+                        try:
+                            with st.spinner("Preparing cached IPL phase metrics..."):
+                                phase_result = phase_batting_metrics(load_deliveries(), selected_player_id)
+                        except (OSError, ValueError) as exc:
+                            phase_issue = str(exc)
+                    if phase_result is not None:
+                        phase_table = pd.DataFrame(phase_result["rows"]).rename(columns={
+                            "phase": "Phase", "overs_zero_based": "Overs (zero-based)",
+                            "runs": "Batter runs", "balls_faced": "Balls faced",
+                            "batter_dot_balls": "Batter dot balls", "strike_rate": "Strike rate",
+                            "dot_ball_percentage": "Dot ball %",
+                        })
+                        st.dataframe(phase_table, hide_index=True, width="stretch")
+                        st.caption(
+                            "IPL delivery archive only; super overs excluded. Powerplay: overs 0–5; "
+                            "Middle: 6–15; Death: 16–19. Strike rate = 100 × batter runs / balls faced. "
+                            "Batter dot % = 100 × counted balls with zero batter runs / balls faced. "
+                            "Wides excluded; source-counted no-balls included. Byes/leg-byes may be batter dots. "
+                            "No exposure gives N/A rates. Fixed bands are not rain-adjusted powerplays."
+                        )
+                        st.caption(f"Phase evidence window: {phase_result['since'] or 'No recorded balls'} "
+                                   f"to {phase_result['through_inclusive'] or 'N/A'}.")
+                    else:
+                        st.info(phase_issue or "IPL phase metrics unavailable.")
+                    scout_packet = append_phase_evidence(scout_packet, phase_result, phase_issue)
                     with st.expander("Inspect evidence sent to the scout"):
                         st.json(scout_packet)
                     try:
@@ -1387,6 +1422,7 @@ elif selected_module == "Auction Trends":
     AMOUNT_UNIT_LABEL = "recorded source units (currency unverified)"
 
     st.title("Auction Trends")
+    st.caption("Legacy chart source: auction.csv. The separate Moneyball section below uses cleaned 2013–2026 sale records.")
     st.caption(
         "Explore historical amounts in the supplied CSV. Currency, units and transaction "
         "types are not documented in this file; these are not verified auction-purse totals "
@@ -1492,15 +1528,68 @@ elif selected_module == "Auction Trends":
                 )
 
         st.divider()
+        st.subheader("Moneyball · latest auction price and same-season impact")
+        st.caption(
+            "This assessment uses the new cleaned auction file independently of the legacy charts above. "
+            "All Time selects each exact-ID player's latest supplied sale; a single season restricts sales to that season. "
+            "Each price is divided only by that same IPL season's output. This is retrospective, not a pre-auction forecast."
+        )
+        impact_table = impact_summary = None
+        impact_issue = None
+        try:
+            clean_prices = load_clean_auction()
+            clean_years = pd.to_numeric(clean_prices["season_year"], errors="coerce").dropna()
+            clean_years = sorted(clean_years.loc[clean_years.mod(1).eq(0)].astype(int).unique(), reverse=True)
+            impact_year = st.selectbox("Moneyball sale season", ["All Time", *map(str, clean_years)], key="moneyball_year")
+            with st.spinner("Preparing cached season impact..."):
+                impact_table, impact_summary = latest_auction_impact(
+                    clean_prices, load_auction_player_links(), load_season_impact(), impact_year,
+                )
+            view = impact_table.rename(columns={
+                "season_year": "Sale / performance season", "player_name": "Player", "team_id": "Purchasing team",
+                "winning_bid_currency": "Currency", "price": "Latest price (native units)",
+                "runs": "Same-season runs", "wickets": "Same-season bowler wickets",
+                "cost_per_run": "Cost per run", "cost_per_wicket": "Cost per wicket",
+                "performance_available": "Observed in season roster",
+            })
+            display_columns = ["Player", "Sale / performance season", "Currency", "Latest price (native units)",
+                               "Cost per run", "Cost per wicket", "Same-season runs", "Same-season bowler wickets",
+                               "Purchasing team", "Observed in season roster"]
+            st.dataframe(view[display_columns], width="stretch", hide_index=True,
+                         column_config={"Sale / performance season": st.column_config.NumberColumn("Season", format="%d"),
+                                        "Latest price (native units)": st.column_config.NumberColumn("Native price"),
+                                        "Cost per run": st.column_config.NumberColumn("Cost/run", format="%.2f"),
+                                        "Cost per wicket": st.column_config.NumberColumn("Cost/wicket", format="%.2f")})
+            st.download_button("Download full Moneyball table", view.to_csv(index=False).encode("utf-8"),
+                               file_name=f"moneyball_{impact_year.replace(' ', '_')}.csv", mime="text/csv")
+            st.caption(
+                f"{impact_summary['matched_price_rows']:,} exact-ID prices; "
+                f"{impact_summary['excluded_uncertain_links']:,} latest source-name sale rows excluded for uncertain links; "
+                f"{impact_summary['excluded_superseded_alias_sales']:,} older alias sale rows superseded; "
+                f"{impact_summary['excluded_ambiguous_sales']:,} ambiguous sale rows excluded; "
+                f"{impact_summary['excluded_invalid_prices']:,} invalid prices excluded; "
+                f"{impact_summary['missing_same_season_performance']:,} prices have no observed same-season roster. "
+                "INR and USD are native currencies and remain separate; rows are sorted within currency, not across currencies. "
+                "No inflation adjustment or currency conversion. Missing output or a zero denominator gives N/A. "
+                "Price/output covers all observed IPL teams in that season; it does not attribute output to the purchasing team alone. "
+                "A roster entry can include a substitute who never batted or bowled. "
+                "Identity matches and prices are not independently certified."
+            )
+        except (OSError, ValueError, KeyError) as exc:
+            impact_issue = str(exc)
+            st.info("Moneyball metrics unavailable: " + impact_issue)
+
+        st.divider()
         st.subheader("Auction Analyst · DeepSeek")
         st.caption(
-            "Generate a historical interpretation of this year's selection or All Time. "
+            "Interpret the legacy auction selection and the separately scoped Moneyball evidence below. "
             "Only clicking the button sends this evidence packet to DeepSeek."
         )
         auction_packet = build_auction_evidence(
             scoped_auction, selected_year, PLAYER_COLUMN, TEAM_COLUMN,
             CATEGORY_COLUMNS, AMOUNT_UNIT_LABEL,
         )
+        auction_packet = append_impact_evidence(auction_packet, impact_table, impact_summary, impact_issue)
         with st.expander("Inspect evidence sent to the Auction Analyst"):
             st.json(auction_packet)
         try:

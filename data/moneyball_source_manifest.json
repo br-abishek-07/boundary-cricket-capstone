@@ -1,0 +1,56 @@
+{
+  "data_attribution": "Cricsheet (deliveries, dismissals, rosters); user-supplied sold auction records and identity crosswalk",
+  "certification": "Source-derived research data; not independently certified against every official event or sale",
+  "files": [
+    {
+      "file": "ipl_deliveries_clean_2008_2026.csv.gz",
+      "source_file": "ipl_deliveries_clean_2008_2026.csv",
+      "source_upload": "IPL_Cricsheet_Clean_Accurate_Data_2008_2026.zip",
+      "rows": 295732,
+      "uncompressed_sha256": "fbba83c2ab7c2e5b45487924c3ad7375582c962202da2ff263b4999567e3d50b",
+      "distributed_sha256": "91a093240011f2700a3a92129d106a975fb54c3bdd89039ffe6751299f670a81",
+      "uncompressed_bytes": 57615316,
+      "distributed_bytes": 3916440
+    },
+    {
+      "file": "ipl_wickets_clean_2008_2026.csv.gz",
+      "source_file": "ipl_wickets_clean_2008_2026.csv",
+      "source_upload": "IPL_Cricsheet_Clean_Accurate_Data_2008_2026.zip",
+      "rows": 14705,
+      "uncompressed_sha256": "991a784d013ce13dda298489674dc880cd42a2a559eb4344b6a082626d55a970",
+      "distributed_sha256": "7fee068399a2fa672ab20bd73bdfeac95fa538f2ee925c57e40a7e1065f52c47",
+      "uncompressed_bytes": 2557321,
+      "distributed_bytes": 327832
+    },
+    {
+      "file": "ipl_match_rosters.csv.gz",
+      "source_file": "ipl_match_rosters.csv",
+      "source_upload": "IPL_Cricsheet_Clean_Accurate_Data_2008_2026.zip",
+      "rows": 27909,
+      "uncompressed_sha256": "1035991712b90ee6141886b00764f2a4f4914ee6f1eb4fc510689f19f9ee82ab",
+      "distributed_sha256": "6bcaf74fa98dce4d5d80171f7fc2cdbf3d23c13fc2360fdec943713f5ec2a058",
+      "uncompressed_bytes": 2256441,
+      "distributed_bytes": 155587
+    },
+    {
+      "file": "ipl_auction_clean_2013_2026.csv",
+      "source_file": "ipl_auction_clean_2013_2026.csv",
+      "source_upload": "IPL_Clean_Real_Datasets_2008_2026.zip",
+      "rows": 1381,
+      "uncompressed_sha256": "1d2b5e80d52fba74b229146df1a8de3afcf40ccd607ffdf7834f976f1d9ce52a",
+      "distributed_sha256": "1d2b5e80d52fba74b229146df1a8de3afcf40ccd607ffdf7834f976f1d9ce52a",
+      "uncompressed_bytes": 396400,
+      "distributed_bytes": 396400
+    },
+    {
+      "file": "ipl_auction_player_links.csv",
+      "source_file": "ipl_auction_player_links.csv",
+      "source_upload": "IPL_Clean_Real_Datasets_2008_2026.zip",
+      "rows": 1381,
+      "uncompressed_sha256": "3a47bd5a7484326a922a8d1809bed0601f92a9563051ba0c11c035523c6e45d7",
+      "distributed_sha256": "3a47bd5a7484326a922a8d1809bed0601f92a9563051ba0c11c035523c6e45d7",
+      "uncompressed_bytes": 98135,
+      "distributed_bytes": 98135
+    }
+  ]
+}
